@@ -44,17 +44,17 @@ def main():
 		  + doc.findall( './/stochastic-variable-test' ):
 			populationFileName = el.find( './population-file' ).text
 			parameterFileName = el.find( './parameter-file' ).text
-			dbFileName = parameterFileName + '_' + populationFileName + os.extsep + 'sqlite3'
+			dbFileName = parameterFileName + '_' + populationFileName + os.extsep + 'db'
 
 			populationFilePath = os.path.join( dir, populationFileName + os.extsep + 'xml' )
 			parameterFilePath = os.path.join( subdir, parameterFileName + os.extsep + 'xml' )
 			dbFilePath = os.path.join( subdir, dbFileName )
 
 			# Newer tests (created after the change from XML format to SQLite
-			# format) will just have a .sqlite3 file, and no .xml files. For
+			# format) will just have a .db file, and no .xml files. For
 			# those, we don't have to do anything.
 			if os.path.isfile( populationFilePath ) and os.path.isfile( parameterFilePath ):
-				# Remove any existing .sqlite3 file which may have been created
+				# Remove any existing .db file which may have been created
 				# by a previous version of this script.
 				if os.path.isfile( dbFilePath ):
 					os.remove( dbFilePath )

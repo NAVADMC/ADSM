@@ -8,8 +8,10 @@
     {% for model in models %}
         <div class="panel-group" id="accordion-{{forloop.counter}}">
             <div class="model-banner">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-{{forloop.counter}}" href="#sub-model{{forloop.counter}}">{{ model.name }}
-                </a>
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-{{forloop.counter}}" href="#sub-model{{forloop.counter}}">{{ model.name }}</a>
+                {% if model.wiki_link %}
+                    <a href="{{ model.wiki_link }}" class="wiki" target="_blank"><img src="/static/icons/TB_documentation_btn.png" width="18" height="18" border="1" style="border:1px solid black;"></a>
+                {% endif %}
             </div>
             <div id="sub-model{{forloop.counter}}" class="panel-collapse collapse in" style="height: auto;">
                 <ul class="file_list compact">

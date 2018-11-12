@@ -5,7 +5,11 @@
 
 <h1>Whole Scenario Validation</h1>
     {%  if dry_run_passed %}
-        <h2>The simulation will successfully load with the current settings.  You may proceed...</h2>
+        {% if missing_values %}
+            <h2>While the simulation will successfully run with the current settings, note the following warnings: </h2>
+        {% else %}
+            <h2>The simulation will successfully run with the current settings. </h2>
+        {% endif %}
     {% else %}
         <h2>Critical Simulation Error:</h2>
         <p>Correct the following error and try again:</p>

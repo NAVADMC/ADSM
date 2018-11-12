@@ -1,6 +1,6 @@
 {
   "name": "adsm",
-  "version": "8.7.0",
+  "version": "9.19.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "babel-preset-react": "^6.3.13",
     "css-loader": "^0.23.0",
     "history": "^1.15.0",
-    "jquery": "^2.1.4",
+    "jquery": "^3.3.1",
     "json-loader": "^0.5.4",
     "react": "^0.14.3",
     "react-bootstrap": "^0.28.1",

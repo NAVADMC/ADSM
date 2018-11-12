@@ -28,27 +28,50 @@ import argparse
 import threading
 import _thread
 import psutil
+import socket
 from django.utils.timezone import now
 
 
-def launch_viewer():
+def launch_viewer(server_port):
     print("\nLaunching browser...")
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR)):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
     console_log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'console.log')
     try:
-        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" --log-file="%s" --console-log-path="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path)), shell=True)
+        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Beta_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
         if viewer_status != 0 and viewer_status != 9:  # The 9 is to ignore X Window System error BadDrawable when closing. TODO: Debug viewer
             raise RuntimeError("Error launching Viewer!")
     except:
-        print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:8000")
-        print("\nPress any key to close the application...")
+        print("\nIt appears that the Viewer Application is either missing or not compatible with this system!\nYou can open a browser and navigate to http://127.0.0.1:%s" % server_port)
+        print("\nPress any key to close the application (unless manually viewing in the browser)...")
         input()
     print("\nClosing application!")
     _thread.interrupt_main()
 
-parser = argparse.ArgumentParser(prog='ADSM.exe')
+
+def find_available_ports():
+    print("Looking for available ports...")
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('', 0))
+    app_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    app_socket.bind(('', 0))
+
+    server_port = server_socket.getsockname()[1]
+    app_port = app_socket.getsockname()[1]
+
+    server_socket.close()
+    app_socket.close()
+
+    print("Found ports %s and %s." % (server_port, app_port))
+
+    # NOTE: We now have the chance for a race condition.
+    # Since we closed the sockets above so the caller can now bind to the ports we found,
+    # another program can possibly come in and bind the ports before our program can rebind.
+    return server_port, app_port
+
+
+parser = argparse.ArgumentParser(prog='ADSM-Beta.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
@@ -57,7 +80,7 @@ args = parser.parse_args()
 
 # Respond to an updater query
 if args.update_name:
-    print("ADSM")
+    print("ADSM_Beta")
     sys.exit(0)
 elif args.version:
     from ADSM import __version__
@@ -120,17 +143,27 @@ if args.test:
     management.call_command('test')
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
+    try:
+        server_port, app_port = find_available_ports()
+    except:
+        print("\nUnable to find a port to bind to! Cannot launch application.")
+        print("\nPress any key to close the application...")
+        input()
+        # TODO: Find a way to close the browser if it is still alive.
+        sys.exit(1)
 
-    browser = threading.Timer(1, launch_viewer)
+    browser = threading.Timer(2, launch_viewer, [server_port, ])
     browser.start()
 
     print("\nLaunching server...")
     try:
-        server_status = management.call_command('runproductionserver', port=8000, app_port=8001, silent=True)
+        server_status = management.call_command('runproductionserver', port=server_port, app_port=app_port, silent=True)
         if server_status != 0:
             raise RuntimeError("Error launching Django Production Server!")
     except:
         if browser.is_alive():
-            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nWe will launch using the debug server instead.\nMake sure your settings are set to development settings and debug=True.\n")
-            management.call_command('runserver', addrport="127.0.0.1:8000", use_reloader=False)
-    # management.call_command('runserver', use_reloader=False)
+            browser.cancel()
+            print("It appears that the Django Production Server Application is either missing or not compatible with this system!\nADSM cannot run without a local server.\nPlease repair your installation.\n")
+            print("\nPress any key to exit...")
+            input()
+            sys.exit(1)

@@ -15,7 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
-    ProbabilityFunction, RelationalFunction, RelationalPoint, Population, \
+    ProbabilityDensityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
     DiseaseProgressionAssignment, Unit, ControlMasterPlan, Zone, ZoneEffect
 from ADSMSettings.utils import workspace_path
@@ -152,12 +152,12 @@ class FunctionalTests(StaticLiveServerTestCase):
     def setup_scenario(self):
         """ handle all temp object creation for tests """
         population = Population.objects.create(source_file="ScenarioCreator/tests/population_fixtures/Population_Test_UTF8.xml")
-        lp_cattle = ProbabilityFunction.objects.create(name="Latent period - cattle", equation_type="Triangular", min=0, mode=3, max=9)
-        sp_cattle = ProbabilityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
-        cp_cattle = ProbabilityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
-        ip_cattle = ProbabilityFunction.objects.create(name="Immune Period", equation_type="Triangular", min=180, mode=270, max=360)
-        dcd = ProbabilityFunction.objects.create(name="Direct contact distance", x_axis_units="Kilometers", equation_type="Triangular", min=10, mode=20, max=30)
-        idcd = ProbabilityFunction.objects.create(name="Indirect contact distance", x_axis_units="Kilometers", equation_type="Triangular", min=20, mode=40, max=60)
+        lp_cattle = ProbabilityDensityFunction.objects.create(name="Latent period - cattle", equation_type="Triangular", min=0, mode=3, max=9)
+        sp_cattle = ProbabilityDensityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
+        cp_cattle = ProbabilityDensityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
+        ip_cattle = ProbabilityDensityFunction.objects.create(name="Immune Period", equation_type="Triangular", min=180, mode=270, max=360)
+        dcd = ProbabilityDensityFunction.objects.create(name="Direct contact distance", x_axis_units="Kilometers", equation_type="Triangular", min=10, mode=20, max=30)
+        idcd = ProbabilityDensityFunction.objects.create(name="Indirect contact distance", x_axis_units="Kilometers", equation_type="Triangular", min=20, mode=40, max=60)
         um = RelationalFunction.objects.create(name="Unrestricted movement", x_axis_units="Days", y_axis_units="Percentage")
         RelationalPoint.objects.create(relational_function=um, x=0, y=1)
         RelationalPoint.objects.create(relational_function=um, x=100000, y=1)
@@ -175,13 +175,13 @@ class FunctionalTests(StaticLiveServerTestCase):
         assigned_type = DiseaseProgressionAssignment.objects.create(production_type=production_type,
             progression=disease_progression)
         self.dc_ds1 = DirectSpread.objects.create(name="Dairy Cattle Large",
-            latent_animals_can_infect_others=True,
+            latent_units_can_infect_others=True,
             contact_rate=5,
             infection_probability=1,
             distance_distribution=dcd,
             movement_control=um)
         dc_ds2 = DirectSpread.objects.create(name="Dairy Cattle Small",
-            latent_animals_can_infect_others=True,
+            latent_units_can_infect_others=True,
             contact_rate=0.5,
             infection_probability=1,
             distance_distribution=dcd,
@@ -228,10 +228,10 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_edit_probability_in_progression(self):
         self.setup_scenario()
 
-        lp_cattle = ProbabilityFunction.objects.create(name="Renaming Test - cattle", equation_type="Triangular", min=0, mode=3, max=9)
-        sp_cattle = ProbabilityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
-        cp_cattle = ProbabilityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
-        ip_cattle = ProbabilityFunction.objects.create(name="Immune Period", equation_type="Triangular", min=180, mode=270, max=360)
+        lp_cattle = ProbabilityDensityFunction.objects.create(name="Renaming Test - cattle", equation_type="Triangular", min=0, mode=3, max=9)
+        sp_cattle = ProbabilityDensityFunction.objects.create(name="Subclinical period - cattle", equation_type="Triangular", min=1, mode=3, max=5)
+        cp_cattle = ProbabilityDensityFunction.objects.create(name="Clinical period - cattle", equation_type="Triangular", min=0, mode=21, max=80)
+        ip_cattle = ProbabilityDensityFunction.objects.create(name="Immune Period", equation_type="Triangular", min=180, mode=270, max=360)
         fmd = Disease.objects.create(name='FMD', disease_description=u'Foot and Mouth Disease')
         disease_progression = DiseaseProgression.objects.create(_disease=fmd,
             name='Rename Test',
@@ -267,7 +267,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         with self.assertRaises(NoSuchElementException):
             self.find('#id_equation_type')  # make sure it's gone
 
-        pdf_updated = ProbabilityFunction.objects.get(pk=lp_cattle.pk)
+        pdf_updated = ProbabilityDensityFunction.objects.get(pk=lp_cattle.pk)
         self.assertEqual(pdf_updated.name, "Renaming Test - cattle edited")
 
 
@@ -275,7 +275,7 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_upload_population_file(self):
         self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('SampleScenario.sqlite3').click()
+        self.selenium.find_element_by_link_text('Sample Scenario.db').click()
         for i in range(5):  # a slow population load
             time.sleep(5) # may need to be adjusted for slow computers or if the file grows
             try:
@@ -287,7 +287,7 @@ class FunctionalTests(StaticLiveServerTestCase):
     def test_upload_blank_population_file(self):
         self.click_navbar_element('Population')
 
-        self.selenium.find_element_by_link_text('blank.sqlite3').click()
+        self.selenium.find_element_by_link_text('blank.db').click()
         time.sleep(5) # may need to be adjusted for slow computers or if the file grows
 
         section = self.find('section')
@@ -412,7 +412,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.assertIn("none", mean_field.value_of_css_property("display"))
 
     def test_disable_control_master_plan(self):
-        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.sqlite3/')
+        self.client.get('/app/OpenTestScenario/ScenarioCreator/tests/population_fixtures/Roundtrip.db/')
         delete_all_outputs()
 
         self.click_navbar_element("Controls") 
@@ -491,7 +491,7 @@ class FunctionalTests(StaticLiveServerTestCase):
             self.assertIn("Error", alert.text)
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario./\\ 123.1&% AZ.db'))
             except:
                 pass
 
@@ -521,7 +521,7 @@ class FunctionalTests(StaticLiveServerTestCase):
             self.assertNotIn('unsaved', status.get_attribute('class'))
         finally:
             try:
-                os.remove(workspace_path('Untitled Scenario123.1 AZ.sqlite3'))
+                os.remove(workspace_path('Untitled Scenario123.1 AZ.db'))
             except:
                 pass
 

@@ -65,10 +65,11 @@ $(function(){
             // is used.
             $('#functions_panel input').prop('disabled', true);
             $('#functions_panel select').prop('disabled', true);
+            $('#functions_panel textarea').prop('disabled', true);
         };
     })
 
-    $('form[action^="/setup/ProbabilityFunction"]').livequery(function(){
+    $('form[action^="/setup/ProbabilityDensityFunction"]').livequery(function(){
         var action = $(this).attr('action');
         // The last part of the action URL is either "/new/" or a numeric ID of
         // an existing function to edit.
@@ -79,6 +80,7 @@ $(function(){
             // is used.
             $('#functions_panel input').prop('disabled', true);
             $('#functions_panel select').prop('disabled', true);
+            $('#functions_panel textarea').prop('disabled', true);
         };
     })
 
@@ -352,7 +354,7 @@ $(function(){
     
     $('#file-upload').on('submit',function(event){
         var filename = $(this).find('input[type=file]').val()
-        var valid_extensions = {"application/x-sqlite3": '.sqlite3',
+        var valid_extensions = {"application/x-sqlite3": '.db',
                                 "application/xml": '.xml'}
         var file_extension = valid_extensions[$(this).find('input[type=file]').attr('accept')]
         if( typeof file_extension !== 'undefined' && filename.indexOf(file_extension) == -1) {
@@ -374,6 +376,10 @@ $(function(){
 
     $(document).on('click', '.edit-button', function() {
         $('.edit-button-holder a, .edit-button-holder button').addClass('reveal')
+    })
+
+    $(document).on('click', '.cancel-button', function() {
+        $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal')
     })
 
     $(document).on('click', '.overwrite-button', function () {
@@ -487,22 +493,23 @@ function open_panel_if_needed() {
 
 function populate_pdf_panel(select) {
     var $input = $(select)
+    var url = $input.attr('data-new-item-url');
     if($input.hasClass('grouplist') || $input.hasClass('productiontypelist'))  //grouplist uses the population_panel instead
         return;
     var load_target = '#functions_panel #current-function'
     var origin = $input.closest('.layout-panel').attr('id');
-    if(origin == 'left-panel') { //use the center-panel if this is from left
+
+    if(origin == 'left-panel' && (url.indexOf('RelationalFunction') == -1 && url.indexOf('ProbabilityDensityFunction') == -1)) { //use the center-panel if this is from left and not a function
         load_target = '#center-panel'
         $('#center-panel').addClass('reveal') //allows toggle of box shadow on :before pseudo element
     }
-    if(origin == 'center-panel' || origin == 'main-panel'){
+    if(load_target == '#functions_panel #current-function'){
         $('#functions_panel').removeClass('TB_panel_closed')
     }
     if(origin == 'functions_panel'){ // we've run out of room and must use a modal
         modelModal.show($input);
         return
     }
-    var url = $input.attr('data-new-item-url');
     if ($input.val() != 'data-add-new' && $input.val() != '')
         url = url.replace('new', $input.val());//will edit already existing model
     $(load_target).load(url)
@@ -776,7 +783,7 @@ function prompt_for_new_file_name(link) {
     var dialog = new BootstrapDialog.show({
         title: 'Scenario Save As...',
         type: BootstrapDialog.TYPE_PRIMARY,
-        message: 'Enter the name of the new scenario: <input type="text" id="new_name">',
+        message: '<div>Enter the name of the new scenario: <input type="text" id="new_name"></div><div>WARNING: Supplying a name of a Scenario that already exists in your ADSM Workspace will OVERWRITE the existing Scenario!</div>',
         buttons: [
             {
                 label: 'Cancel',
@@ -797,6 +804,7 @@ function prompt_for_new_file_name(link) {
                         ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined, function () {
                             $('h1.filename').text($('.filename input').val()) //match major title with form value
                         });
+                        location.reload();
                     } else {
                         //TODO: need FormData from form that is to be added in #NewScenario
                         //ajax_submit_complex_form_and_replaceWith(link, new FormData($self[0]), $self, $self, undefined);
@@ -929,6 +937,7 @@ function hide_unneeded_probability_fields() {
 function make_function_panel_editable() {
     $('.edit-button-holder a, .edit-button-holder button').removeClass('reveal') //collapse the edit buttons, possibly hide
     $('.edit-button-holder').css('display', 'none')
+    $('.back-button').css('display', 'none')
 
     var base = $('#functions_panel');
     var $modal = $('.modal-body');
@@ -937,6 +946,7 @@ function make_function_panel_editable() {
     base.addClass('editable')
     base.find('input').addClass('editable').removeAttr('disabled')
     base.find('select').addClass('editable').removeAttr('disabled')
+    base.find('textarea').addClass('editable').removeAttr('disabled')
     base.find(':input').addClass('editable')
     //$('#tb_mask').css('visibility', 'visible')
     base.css('pointer-events', 'all')

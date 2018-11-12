@@ -40,15 +40,6 @@ class OutputBaseModel(models.Model):
         abstract = True
 
 
-class DailyReport(OutputBaseModel):
-    sparse_dict = models.TextField()
-    full_line = models.TextField()
-
-    def __str__(self):
-        sparse_dict = literal_eval(self.sparse_dict)
-        return "iteration: %s, day: %s" % (sparse_dict['Run'], sparse_dict['Day'])
-
-
 class DailyByProductionType(OutputBaseModel):
     iteration = models.IntegerField(blank=True, null=True, verbose_name=printable_name('iteration'),
         help_text='The iteration during which the outputs in this records where generated.', )
@@ -362,7 +353,6 @@ class DailyControls(OutputBaseModel):
     destrOccurred = models.IntegerField(blank=True, null=True, verbose_name='Destruction Occurred')
     firstDetUInf = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Units Infected at First Detection'))
     firstDetAInf = models.IntegerField(blank=True, null=True, verbose_name=printable_name('Animals Infected at First Detection'))
-    detcUq = models.IntegerField(blank=True, null=True, verbose_name=printable_name('detcUq'))
     vaccTriggered = models.IntegerField(blank=True, null=True, verbose_name="First Vaccination Trigger Activated")
 
 

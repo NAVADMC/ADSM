@@ -119,11 +119,13 @@ FunctionEnd
 !insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
 !endif
 
+!define MUI_PAGE_HEADER_SUBTEXT "Choose the folder in which to install ADSM."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Setup will install ADSM in the following folder.$\r$\nNOTE: If ADSM is installed in a folder that normal users do not have write permissions to, an Admin will always be required to run updates.$\r$\nTo install in a different folder, click Browse and select another folder. Click next to continue."
 !insertmacro MUI_PAGE_DIRECTORY
 
 Var WorkspacePath
 !define MUI_PAGE_HEADER_SUBTEXT "Choose the User Workspace folder for ADSM."
-!define MUI_DIRECTORYPAGE_TEXT_TOP "The installer will tell ADSM to use the following workspace folder. To use a different folder, click Browse and select another folder.$\r$\n$\r$\nTo allow MULTIPLE USERS, leave the field blank so ADSM will attempt to detect the appropriate workspace folder for each user$\r$\nNote: this MAY not work on systems where user files are stored on networked shares.$\r$\nClick Next to continue."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "The installer can tell ADSM to use the following workspace folder.$\r$\nONLY do this if you are installing for a SINGLE USER, or if the workspace folder is intended to be shared and is writable by all users.$\r$\nTo allow MULTIPLE USERS, leave the field blank so ADSM will attempt to detect the appropriate workspace folder at startup for each user.$\r$\nNote: this MAY not work on systems where user files are stored on networked shares.$\r$\nClick Next to continue."
 !define MUI_DIRECTORYPAGE_VARIABLE $WorkspacePath
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE DirectoryLeave
 !define MUI_DIRECTORYPAGE_VERIFYONLEAVE
@@ -156,9 +158,9 @@ FunctionEnd
 !insertmacro MUI_LANGUAGE "English"
 
 ##########
-Function .onInit
-StrCpy $WorkspacePath "$DOCUMENTS\ADSM Workspace"
-FunctionEnd
+#Function .onInit
+#StrCpy $WorkspacePath "$DOCUMENTS\ADSM Workspace"
+#FunctionEnd
 
 ##########
 !include LogicLib.nsh

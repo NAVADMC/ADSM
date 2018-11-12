@@ -1,10 +1,12 @@
 import multiprocessing
+import math
 import csv
 
 from django.conf import settings
-from django.db import connections
+from django.db import connections, OperationalError
 from django.db.models import Avg, Min, Max
 from math import sqrt
+from statistics import pstdev
 
 from ADSMSettings.utils import workspace_path, scenario_filename
 from Results.models import DailyControls
@@ -44,7 +46,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
             for database in settings.DATABASES:
                 settings.DATABASES[database]['NAME'] = settings.DATABASES[database]['TEST']['NAME'] if 'TEST' in settings.DATABASES[database] else settings.DATABASES[database]['TEST_NAME']
 
-        location = workspace_path(scenario_filename() + '/' + SUMMARY_FILE_NAME)  # Note: scenario_filename uses the database
+        location = workspace_path(scenario_filename() + '/' + "Supplemental Output Files" + '/' + SUMMARY_FILE_NAME)  # Note: scenario_filename uses the database
         headers, data = self.get_summary_data_table()
 
         create_csv_file(location, headers, data)
@@ -55,7 +57,7 @@ class SummaryCSVGenerator(multiprocessing.Process):
         layout and follows the column order.  This could be changed to an OrderedDict( OrderedDict<column, value> ) if you want more flexibility in storage
         and retrieval, but it's simplest to just calculate and store them in order."""
         from Results.models import DailyByProductionType
-        headers = ['Field Name', 'Explanation', 'Mean', 'Low', 'High', 'p5', 'p25', 'p50', 'p75', 'p95']
+        headers = ['Field Name', 'Explanation', 'Mean', 'StdDev', 'Low', 'High', 'p5', 'p25', 'p50', 'p75', 'p95']
         data = []  # 2D
 
         fields_of_interest = [field for field, val in DailyByProductionType() if 'Cumulative' in explain(field)]  # only cumulative, last day fields in DailyByProductionType for all production types
@@ -103,22 +105,30 @@ class SummaryCSVGenerator(multiprocessing.Process):
 
 def std_dev(field, query):
     """This is the __Population__ Standard Deviation formula translated into RAW SQL statement, specifically SQLite version."""
+
+    #get next table name based on given query
     table_name = query.model._meta.db_table
-    sql_statement = "SELECT AVG(({table}.{col} - sub.a) * ({table}.{col} - sub.a)) as var from {table}, (SELECT AVG({col}) AS a FROM {table} WHERE last_day<>0) AS sub WHERE last_day<>0;".format(table=table_name, col=field)
+    cursor = connections["scenario_db"].cursor()
 
-    cursor = connections['scenario_db'].cursor()
-    cursor.execute(sql_statement)
-    row = cursor.fetchone()
-    variance = row[0]
-    if variance is None:
-        answer = None
+    #two statements, one is for tables that have production_type_id and one for tables that dont
+    # try and use the query for tables with production_type_id, if that fails use the other query
+    try:
+        last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1 and production_type_id is null".format(table=table_name, field=field)
+        cursor.execute(last_day_vals)
+    except OperationalError:
+        try:
+            last_day_vals = "SELECT {field} FROM {table} WHERE last_day = 1".format(table=table_name, field=field)
+            cursor.execute(last_day_vals)
+        except OperationalError:
+            return "N/A"
+
+    row = cursor.fetchall()
+
+    #every value in the query return that is an integer to a list, these are the values used in calculation
+    values = [element[0] for element in row if isinstance(element[0], int)]
+
+    if values:
+        #return the standard deviation
+        return round(pstdev(values), 2)
     else:
-        answer = sqrt(float(variance))
-    return answer
-
-
-
-
-
-
-
+        return "N/A"

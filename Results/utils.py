@@ -39,7 +39,7 @@ def delete_supplemental_folder():
     scenario_folder = scenario_filename()
     if scenario_folder != '':
         try:
-            shutil.rmtree(workspace_path(scenario_folder))
+            shutil.rmtree(workspace_path(scenario_folder + "/" + scenario_folder))
         except:
             pass  # because the folder doesn't exist (which is fine)
 
@@ -49,11 +49,11 @@ def delete_supplemental_folder():
 
 def map_zip_file():
     """This is a file named after the scenario in the folder that's also named after the scenario."""
-    return workspace_path(scenario_filename() + '/' + scenario_filename() + " Map Output.zip")
+    return workspace_path(scenario_filename() + '/' + "Supplemental Output Files" + '/' + scenario_filename() + " Map Output.zip")
 
 
 def zip_map_directory_if_it_exists():
-    dir_to_zip = workspace_path(scenario_filename() + "/Map")
+    dir_to_zip = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + "/Map")
     if os.path.exists(dir_to_zip) and supplemental_folder_has_contents(subfolder='/Map'):
         zipname = map_zip_file()
         dir_to_zip_len = len(dir_to_zip.rstrip(os.sep)) + 1
@@ -76,10 +76,12 @@ def abort_simulation(request=None):
 
 
 def delete_all_outputs():
-    from Results.models import DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion
+    from Results.models import DailyControls, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion
     abort_simulation()
     if DailyControls.objects.count() > 0:
         print("DELETING ALL OUTPUTS")
-    for model in [DailyControls, DailyReport, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
+    for model in [DailyControls, DailyByZone, DailyByProductionType, DailyByZoneAndProductionType, UnitStats, ResultsVersion]:
         model.objects.all().delete()
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
+    if os.path.isdir(workspace_path(scenario_filename() + "/" + "Supplemental Output Files")):
+        shutil.rmtree(workspace_path(scenario_filename() + "/" + "Supplemental Output Files"))

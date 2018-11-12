@@ -15,7 +15,7 @@ class Command(BaseCommand):
     @staticmethod
     def generate_urls_from_models(input_file, extra_urls=()):
         assert hasattr(extra_urls, '__getitem__')
-        lines = open(input_file, 'r').readlines()
+        lines = open(input_file, 'r', encoding='utf8').readlines()
         model_strings = extra_urls  # extra_urls is placed first so that they take precedence over auto-urls
         for line in lines:
             if 'class' in line[:5]:
@@ -49,15 +49,16 @@ class Command(BaseCommand):
              "url('^OpenPopulation/(?P<target>.+)$', 'ScenarioCreator.views.open_population')",
              "url('^PopulationPanel/$', 'ScenarioCreator.views.population_panel_only')",  # for async updates
 
-
              "url('^ValidateScenario/$', 'ScenarioCreator.views.validate_scenario')",
              "url('^ProductionTypeList.json/$', 'ScenarioCreator.views.production_type_list_json')",
              "url('^PopulationPanelStatus.json/$', 'ScenarioCreator.views.population_panel_status_json')",
              "url('^DisableAllControls.json/$', 'ScenarioCreator.views.disable_all_controls_json')",
+             "url('^VaccinationGlobal/$', 'ScenarioCreator.views.vaccination_global')",
+             "url('^DestructionGlobal/$', 'ScenarioCreator.views.destruction_global')",
 
-             "url('^ProbabilityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
+             "url('^ProbabilityDensityFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.probability_graph')",
              "url('^RelationalFunction/(?P<primary_key>\d+)/graph.png$', 'ScenarioCreator.function_graphs.relational_graph')",
-             "url('^ProbabilityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
+             "url('^ProbabilityDensityFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
              "url('^RelationalFunction/new/graph.png$', 'ScenarioCreator.function_graphs.empty_graph')",
 
              "url('^SpreadOptions.json/$', 'ScenarioCreator.views.spread_options_json')",

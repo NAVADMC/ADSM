@@ -9,10 +9,10 @@ import shutil
 def count_model_entries():
     from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression, \
         DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-        ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
-    models = [ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression, 
-              DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, 
-              ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment
+        ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment
+    models = [ProductionType, Scenario, OutputSettings, Population, Disease, DiseaseProgression,
+              DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol,
+              ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment
               ]
     print("Total model entries:", sum(model.objects.count() for model in models))
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
 
     if len(sys.argv) >= 4:  # single command line invocation
-        print("""Usage: python3.4 ./xml2sqlite.py export_pop.xml parameters.xml debug.sqlite3 [--workspace]
+        print("""Usage: python3.4 ./xml2sqlite.py export_pop.xml parameters.xml debug.db [--workspace]
         Include the flag '--workspace' as the fourth argument if you want to save the scenario to the ADSM Workspace""")
         shutil.copy(db_path(), workspace_path('activeSession.bak'))
         shutil.copy(db_path('default'), workspace_path('settings.bak'))

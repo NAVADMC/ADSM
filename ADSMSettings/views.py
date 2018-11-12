@@ -11,9 +11,10 @@ from django.utils.safestring import mark_safe
 from ADSMSettings.models import SmSession, unsaved_changes
 from ADSMSettings.forms import ImportForm
 from ADSMSettings.xml2sqlite import import_naadsm_xml
-from ADSMSettings.utils import update_db_version, db_path, workspace_path, file_list, handle_file_upload, graceful_startup, scenario_filename, \
+from ADSMSettings.utils import update_db_version, db_path, workspace_path, db_list, handle_file_upload, graceful_startup, scenario_filename, \
     copy_blank_to_session, create_super_user
 from Results.models import outputs_exist
+from ScenarioCreator.utils import convert_user_notes_to_unit_id
 
 
 def home(request):
@@ -50,7 +51,7 @@ def update_adsm_from_git(request):
 
 
 def file_dialog(request):
-    context = {'db_files': (file_list(".sqlite3")),
+    context = {'db_files': (db_list()),
                'title': 'Select a new Scenario to Open'}
     return render(request, 'ScenarioCreator/workspace.html', context)
 
@@ -77,6 +78,7 @@ def import_legacy_scenario(param_path, popul_path, new_name=None):
         names_without_extensions = '%s with %s' % names_without_extensions
 
     import_naadsm_xml(popul_path, param_path)  # puts all the data in activeSession
+    convert_user_notes_to_unit_id()
     scenario_filename(names_without_extensions, check_duplicates=True)
     return save_scenario(None)  # This will overwrite a file of the same name without prompting
     # except BaseException as error:
@@ -121,7 +123,7 @@ def import_naadsm_scenario(request, new_name=None):
 
 
 def upload_scenario(request):
-    if '.sqlite' in request.FILES['file']._name:
+    if '.sqlite' in request.FILES['file']._name or '.db' in request.FILES['file']._name:
         handle_file_upload(request)  #TODO: This can throw an error, but this method isn't used currently
         return redirect('/app/Workspace/')
     else:
@@ -129,14 +131,17 @@ def upload_scenario(request):
 
 
 def open_scenario(request, target, wrap_target=True):
+    if not target.lower().endswith('.db'):
+        target = target + ".db"
     if wrap_target:
-        target = workspace_path(target)
+        target = os.path.join(workspace_path(os.path.splitext(target)[0]), target)
     print("Copying ", target, "to", db_path(), ". This could take several minutes...")
     close_old_connections()
     shutil.copy(target, db_path(name='scenario_db'))
     scenario_filename(os.path.basename(target))
     print('Sessions overwritten with ', target)
     update_db_version()
+    convert_user_notes_to_unit_id()
     unsaved_changes(False)  # File is now in sync
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=outputs_exist())  # This is also reset from delete_all_outputs
     # else:
@@ -162,18 +167,20 @@ def new_scenario(request=None, new_name=None):
 def save_scenario(request=None):
     """Save to the existing session of a new file name if target is provided
     """
-    if request is not None and 'filename' in request.POST:
+    if request is not None and 'filename' in request.POST and request.POST['filename']:
         target = request.POST['filename']
     else:
         target = scenario_filename()
     target = strip_tags(target)
-    full_path = workspace_path(target) + ('.sqlite3' if not target.endswith('.sqlite3') else '')
+    full_path = workspace_path(target + "/" + target + ('.db' if not target.endswith('.db') else ''))
     try:
         if '\\' in target or '/' in target:  # this validation has to be outside of scenario_filename in order for open_test_scenario to work
             raise ValueError("Slashes are not allowed: " + target)
         scenario_filename(target)
         print('Copying database to', target)
 
+        if not os.path.exists(os.path.dirname(full_path)):
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
         shutil.copy(db_path(), full_path)
         unsaved_changes(False)  # File is now in sync
         print('Done Copying database to', full_path)
@@ -193,18 +200,26 @@ def save_scenario(request=None):
 
 def delete_file(request, target):
     print("Deleting", target)
-    os.remove(workspace_path(target))
+    if "\\" not in target and os.path.splitext(target)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+        target = os.path.splitext(target)[0]
+        shutil.rmtree(workspace_path(target))
+    else:
+        os.remove(workspace_path(target))
     print("Done")
     return HttpResponse()
 
 
 def copy_file(request, target, destination):
-    if target.replace('.sqlite3', '') == scenario_filename():  # copying the active scenario
+    if target.replace('.db', '') == scenario_filename():  # copying the active scenario
         return save_scenario(request)
-    if not destination.endswith('.sqlite3'):
-        destination += ".sqlite3"
     print("Copying", target, "to", destination, ". This could take several minutes...")
-    shutil.copy(workspace_path(target), workspace_path(destination))
+    target = workspace_path(os.path.splitext(target)[0] + "/" + target)
+    destination = workspace_path(os.path.splitext(destination)[0] + "/" + destination)
+    if not destination.endswith('.db'):
+        destination += ".db"
+    if not os.path.exists(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+    shutil.copy(target, destination)
     print("Done copying", target)
     return redirect('/')
 
@@ -212,23 +227,32 @@ def copy_file(request, target, destination):
 def download_file(request):
     target = request.GET['target']
     target = target if target[-1] not in r'/\\' else target[:-1]  # shouldn't be a trailing slash
-    file_path = workspace_path(target)
+    if "\\" not in target and os.path.splitext(target)[1].lower() in ['.db', '.sqlite', '.sqlite3']:
+        file_path = workspace_path(os.path.splitext(target)[0] + "/" + target)
+    else:
+        file_path = workspace_path(target)
     f = open(file_path, "rb")
     response = HttpResponse(f, content_type="application/x-sqlite")  # TODO: generic content type
     response['Content-Disposition'] = 'attachment; filename="' + target
     return response
 
 
-def backend(request):
+def backend(request, url):
     from django.contrib.auth import login
     from django.contrib.auth.models import User
-    user = User.objects.filter(is_staff=True).first()
+    user = User.objects.filter(username="ADSM").first()
     if user is None:
         user = create_super_user()
     print(user, user.username)
+    if not user.is_superuser:
+        user.is_superuser = True
+        user.save()
+    if not user.is_staff:
+        user.is_staff = True
+        user.save()
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
-    return redirect('/admin/')
+    return redirect(url)
 
 
 def show_help_text_json(request):
@@ -239,3 +263,13 @@ def show_help_text_json(request):
         return JsonResponse({'status':'success'})
     else:  # GET
         return JsonResponse({'show_help_text': SmSession.objects.get().show_help_text})
+
+
+def show_help_overlay_json(request):
+    if 'POST' in request.method:
+        new_value = request.POST['show_help_overlay']
+        set_to = new_value == 'true'
+        SmSession.objects.all().update(show_help_overlay=set_to)
+        return JsonResponse({'status':'success'})
+    else:  # GET
+        return JsonResponse({'show_help_overlay': SmSession.objects.get().show_help_overlay})

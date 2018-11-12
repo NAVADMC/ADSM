@@ -153,7 +153,7 @@ There are a few things to note about the settings of this project.
 Application used to store user settings and track simulation progress. This is mostly behind the scenes data storage.
 
 #### Database Templates
-These are the blank state databases for a scenario (blanks.sqlite3) and the ADSMSettings app (settings.sqlite3).  
+These are the blank state databases for a scenario (blanks.db) and the ADSMSettings app (settings.db).  
 Blank state databases are required to help the program startup faster so the database doesn't have to be created from the schema each time.
  
 #### Results
@@ -337,7 +337,7 @@ Each release line of ADSM has a "Program_id" and "Password" associated with it o
 
 The ADSM releases are:
 
-* ADSM (with is the Production release)
+* ADSM (which is the Production release)
 * ADSM_Beta
 * ADSM_Vaccination_Rings
 
@@ -365,7 +365,7 @@ The ADSM releases are:
 ## Credits
 Project Members:
 
-* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team
+* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@aphis.usda.gov
 * ADSM Technical Lead - Josiah Seaman
 * Simulation Creator / Maintainer - Neil Harvey
 * Dev Ops - Bryan Hurst
@@ -373,6 +373,8 @@ Project Members:
 * USDA Subject Matter Experts - Kelly Patyk, Amy Delgado, Columb Rigney, Kim Forde-Folle, Ann Seitzinger
 * University of Minnesota Center for Food Protection Subject Matter Expert Tim Boyer
 * Custom compiling Python libraries - Christoph Gohlke,  University of California, Irvine
+* Student Externs: Conrad Selig, South Dakota School of Mines, Erin Campbell, University of Rochester
+* R Collaborators: Karla Moreno-Torres, USDA ORISE Fellow, Matt Branan, USDA:APHIS:VS:CEAH
 
 Noun Project Icons:
 

@@ -8,6 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
+    url(r'^explorer/', include('explorer.urls')),
     url(r'^setup/', include('ScenarioCreator.urls')),
     url(r'^results/', include('Results.urls')),
     url(r'^app/', include('ADSMSettings.urls')),
@@ -15,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^$', 'ADSMSettings.views.home'),
     url('^LoadingScreen/$', 'ADSMSettings.views.loading_screen'),
     url('^500/$', 'ADSM.debug_views.handler500'),
-    url(r'react/$', TemplateView.as_view(template_name='react.html'))
+    url(r'react/$', TemplateView.as_view(template_name='react.html')),
     )
 
 if settings.DEBUG:

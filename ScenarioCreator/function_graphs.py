@@ -75,7 +75,7 @@ def probability_graph(request, primary_key):
 
 def existing_probability_graph(primary_key):
     import ScenarioCreator.models
-    m = ScenarioCreator.models.ProbabilityFunction.objects.get(id=primary_key)
+    m = ScenarioCreator.models.ProbabilityDensityFunction.objects.get(id=primary_key)
     #TODO: filler to avoid NaNs
     for field in m._meta.fields:
         if getattr(m, field.name) is None and isinstance(field, (IntegerField, FloatField)):
@@ -98,7 +98,7 @@ def existing_probability_graph(primary_key):
             "Beta": [scipy.stats.beta, {'a': m.alpha, 'b': m.alpha2, 'loc': m.min, 'scale': m.max - m.min}],
             "BetaPERT": [scipy.stats.beta, {'a': a, 'b': b, 'loc': m.min, 'scale': m.max - m.min}],
             "Binomial": [scipy.stats.binom, [m.s, m.p]],
-            "Discrete Uniform": [scipy.stats.randint, [m.min, m.max]],
+            "Discrete Uniform": [scipy.stats.randint, [m.min, m.max + 2]],
             "Exponential": [scipy.stats.expon, {'scale': m.mean}],
             "Fixed Value": [fixed_value, [m.mode]],  # custom
             "Gamma": [scipy.stats.gamma, {'a': m.alpha, 'scale': m.beta, 'loc': 0}],
@@ -152,13 +152,13 @@ def pdf_graph(x_label, function, kwargs_dict):
         return fig
     else:  # scipy discrete functions
         x = np.arange(dist.ppf(0.01),
-              dist.ppf(0.99) + 2, 1)
+                        dist.ppf(0.99) + (0 if "scipy.stats._discrete_distns.randint_gen" in str(function) else 2), 1)
         return discrete_graph(x_label, x, dist.pmf(x))
 
 
 
 def empty_graph(request=None):
-    return line_graph('Days', [], [])  # empty graph
+    return line_graph('Time Step Units', [], [])  # empty graph
 
 
 def relational_graph_update(request, primary_key):
@@ -178,7 +178,7 @@ def relational_graph_update(request, primary_key):
         #         http://stackoverflow.com/questions/8483348/django-return-image-data-from-a-view
         # https://en.wikipedia.org/wiki/Data_URI_scheme
         # http://stackoverflow.com/questions/10802312/display-png-image-as-response-to-jquery-ajax-request
-        return line_graph('Days', x, y)
+        return line_graph('Time Step Units', x, y)
     else:
         return existing_relational_graph(primary_key)
 

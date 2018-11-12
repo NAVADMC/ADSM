@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 import warnings
 from pyproj import Proj
 from math import exp, sqrt, modf
+from collections import OrderedDict
+import json
 
 import ADSMSettings.models
 from ScenarioCreator.models import *
@@ -104,7 +106,7 @@ def sequence( tag ):
 
 
 def getPdf( xml, nameGenerator ):
-    """Returns a ProbabilityFunction object corresponding to the XML."""
+    """Returns a ProbabilityDensityFunction object corresponding to the XML."""
     assert isinstance( xml, ET.Element )
     firstChild = list( xml )[0]
     if firstChild.tag == 'probability-density-function':
@@ -251,7 +253,7 @@ def getPdf( xml, nameGenerator ):
     else:
         raise NotImplementedError( pdfType )
 
-    pdf, created = create_no_duplicates(ProbabilityFunction, name, **args)
+    pdf, created = create_no_duplicates(ProbabilityDensityFunction, name, **args)
     return pdf
 
 
@@ -345,7 +347,13 @@ def readPopulation( populationFileName ):
 
     # Create a dictionary to remap long state names to one-letter codes.
     stateCodes = {}
-    for code, fullName in Unit.initial_state_choices:
+    legacy_state_choices = (
+        ('L', 'Incubating'),
+        ('B', 'Inapparent Shedding'),
+        ('B', 'Infectious Subclinical'),
+        ('C', 'Infectious Clinical')
+    )
+    for code, fullName in Unit.initial_state_choices + legacy_state_choices:
         stateCodes[fullName] = code
         stateCodes[fullName.replace( ' ', '' )] = code
 
@@ -361,10 +369,20 @@ def readPopulation( populationFileName ):
     bulkUnits = []
     for el in xml.findall( './/herd' ):
         description = el.find( './id' )
-        if description is None:
-            description = ''
+        try:
+            description = description.text
+        except:
+            description = el.find( './unitid' )
+            try:
+                description = description.text
+            except:
+                description = None
+        if description is not None and description != '':
+            id = description
+            description = 'unit_id=' + description
         else:
-            description = 'id=' + description.text
+            description = ""
+            id = None
         typeName = required_text(el, './production-type' )
         productionType = ProductionType.objects.get_or_create( name=typeName )[0]
         size = int( required_text(el, './size' ) )
@@ -398,6 +416,7 @@ def readPopulation( populationFileName ):
             days_in_initial_state = daysInState,
             days_left_in_initial_state = daysLeftInState,
             initial_size = size,
+            unit_id = id,
             user_notes = description
         ))
         if len( bulkUnits ) >= CREATE_AT_A_TIME:
@@ -634,8 +653,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         distance_distribution = distance,
                         transport_delay = delay,
                         infection_probability = probInfect,
-                        latent_animals_can_infect_others = latentCanInfect,
-                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                        latent_units_can_infect_others = latentCanInfect,
+                        subclinical_units_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_direct_contact_spread = True
                 elif el.attrib['contact-type'] == 'indirect':
@@ -647,7 +666,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         distance_distribution = distance,
                         transport_delay = delay,
                         infection_probability = probInfect,
-                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                        subclinical_units_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_indirect_contact_spread = True
                 else:
@@ -722,6 +741,9 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     if useDetection or useTracing or useVaccination or useDestruction:
         plan = ControlMasterPlan()
         plan.save()
+    
+    if useDestruction:
+        destructionGlobal = DestructionGlobal()
 
     status("Building Detection Model")
     for el in xml.findall( './/detection-model' ):
@@ -1050,6 +1072,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     # end of loop over <vaccine-model> elements
 
     productionTypesThatAreVaccinated = set()
+    # Create a dictionary where key=radius and value=set of ProductionTypes
+    # that trigger a ring with that radius. This will tell us how many
+    # VaccinationRingRule objects are needed.
+    rings_needed = {}
     for el in xml.findall( './/ring-vaccination-model' ):
         # Older XML files allowed just a "production-type" attribute and an
         # implied "from-any" functionality.
@@ -1061,26 +1087,10 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             toTypeNames = getProductionTypes( el, 'to-production-type', productionTypeNames )
 
         radius = float( required_text(el, './radius/value' ) )
-        for fromTypeName in fromTypeNames:
-            # If a ControlProtocol object has already been assigned to this
-            # production type, retrieve it; otherwise, create a new one.
-            try:
-                assignment = ProtocolAssignment.objects.get( production_type__name=fromTypeName )
-                protocol = assignment.control_protocol
-            except ProtocolAssignment.DoesNotExist:
-                protocol = ControlProtocol(
-                    use_detection = False
-                )
-                protocol.save()
-                assignment = ProtocolAssignment(
-                    production_type = ProductionType.objects.get( name=fromTypeName ),
-                    control_protocol = protocol
-                )
-                assignment.save()
-            protocol.trigger_vaccination_ring = True
-            protocol.vaccination_ring_radius = radius
-            protocol.save()
-        # end of loop over from-production-types covered by this <ring-vaccination-model> element
+        try:
+            rings_needed[radius].update(fromTypeNames)
+        except KeyError:
+            rings_needed[radius] = set(fromTypeNames)
 
         priority = int( required_text(el, './priority' ) )
         minTimeBetweenVaccinations = int_dz( required_text(el, './min-time-between-vaccinations/value' ) )
@@ -1104,7 +1114,6 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                     control_protocol = protocol
                 )
                 assignment.save()
-            protocol.use_vaccination = True
             protocol.minimum_time_between_vaccinations = minTimeBetweenVaccinations
             protocol.vaccinate_detected_units = vaccinateDetectedUnits
             protocol.save()
@@ -1112,6 +1121,14 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             productionTypesThatAreVaccinated.add( toTypeName )
         # end of loop over to-production-types covered by this <ring-vaccination-model> element
     # end of loop over <ring-vaccination-model> elements
+
+    # Create the VaccinationRingRules
+    for radius, trigger_production_types in rings_needed.items():
+        rule = VaccinationRingRule(outer_radius=radius)
+        rule.save()
+        rule.trigger_group.add(*ProductionType.objects.filter(name__in=trigger_production_types))
+        rule.target_group.add(*ProductionType.objects.filter(name__in=productionTypesThatAreVaccinated))
+    # end of loop to create rules
 
     if len( productionTypesThatAreVaccinated - productionTypesWithVaccineEffectsDefined ) > 0:
         raise Exception( 'some production types that are vaccinated do not have vaccine effects defined' )
@@ -1333,8 +1350,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
 
     for el in xml.findall( './/resources-and-implementation-of-controls-model' ):
         if useDestruction:
-            plan.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
-            plan.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
+            destructionGlobal.destruction_program_delay = int_dz( required_text(el, './destruction-program-delay/value' ) )
+            destructionGlobal.destruction_capacity = getRelChart( el.find( './destruction-capacity' ), relChartNameSequence )
             try:
                 order = required_text(el, './destruction-priority-order' ).strip()
             except AttributeError:
@@ -1342,7 +1359,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             # The XML did not put spaces after the commas, but the Django
             # model does.
             order = ', '.join( order.split( ',' ) )
-            plan.destruction_priority_order = order
+            destructionGlobal.destruction_priority_order = order
 
             # Create a new version of destructionReasonOrder where a) only the
             # minimum priority number attached to each reason is preserved and
@@ -1352,7 +1369,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 minPriority = min( [item[0] for item in filter( lambda item: item[1]==reason, destructionReasonOrder )] )
                 newDestructionReasonOrder.append( (minPriority, reason) )
             newDestructionReasonOrder.sort()
-            plan.destruction_reason_order = ', '.join( [item[1] for item in newDestructionReasonOrder] )
+            destructionGlobal.destruction_reason_order = ', '.join( [item[1] for item in newDestructionReasonOrder] )
 
             # Similar process for destructionProductionTypeOrder.
             newDestructionProductionTypeOrder = []
@@ -1369,7 +1386,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 protocol.save()
                 priority += 1
 
-            plan.save()
+            destructionGlobal.save()
         # end of if useDestruction==True
 
         if useVaccination:
@@ -1384,11 +1401,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
             for productionType in ProductionType.objects.all():
                 trigger.trigger_group.add( productionType )
             plan.vaccination_capacity = getRelChart( el.find( './vaccination-capacity' ), relChartNameSequence )
-            order = required_text(el, './vaccination-priority-order' ).strip()
-            # The XML did not put spaces after the commas, but the Django
-            # model does.
-            order = ', '.join( order.split( ',' ) )
-            plan.vaccination_priority_order = order
+            order = required_text(el, './vaccination-priority-order' ).strip().lower().split(',')
 
             # Create a new version of vaccinationProductionTypeOrder where a)
             # only the minimum priority number attached to each production type
@@ -1399,13 +1412,18 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                 newVaccinationProductionTypeOrder.append( (minPriority, typeName) )
             newVaccinationProductionTypeOrder.sort()
             newVaccinationProductionTypeOrder = [item[1] for item in newVaccinationProductionTypeOrder]
-            priority = 1
-            for typeName in newVaccinationProductionTypeOrder:
-                assignment = ProtocolAssignment.objects.get( production_type__name=typeName )
-                protocol = assignment.control_protocol
-                protocol.vaccination_priority = priority
-                protocol.save()
-                priority += 1
+
+            tmp = OrderedDict()
+            for criterion in order:
+                if criterion == 'production type':
+                    tmp['Production Type'] = newVaccinationProductionTypeOrder
+                elif criterion == 'reason':
+                    tmp['Reason'] = ['Ring']
+                elif criterion == 'time waiting':
+                    tmp['Days Holding'] = ['Oldest', 'Newest']
+            tmp['Size'] = ['Largest', 'Smallest']
+            tmp['Direction'] = ['Outside-in', 'Inside-out']
+            plan.vaccination_priority_order = json.dumps(tmp)
 
             plan.save()
         # end of if useVaccination==True

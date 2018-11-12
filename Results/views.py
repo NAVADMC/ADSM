@@ -40,7 +40,7 @@ def simulation_status(request):
 
 def results_home(request):
     from Results.csv_generator import SUMMARY_FILE_NAME
-    path_ex = workspace_path(scenario_filename() +"/*.csv")
+    path_ex = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + "/*.csv")
     start = workspace_path()
     context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
     summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
@@ -225,7 +225,7 @@ def summary_csv(request):
             return HttpResponseAccepted()
         elif not DailyControls.objects.all().count() or is_simulation_running():
             return HttpResponseBadRequest()
-        elif not os.path.isfile(workspace_path(scenario_filename() + '/' + SUMMARY_FILE_NAME)):
+        elif not os.path.isfile(workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/' + SUMMARY_FILE_NAME)):
             return HttpResponseNotFound()
         else:
             return HttpResponse()

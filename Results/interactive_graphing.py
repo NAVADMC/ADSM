@@ -83,19 +83,19 @@ def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated
     for i in range(len(infected)):
         if infected[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - half, latitude[i] - half),
-                                   color = (0.89, 0.102, 0.11),
+                                   color = ("#FF0000"),
                                    width = width,
                                    height= marker_km * (infected[i] / total_iterations),
                                    zorder=2000))
         if vaccinated[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] - width *.5, latitude[i] - half),
-                                   color=(0.2549, 0.6706, 0.3647),
+                                   color=("#00FF00"),
                                    width= width,
                                    height= marker_km * (vaccinated[i] / total_iterations),
                                    zorder=2000))
         if destroyed[i] > 0:
             ax.add_patch(Rectangle(xy=(longitude[i] + width * .5, latitude[i] - half),
-                                   color=(234/255, 125/255, 48/255),
+                                   color=("#EA7D30"),
                                    width=width,
                                    height= marker_km * (destroyed[i] / total_iterations),
                                    zorder=2000))
@@ -169,7 +169,7 @@ class PopulationWorker(threading.Thread):
         
     def make_population_map_file(self):
         if not os.path.exists(workspace_path(scenario_filename())):
-            os.makedirs(workspace_path(scenario_filename()))
+            os.makedirs(workspace_path(scenario_filename()), exist_ok=True)
         print("Calculating a new Population Map")
         fig = population_results_map()
         FigureCanvas(fig).print_png(self.path)
@@ -182,8 +182,8 @@ class PopulationWorker(threading.Thread):
         
 
 def population_zoom_png(request=None):
-    path = workspace_path(scenario_filename() + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
+    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
     try:
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
@@ -203,8 +203,8 @@ def population_zoom_png(request=None):
 
 
 def population_thumbnail_png(request, second_try=False):
-    path = workspace_path(scenario_filename() + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + '/population_thumbnail.png')
+    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
     try:
         with open(thumb_path, "rb") as f:
             return HttpResponse(f.read(), content_type="image/png")

@@ -32,7 +32,8 @@ if OVERRIDE_DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
-# Look for any settings to import from the installer
+# Look for any settings to import from the installer.
+# Installer settings are to be used globally across all users.
 if os.path.isfile(os.path.join(BASE_DIR, 'settings.ini')):
     from importlib import machinery
     install_settings = machinery.SourceFileLoader('install_settings', os.path.join(BASE_DIR, 'settings.ini')).load_module()
@@ -45,11 +46,11 @@ if not WORKSPACE_PATH:
             SHGFP_TYPE_CURRENT = 0
             buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
             ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Workspace")
+            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Beta Workspace")
         except:
             WORKSPACE_PATH = None
     if not WORKSPACE_PATH:
-        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
+        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Beta Workspace")
 if not DB_BASE_DIR:
     DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
 if not os.path.exists(WORKSPACE_PATH):
@@ -68,6 +69,53 @@ else:
 
 INTERNAL_IPS = ('127.0.0.1', '::1')
 
+ROOT_URLCONF = 'ADSM.urls'
+
+WSGI_APPLICATION = 'ADSM.wsgi.application'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap'
+
+# Database
+# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
+
+
+DATABASES.update({
+    'default': {
+        'NAME': os.path.join(DB_BASE_DIR, 'settings.db'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_settings.db')},
+    },
+    'scenario_db': {
+        'NAME': os.path.join(DB_BASE_DIR, 'activeSession.db'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.db')},
+        'OPTIONS': {
+            'timeout': 300,
+        }
+    }
+})
+
+EXPLORER_CONNECTIONS = {'scenario_db': 'scenario_db', }  # Mapping of friendly_name:db_alias. For now, just keeping the same on both sides.
+EXPLORER_DEFAULT_CONNECTION = 'scenario_db'
+EXPLORER_CONNECTION_NAME = 'scenario_db'
+EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = ('auth_', 'django_', 'south_migrationhistory', 'sqlite_master', 'sqlite_sequence')
+EXPLORER_SQL_BLACKLIST = ('ALTER', 'RENAME', 'DROP', 'TRUNCATE')
+
+DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
+
+# Internationalization
+# https://docs.djangoproject.com/en/1.6/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = False
+
+USE_L10N = True
+
+USE_TZ = True
+
 INSTALLED_APPS = (
     'ScenarioCreator',
     'Results',
@@ -83,6 +131,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'productionserver',
     'webpack_loader',
+    'explorer',
     # 'debug_toolbar',
     # 'pympler',
 )
@@ -104,47 +153,6 @@ if DEBUG:
         # 'ADSMSettings.debug.HotshotProfileMiddleware',
         # 'ADSMSettings.debug.cProfileMiddleware',
     )
-
-ROOT_URLCONF = 'ADSM.urls'
-
-WSGI_APPLICATION = 'ADSM.wsgi.application'
-
-CRISPY_TEMPLATE_PACK = 'bootstrap'
-
-# Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
-
-
-DATABASES.update({
-    'default': {
-        'NAME': os.path.join(DB_BASE_DIR, 'settings.sqlite3'),
-        'ENGINE': 'django.db.backends.sqlite3',
-        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_settings.sqlite3')},
-    },
-    'scenario_db': {
-        'NAME': os.path.join(DB_BASE_DIR, 'activeSession.sqlite3'),
-        'ENGINE': 'django.db.backends.sqlite3',
-        'TEST': {'NAME': os.path.join(DB_BASE_DIR, 'test_activeSession.sqlite3')},
-        'OPTIONS': {
-            'timeout': 300,
-        }
-    }
-})
-
-DATABASE_ROUTERS = ['ScenarioCreator.router.ScenarioRouter', ]
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = False
-
-USE_L10N = True
-
-USE_TZ = True
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -182,8 +190,8 @@ if getattr(sys, 'frozen', False):
     for app_name in INSTALLED_APPS:
         if os.path.exists(os.path.join(BASE_DIR, 'templates', app_name)):
             TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', app_name), ])
-    if os.path.exists(os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates')):  # TODO: Figure out how to find name of base app (doesn't work nicely when frozen)
-        TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', 'ADSM', 'templates'), ])
+    if os.path.exists(os.path.join(BASE_DIR, 'templates', 'ADSM')):  # TODO: Figure out how to find name of base app (doesn't work nicely when frozen)
+        TEMPLATES[0]['DIRS'].extend([os.path.join(BASE_DIR, 'templates', 'ADSM'), ])
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -237,3 +245,4 @@ DEBUG_TOOLBAR_CONFIG = {
     'JQUERY_URL': '',
     'SHOW_TOOLBAR_CALLBACK': 'ddt_request_history.panels.request_history.allow_ajax',
 }
+

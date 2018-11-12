@@ -1,0 +1,47 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: Results Cost by production type
+--    Date:         11/2/2018
+--    By:           Schoenbaum, Missy
+--
+--    Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             -- allows for line to be commented  (omitted)
+--   This query calculates costs from the counts of units and animals
+--   It is possible that rounding will be slightly different than the total cost that is calculated across all production type
+----------------------------------------------------------------------------------------
+
+SELECT 
+iteration, day as Duration, name as Production_Type,  protocol, 
+descU, descA, VaccU, VaccA,
+cost_of_destruction_cleaning_per_unit, ROUND(cost_of_destruction_cleaning_per_unit*descU, 0) as CostCleaning,
+cost_of_destruction_appraisal_per_unit, ROUND(cost_of_destruction_appraisal_per_unit*descU, 0) as CostAppraisal,
+cost_of_euthanasia_per_animal, ROUND(cost_of_euthanasia_per_animal*descA, 0) as CostEuthanasia,
+cost_of_indemnification_per_animal, ROUND(cost_of_indemnification_per_animal*descA, 0) as CostIndemnity,
+cost_of_carcass_disposal_per_animal, ROUND(cost_of_carcass_disposal_per_animal*descA, 0) as CostDisposal,
+cost_of_vaccination_setup_per_unit, ROUND(cost_of_vaccination_setup_per_unit*VaccU, 0) as CostVXSetup,
+cost_of_vaccination_baseline_per_animal, ROUND(cost_of_vaccination_baseline_per_animal*VaccA, 0) as CostVXBaseline,
+CASE
+    WHEN vaccination_demand_threshold > VaccA
+    THEN 0 
+    ELSE cost_of_vaccination_additional_per_animal * (VaccA - vaccination_demand_threshold)
+    END as CostVXAdditional
+FROM Results_dailybyproductiontype r
+Left join 
+ScenarioCreator_productiontype pt
+on r.production_type_id = pt.id
+LEFT JOIN 
+(SELECT CP.name as protocol, pa.Production_type_id PTID, 
+cost_of_destruction_cleaning_per_unit,
+cost_of_destruction_appraisal_per_unit,
+cost_of_euthanasia_per_animal,
+cost_of_indemnification_per_animal,
+cost_of_carcass_disposal_per_animal,
+cost_of_vaccination_setup_per_unit,
+cost_of_vaccination_baseline_per_animal,
+vaccination_demand_threshold,
+cost_of_vaccination_additional_per_animal
+FROM ScenarioCreator_protocolassignment pA
+LEFT JOIN ScenarioCreator_controlprotocol cp ON cp.id = pa.control_protocol_id) costs
+ON costs.PTID = r.Production_type_id
+WHERE 1=1 
+and production_type_id is not null 
+and last_day = 1 order by 1,2, 4

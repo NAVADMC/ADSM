@@ -297,6 +297,15 @@ header .header_logo{
     background-repeat: no-repeat;
     min-width: 190px;
 }
+header .info-overlay {
+    height: 30px;
+    width: 30px;
+    display: block;
+    margin: 10px 7px 0px auto;
+    min-width: 33px;
+    position: absolute;
+    right: 0;
+}
 header .col-xs-8 {
     height: 42px;
 }
@@ -434,6 +443,10 @@ body>nav {
     margin-right: 0;
     margin-left: 200px;
     z-index: 0;
+}
+
+.fragment {
+    /*position: relative;*/
 }
 
 .layout-panel {
@@ -639,6 +652,9 @@ ul {
 }
 #TB_documentation {
     background-image: url("../icons/TB_documentation_btn.png");
+}
+#TB_sqlexplorer {
+    background-image: url("../icons/TB_sqlexplorer_btn.png");
 }
 #TB_population {
     background-image: url("../icons/TB_population_btn.png");
@@ -908,6 +924,12 @@ ul {
 /*.edit-button-holder .edit-button {*/
     /*z-index: 20;*/
 /*}*/
+
+.back-button{
+    float:left;
+    display: unset;
+}
+
 .edit-button-holder button,
 .edit-button-holder a {
     position: absolute;
@@ -924,7 +946,7 @@ ul {
     /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 2);
 }
-.edit-button-holder .btn-cancel.reveal {
+.edit-button-holder .cancel-button.reveal {
     /*noinspection CssInvalidPropertyValue*/
     bottom: calc(-10px + 32px * 3);
 }
@@ -968,11 +990,11 @@ ul {
     visibility: hidden;
 }
 
-#setupMenu h2:first-child a{
+#setupMenu h2:first-child a, #priorities li:first-child {
     border-top:1px solid #eeeeee;
 }
 
-#setupMenu h2, #setupMenu h3, #setupMenu h4 {
+#setupMenu h2, #setupMenu h3, #setupMenu h4, .tab-list {
     margin-top: 0;
     margin-bottom: 0; /* These are meant to stack */
     overflow: hidden;
@@ -981,7 +1003,8 @@ ul {
     /*width:170px;*/
 }
 
-#setupMenu a {
+#setupMenu a,
+#priorities li {
     color: #606060;
     display:block;
     text-decoration: none;
@@ -995,7 +1018,7 @@ ul {
     direction: ltr;
 }
 
-#setupMenu a:before {
+#setupMenu a:before, #priorities li:before {
     content:"";
     display:block;
     width:100%;
@@ -1006,12 +1029,13 @@ ul {
     left:-5px;
 }
 
-#setupMenu a:hover{
+#setupMenu a:hover, #priorities li:hover{
     background-color:#eeeeee;
 }
 
 #setupMenu a.active:hover{
     background-color:#606060;
+    color: white !important; /*ID selector was more specific*/
 }
 
 #setupMenu h3 a, #setupMenu h4 a {
@@ -1028,7 +1052,7 @@ ul {
     margin-right: 0;
 }
 
-#setupMenu span {
+#setupMenu span, #priorities span {
     width: 5px;
     height: 35px;
     -webkit-border-radius:0 2px 2px 0;
@@ -1680,6 +1704,7 @@ section#population_main_panel h1:first-of-type {
     margin-left: 190px;
     width: calc(100vw - 250px);
     padding: 10px;
+    padding-bottom: 61px;
     background: white;
     position: relative;
     display: block;
@@ -1890,7 +1915,7 @@ section#population_main_panel h1:first-of-type {
 }
 #farm_filter select {
     margin: 0;
-    width: 129px;
+    width: 225px;
 }
 #farm_filter input {
     width: 87px;
@@ -1920,7 +1945,7 @@ section#population_main_panel h1:first-of-type {
         width: 100%;
     }
     #farm_filter select {
-        width: 200px;
+        width: 260px;
     }
 }
 @media screen and (max-width: 1100px) {
@@ -2124,7 +2149,6 @@ th:hover .sortControls{
 .model-banner a{
     color:#404040;
     font-weight: 600;
-    display:block;
     width: calc(100% - 30px);
     padding-left: 5px;
 }
@@ -2172,12 +2196,13 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 #sim_progress_and_button {
     position: fixed;
     bottom: 10px;
-    margin-left: 212px;
+    margin-left: 200px;
     display: block;
     height: 51px;
-    width: calc(100% - 212px);
+    width: calc(100% - 250px);
     border-top: 2px solid #606060;
     border-bottom: 2px solid #606060;
+    border-right: 2px solid #606060;
     z-index: 1;
     background-color: white;
 }
@@ -2212,7 +2237,7 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
 }
 
 #sim_progress_and_button .progress {
-    width: 60%;
+    width: 57.5%;
     margin: 0px;
     float:left;
     border-left: 2px solid #606060;
@@ -2220,6 +2245,10 @@ table tbody span:hover { /*necessary in addtion to disableSelection() to preserv
     height: 100%;
     border-radius: 0;
     position: relative;
+}
+#sim_progress_and_button .progress-done {
+    width: 100%;
+    border-right: none;
 }
 #sim_progress_and_button .progress:after {
     content: "";
@@ -2298,7 +2327,7 @@ select[multiple] {}
     padding: 5px 10px;
 }
 .productiontypelist:after {
-    content:"To add production types to the trigger click on a Type in the Population Panel";
+    content:"To add Production Types to this list,\A click in this box then click on a Type in the Population Panel";
     white-space: pre-wrap;
     font-style: italic;
     color: #808080;
@@ -2493,17 +2522,17 @@ span.IndirectSpread {
 #legend-right li {
     display: block;
     height: 20px;
-    border-left: 20px solid #68be5e;
+    border-left: 20px solid #00FF00;
     margin-left: 0;
     margin-bottom: 4px;
     line-height: 20px;
     padding-left: 5px;
 }
 #legend-right li:first-child {
-    border-color: #ba3e44;
+    border-color: #FF0000;
 }
 #legend-right li:last-child {
-    border-color: rgb(234, 125, 48);
+    border-color: #EA7D30;
 }
 @media screen and (max-height: 800px){
     #legend {
@@ -2584,6 +2613,33 @@ span.IndirectSpread {
     text-decoration: underline;
 }
 
+/**********Priority Widget***********************/
+
+.ui-sortable { /*list ul element*/
+    width: 200px;
+    background-color: white;
+}
+
+.ui-sortable-handle:hover {
+    cursor: ns-resize;
+}
+.ui-sortable-handle {
+    overflow: visible;
+    white-space: normal;
+}
+.sub-priorities {
+    position: absolute;
+    top: 0;
+    left: 200px;
+    /*or float*/
+    z-index: 200;
+    display:none;
+}
+
+.ui-sortable-handle.active .sub-priorities {
+    display:block;
+}
+/*NOTE: I wanted to do list-style-image for the sortable lists to add a little grab icon, but just couldn't get it to work.*/
 
 @media screen and (max-width: 1200px) {
 /*------------- navigation ----------------*/

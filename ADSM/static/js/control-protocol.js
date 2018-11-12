@@ -29,6 +29,7 @@ switch_tabs = function(element){
     if(!current_is_active(element)){
         //activate the correct protocol rather than navigating
         load_target_link.call(get_parent_title(element), function(){active_tab(element)});
+
     }else{
         active_tab(element);
     }
@@ -45,6 +46,9 @@ ensure_expanded = function(element){
 
 
 build_protocols_list = function(){
+    var first_submodel_with_error = null;
+    var first_tab_with_error = null;
+
     $.ajax({
         url: '/setup/Protocols.json',
         data: {},
@@ -74,7 +78,7 @@ build_protocols_list = function(){
                             '<input type="checkbox" name="'+ tab['field'] + '" ' + //used in endpoint url
                             (tab['enabled'] ? "checked" : "") +  //initial checked state
                             ' data-proxy="#id_'+ tab['field'] +
-                            '" class="checkboxinput fat_checkbox">' +
+                            '" class="checkboxinput fat_checkbox" ' + (tab['can_select'] ? "" : "disabled") + '>' +
                             '<div class="defined_name" onClick="switch_tabs(this);">'+
                             tab['name'] +
                                 //only include an element if it's not valid.  only show that element if it's invalid and enabled
@@ -82,6 +86,10 @@ build_protocols_list = function(){
                             '</div>' +
                             '</div>' +
                             '</li>'));
+                    if (!tab['valid']) {
+                        first_submodel_with_error = "#sub-model" + index;
+                        first_tab_with_error = "#id_" + tab['field'];
+                    }
                 });
                 $container.append($sub_headings);
                 $header.append($container);//children
@@ -89,7 +97,15 @@ build_protocols_list = function(){
             });
             $('#protocol_list').append($accordion);
             //$('.collapse').collapse(); //enable bootstrap javascript
-        }});
+            if (first_submodel_with_error != null) {
+                check_enabled_tabs();
+                $(first_submodel_with_error).collapse('show');
+                // first_tab_with_error = $('input[data-proxy="'+first_tab_with_error+'"]').parents('.defined_wrapper').find('.defined_name').first();
+                first_tab_with_error = $('input[data-proxy="'+first_tab_with_error+'"]').siblings('.defined_name').first();
+                switch_tabs(first_tab_with_error);
+            }
+        }
+    });
 };
 
 var hide_hidden_labels = function(){

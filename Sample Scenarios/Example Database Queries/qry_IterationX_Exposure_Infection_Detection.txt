@@ -1,0 +1,43 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Iteration X, Cumulative, Exposure, Infection and Detection, ALL production types,  UNIT Only
+--	Date:         6/27/2017
+--      By:           Schoenbaum, Missy
+--   -- allows for line to be commented  (omitted)
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--                         
+--      Naming Conventions are built with the following abbreviations - wiki provides more documentation
+--      U = Unit  c - cumulative n - new I REMOVED ALL n NEW VARIABLES BECAUSE I AM ONLY GOING TO LOOK AT THE LAST 
+--                                                          DAY OF THE OUTBREAK 
+--      exp - exposure, from a contact method Air - airborn, Dir - direct or Ind - Indirect
+--      inf - infection, which from a contact method Air - airborn, Dir - direct or Ind - Indirect
+--      det - detection, from Clin - clinical exam or Test - testing
+----------------------------------------------------------------------------------------
+SELECT -- then list the fields that you want
+iteration,
+day,
+r.production_type_id,  -- looking for null here, which is all prodution types
+IFNULL(r.production_type_id, 'ALL') as production_type, -- I don't like leaving a blank, so I am going to give this a value of ALL and rename
+last_day,
+-- -------  Exposure by UNIT COUNTS
+expcU,          -- NAMING EXAMPLE  Exposure Cumulative by Unit by all contact methods
+expcUAir,     --Exposure Cumulative by Unit by airborne contact
+expcUDir,    --Exposure Cumulative by Unit by direct contact
+expcUInd,    --Exposure Cumulative by Unit by indirect contact
+-- -------       Infection by Unit
+infcU,          -- Infection Cumulative by Unit by all contact methods
+infcUAir,     -- Infection Cumulative by Unit by airborne contact
+infcUDir,     -- Infection Cumulative by Unit by direct contact
+infcUInd,    -- Infection Cumulative by Unit by indirect contact
+---------- Detection by Unit
+detcU,             -- Detection Cumulative by Unit by all contact methods
+detcUClin,      -- Detection Cumulative by Unit by Clinical exam
+detcUTest      -- Detection Cumulative by Unit by testings
+----------now the table where we get the data from
+FROM  Results_dailybyproductiontype r
+ -- Example of WHERE clause that allows us to limit results 
+WHERE 1=1
+AND r.production_type_id is null  -- THIS EMPTY MEANS IT IS THE LINE FOR THE COMBINED PRODUCTION TYPES
+--AND iteration = 8  -- PICK AN ITERATION, in my example 8 was short but interesting
+--AND last_day =1   -- REMOVING THIS TO SEE ALL DAYS  (0 false/1 true)
+ -- Example of ORDER BY clause that allows us to sort results,  use desc to indicate descending
+ORDER BY  iteration, day  

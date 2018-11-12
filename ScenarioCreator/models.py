@@ -32,7 +32,9 @@ import os
 
 import re
 import time
+import json
 
+from collections import OrderedDict
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -40,7 +42,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django_extras.db.models import LatitudeField, LongitudeField, MoneyField
 
-from ADSMSettings.models import SingletonManager
+from ADSMSettings.models import SingletonManager, BulkUpdateManager
 from ScenarioCreator.custom_fields import PercentField
 from ScenarioCreator.templatetags.db_status_tags import wiki, link, bold
 import ScenarioCreator.population_parser
@@ -127,7 +129,7 @@ class Population(InputSingleton):
     def save(self, *args, **kwargs):
         super(Population, self).save(*args, **kwargs)
         if self.source_file:
-            if self.source_file.endswith('.sqlite3'):
+            if self.source_file.endswith('.db'):
                 self.import_population_from_sqlite()
             else:
                 self.import_population()  # Population must be saved to db so that it can be foreignkeyed
@@ -176,7 +178,7 @@ class Population(InputSingleton):
             connections.databases[import_db] = {
                 'NAME': self.source_file,
                 'TEST':{'NAME': self.source_file},
-                'ENGINE': 'django.db.backends.sqlite3',
+                'ENGINE': 'django.db.backends.db',
                 'OPTIONS': {
                     'timeout': 300,
                 }
@@ -201,10 +203,6 @@ class Population(InputSingleton):
 
 
 class Unit(BaseModel):
-    def save(self, *args, **kwargs):
-        self._population = Population.objects.get()
-        super(Unit, self).save(*args, **kwargs)
-
     _population = models.ForeignKey(Population)
     production_type = models.ForeignKey('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -229,6 +227,13 @@ class Unit(BaseModel):
     initial_size = models.PositiveIntegerField(validators=[MinValueValidator(1)],
         help_text='The number of animals in the ' + wiki("Unit") + '.', )
     user_notes = models.CharField(max_length=255, blank=True, null=True)  # as long as possible
+    unit_id = models.CharField(max_length=50, blank=True, null=True)
+
+    objects = BulkUpdateManager()
+
+    def save(self, *args, **kwargs):
+        self._population = Population.objects.get()
+        super(Unit, self).save(*args, **kwargs)
 
     @classmethod
     def create(cls, **kwargs):
@@ -243,16 +248,24 @@ class Unit(BaseModel):
                 except ValueError as e:
                     # attempt float
                     kwargs[key] = int(float(kwargs[key]))
-
             elif key == 'initial_state':
                 if len(kwargs[key]) > 1:
                     new_val = choice_char_from_value(kwargs[key], Unit._meta.get_field_by_name('initial_state')[0]._choices)
                     if new_val is None:
                         raise ValidationError(kwargs[key] + " is not a valid state")
                     kwargs[key] = new_val
+            elif key == 'days_in_initial_state':
+                if kwargs[key] == '':
+                    kwargs[key] = None
+            elif key == 'days_left_in_initial_state':
+                if kwargs[key] == '':
+                    kwargs[key] = None
         unit = cls(**kwargs)
         unit.full_clean()
         return unit
+
+    def get_id(self):
+        return self.unit_id
 
     def __str__(self):
         return "Unit(%s: (%s, %s)" % (self.production_type, self.latitude, self.longitude)
@@ -263,8 +276,8 @@ class Function(BaseModel):
  a relational function (relid) depending on which child class is used.  """
     name = models.CharField(max_length=255,
         help_text='User-assigned name for each function.', )
-    x_axis_units = models.CharField(max_length=255, default="Days",
-        help_text='Specifies the descriptive units for the x axis in relational functions.', )
+    x_axis_units = models.CharField(max_length=255, default="Time Step Unit",
+        help_text='The x-axis is the time step unit that corresponds to the time unit used for parameterizing the model.  For example, infectious diseases are commonly parameterized in a daily time step, so the x-axis would be “Days”.', )
     notes = models.TextField(blank=True, null=True, help_text='', )
     class Meta(object):
         abstract = True
@@ -272,16 +285,17 @@ class Function(BaseModel):
         return self.name
 
 
-class ProbabilityFunction(Function):
+class ProbabilityDensityFunction(Function):
     """ There are a large number of fields in this model because different equation_type use different
         parameters.  Parameters are all listed as optional because they are frequently unused.  A second
         layer of validation will be necessary for required parameters per equation_type.
 
         IMPORTANT: Be careful about editing the help text here since it is used to enforce required
-        fields in ProbabilityFunctionForm.clean().  Use this to check your work:
+        fields in ProbabilityDensityFunctionForm.clean().  Use this to check your work:
 
-        for field in ProbabilityFunction._meta.fields:
+        for field in ProbabilityDensityFunction._meta.fields:
             print(re.split(r": |, |\.", field.help_text))"""
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Lexicon-of-Disease-Spread-Modelling-terms#probability-density-function"
     equation_type = models.CharField(max_length=255,
         help_text='For probability density functions identifies the type of function.',
         default="Triangular",
@@ -331,6 +345,7 @@ class ProbabilityFunction(Function):
 
 
 class RelationalFunction(Function):
+    wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Relational-functions"
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 
@@ -348,29 +363,88 @@ class ControlMasterPlan(InputSingleton):
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") +
                   ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
-    destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
-    destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text="The relational function used to define the daily destruction capacity.", )
-    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
-        help_text='The primary priority order for destruction.',
-        choices=priority_choices(), )
-    destruction_reason_order = models.CharField(max_length=255,
-        default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
-        # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
-        # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
-        help_text='The secondary priority order for destruction.', )
     vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Relational function used to define the daily vaccination capacity.', )
     restart_vaccination_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
         help_text='Define if the daily vaccination capacity will be different if started a second time.', )
-    vaccination_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
-        help_text='The primary priority criteria for order of vaccinations.',
-        choices=priority_choices(), )
+    vaccination_priority_order = models.TextField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Reason":["Basic", "Trace fwd direct", "Trace fwd indirect", "Trace back direct", "Trace back indirect", "Ring"], "Direction":["Outside-in", "Inside-out"], "Size":["Largest", "Smallest"]}',
+        help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
-        help_text='Once a vaccination program starts, this number determines how many days previous to the start of the vaccination program a detection will trigger vaccination.', )
+        help_text='Once a trigger has been activated, detected units prior to the trigger day can be retrospectively included in the vaccination strategy. This number defines how many days before the trigger to step back, and incorporate detected units.', )
+
+    def update_production_type_listing(self):
+        data = json.loads(self.vaccination_priority_order, object_pairs_hook=OrderedDict)  # preserve priority ordering is important
+        missing =  [name for name in ProductionType.objects.values_list('name', flat=True) if name not in data['Production Type']]
+        obsolete = [name for name in data['Production Type'] if name not in ProductionType.objects.values_list('name', flat=True)]
+        if missing or obsolete:
+            data['Production Type'] += missing  # extend list at end
+            for name in obsolete:
+                data['Production Type'].remove(name)
+            self.vaccination_priority_order = json.dumps(data)
+
+
+    def save(self, *args, **kwargs):
+        if self.vaccination_priority_order.startswith('{'):  # after the data migration
+            self.update_production_type_listing()
+        super(ControlMasterPlan, self).save(*args, **kwargs)
+
     def __str__(self):
         return str(self.name)
+
+
+class DestructionGlobal(InputSingleton):
+    destruction_program_delay = models.PositiveIntegerField(blank=True, null=True,
+                                                            help_text='The number of days that must pass after the first detection before a destruction program can begin.', )
+    destruction_capacity = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
+                                             help_text="The relational function used to define the daily destruction capacity.", )
+    '''
+    #Destruction Priority Secondary Priority
+    destruction_priority_order = models.CharField(default='{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}', max_length=255,
+                                                  help_text='The primary priority order for destruction.', )
+    
+    destruction_reason_order = models.CharField(max_length=255,
+                                                default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace ack indirect, Ring',
+                                                # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
+                                                # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
+                                                help_text='The secondary priority level for destruction. All options shown, but only enabled options are used.', )
+    '''
+    destruction_priority_order = models.CharField(default='reason, time waiting, production type', max_length=255,
+                                                  help_text = 'The primary priority order for destruction.',
+                                                  choices = priority_choices(), )
+    destruction_reason_order = models.CharField(max_length=255,
+                                                default='Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring',
+                                                # old DB: 'basic,direct-forward,ring,indirect-forward,direct-back,indirect-back'
+                                                # old UI: Detected, Trace forward of direct contact, Ring, Trace forward of indirect contact, Trace back of direct contact, Trace back of indirect contact
+                                                help_text='The secondary priority level for destruction. All options shown, but only enabled options are used.', )
+
+    '''
+    #Destruction Priority Secondary Priority
+    def update_production_type_listing(self):
+        #try catches
+        try:
+            data = json.loads(self.destruction_priority_order, object_pairs_hook=OrderedDict) # preserve priority ordering is important
+        except ValueError:
+            data = json.loads('{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}', object_pairs_hook=OrderedDict)
+        missing =  [name for name in ProductionType.objects.values_list('name', flat=True) if name not in data['Production Type']]
+        obsolete = [name for name in data['Production Type'] if name not in ProductionType.objects.values_list('name', flat=True)]
+        if missing or obsolete:
+            data['Production Type'] += missing  # extend list at end
+            for name in obsolete:
+                data['Production Type'].remove(name)
+            self.destruction_priority_order = json.dumps(data)
+
+    def save(self, *args, **kwargs): # after the data migration
+        self.update_production_type_listing()
+        super(DestructionGlobal, self).save(*args, **kwargs)
+    '''
+
+    def validate(self):
+        '''
+        #Destruction Priority Secondary Priority
+        return True if self.destruction_program_delay is not None and self.destruction_capacity is not None else False;
+        '''
+        return True if self.destruction_program_delay != None and self.destruction_capacity != None else False;
+
 
 protocol_substructure = {'use_detection': ['detection_probability_for_observed_time_in_clinical',
                                            'detection_probability_report_vs_first_detection',
@@ -418,9 +492,6 @@ protocol_substructure = {'use_detection': ['detection_probability_for_observed_t
                                              'minimum_time_between_vaccinations',
                                              'days_to_immunity',
                                              'vaccine_immune_period',
-                                             'trigger_vaccination_ring',
-                                             'vaccination_ring_radius',
-                                             'vaccination_priority',
                                              ],
                          'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
                                                  'cost_of_destruction_cleaning_per_unit',
@@ -465,7 +536,7 @@ class ControlProtocol(BaseModel):
         help_text='Probability of success of trace for '+wiki("indirect contact")+'.', )
     indirect_trace_period = models.PositiveIntegerField(blank=True, null=True,
         help_text='Days before detection  (critical period) for tracing of '+wiki("indirect contact")+'s.', )
-    trace_result_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
+    trace_result_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
         help_text='Delay for carrying out trace investigation result (days).', )
     direct_trace_is_a_zone_trigger = models.BooleanField(default=False,
         help_text='Indicator if direct tracing of infected units of this ' + wiki("production type") + ' will trigger a '+wiki("Zone")+' focus.', )
@@ -474,11 +545,11 @@ class ControlProtocol(BaseModel):
     use_destruction = models.BooleanField(default=False,
         help_text='Indicates if detected units of this ' + wiki("production type") + ' will be destroyed.', )
     destruction_is_a_ring_trigger = models.BooleanField(default=False,
-        help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', )
+        help_text='Indicates if detection of a unit of this ' + wiki("production type") + ' will trigger the formation of a destruction ring.', verbose_name="Detection is a ring trigger")
     destruction_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Radius in kilometers of the destruction ring.', )
+        help_text='Radius in kilometers of the destruction ring.', default=0, )
     destruction_is_a_ring_target = models.BooleanField(default=False,
-        help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', )
+        help_text='Indicates if unit of this ' + wiki("production type") + ' will be subject to preemptive ring destruction.', verbose_name="In the event of a trace, Destruction is a ring target")
     destroy_direct_forward_traces = models.BooleanField(default=False,
         help_text='Indicates if units of this type identified by '+wiki("trace forward")+' of '+wiki("direct contact")+'s will be subject to preemptive destruction.', )
     destroy_indirect_forward_traces = models.BooleanField(default=False,
@@ -495,16 +566,10 @@ class ControlProtocol(BaseModel):
         help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
-    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=True, null=True,
-        help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '.', )
-    vaccine_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
-        help_text='Defines the '+ wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
-    trigger_vaccination_ring = models.BooleanField(default=False,
-        help_text='Indicates if detection of a unit of this type will trigger a vaccination ring.', )
-    vaccination_ring_radius = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
-        help_text='Radius in kilometers of the vaccination ring.', )
-    vaccination_priority = models.PositiveIntegerField(default=5, blank=True, null=True,
-        help_text='The vaccination priority of this production type relative to other production types.  A lower number indicates a higher priority.', )
+    minimum_time_between_vaccinations = models.PositiveIntegerField(blank=False, null=False, default=99999,
+        help_text='The minimum time in days between vaccination for units of this ' + wiki("production type") + '. Default value set to 99999 to stop duplicate vaccinations.', )
+    vaccine_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
+        help_text='Defines the ' + wiki("vaccine immune") + ' period for units of this ' + wiki("production type") + '.', )
     vaccination_demand_threshold = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of animals of this type that can be vaccinated before the cost of vaccination increases.', )
     cost_of_vaccination_additional_per_animal = MoneyField(default=0.0,
@@ -547,7 +612,7 @@ class ControlProtocol(BaseModel):
         help_text=link("Test Specificity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
     test_sensitivity = FloatField(validators=[MinValueValidator(0.0)], blank=True, null=True,
         help_text=link("Test Sensitivity", "http://en.wikipedia.org/wiki/Sensitivity_and_specificity") + ' for units of this production type', )
-    test_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,
+    test_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,
         help_text='Function that describes the delay in obtaining test results.', )
     use_cost_accounting = models.BooleanField(default=False, )
     cost_of_destruction_appraisal_per_unit = MoneyField(default=0.0,
@@ -575,18 +640,26 @@ class ControlProtocol(BaseModel):
                 return False
         return True
 
-    def clean(self):
+    def soft_clean(self):
+        errors = {}
+        # for trigger_switch, fields in protocol_substructure.items():
+        #     if self.__getattribute__(trigger_switch):
+        #         if not self.tab_is_valid(trigger_switch, fields):
+        #             errors[trigger_switch] = ValidationError(trigger_switch + " is enabled but the section is not filled in completely.")
+        for trigger_switch, fields in protocol_substructure.items():
+            if self.__getattribute__(trigger_switch):
+                for field in fields:
+                    if self.__getattribute__(field) is None:
+                        errors[field] = ValidationError("This field cannot be blank!")
+        if errors:
+            return ValidationError(errors)
+
+    def is_valid(self):
         for trigger_switch, fields in protocol_substructure.items():
             if self.__getattribute__(trigger_switch):
                 if not self.tab_is_valid(trigger_switch, fields):
-                    raise ValidationError(trigger_switch + " is enabled but the section is not filled in completely.")
-
-    def is_valid(self):
-        try:
-            self.clean()
-            return True
-        except BaseException:
-            return False
+                    return False
+        return True
 
 
 class ProtocolAssignment(BaseModel):
@@ -596,7 +669,7 @@ class ProtocolAssignment(BaseModel):
 
     _master_plan = models.ForeignKey('ControlMasterPlan',
                                      help_text='Points back to a master plan for grouping purposes.')
-    production_type = models.ForeignKey('ProductionType', unique=True,
+    production_type = models.OneToOneField('ProductionType',
         help_text='The production type that these outputs apply to.', )
     control_protocol = models.ForeignKey('ControlProtocol', blank=True, null=True,  # Just to note you're excluding it
         help_text='The control protocol to apply to this production type.')
@@ -634,16 +707,16 @@ class DiseaseProgression(BaseModel):
     name = models.CharField(max_length=255,
         help_text="Examples: Severe Progression, FMD Long Incubation")
     _disease = models.ForeignKey('Disease')
-    disease_latent_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_latent_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
         verbose_name='Latent period',
         help_text='Defines the ' + wiki('latent period',"latent-state") + ' for units of this ' + wiki("production type") + '.', )
-    disease_subclinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_subclinical_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
         verbose_name='Subclinical period',
         help_text='Defines the ' + wiki("Subclinical", "subclinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
-    disease_clinical_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_clinical_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
         verbose_name='Clinical period',
         help_text='Defines the ' + wiki("clinical", "clinically-infectious") + ' period for units of this ' + wiki("production type") + '.', )
-    disease_immune_period = models.ForeignKey(ProbabilityFunction, related_name='+',
+    disease_immune_period = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
         verbose_name='Immune period',
         help_text='Defines the natural ' + wiki('immune') + ' period for units of this ' + wiki("production type") + '.', )
     disease_prevalence = models.ForeignKey(RelationalFunction, related_name='+',
@@ -655,7 +728,7 @@ class DiseaseProgression(BaseModel):
 
 
 class DiseaseProgressionAssignment(BaseModel):
-    production_type = models.ForeignKey('ProductionType', unique=True,
+    production_type = models.OneToOneField('ProductionType',
         help_text='The ' + wiki("production type") + ' that these outputs apply to.', )
     progression = models.ForeignKey('DiseaseProgression', blank=True, null=True) # can be excluded from disease progression
     # Since there are ProductionTypes that can be listed without having a DiseaseProgressionAssignment,
@@ -672,15 +745,15 @@ class DiseaseSpread(BaseModel):
     name = models.CharField(max_length=255,)
     _disease = models.ForeignKey('Disease', help_text='Parent disease whose spreading characteristics this describes.')
         # This is in Disease because of simulation restrictions
-    transport_delay = models.ForeignKey(ProbabilityFunction, related_name='+', blank=True, null=True,  # This will be hidden if it's defaulted
+    transport_delay = models.ForeignKey(ProbabilityDensityFunction, related_name='+', blank=True, null=True,  # This will be hidden if it's defaulted
         help_text='WARNING: THIS FIELD IS NOT RECOMMENDED BY ADSM and will be removed in later versions. Consider setting this to "-----".', )
     class Meta(object):
         abstract = True
 
 
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
-    subclinical_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
+    subclinical_units_can_infect_others = models.BooleanField(default=False,
+                                                              help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
                   ' units of the source type can spread disease. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
@@ -690,7 +763,7 @@ class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indire
                                     Mean baseline contact rate (in outgoing contacts/unit/day).</div>"""))
     use_fixed_contact_rate = models.BooleanField(default=False,
         help_text='Use a fixed contact rate or model contact rate as a mean distribution.', )
-    distance_distribution = models.ForeignKey(ProbabilityFunction, related_name='+',
+    distance_distribution = models.ForeignKey(ProbabilityDensityFunction, related_name='+',
         help_text='Defines the shipment distances for ' + wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
     movement_control = models.ForeignKey(RelationalFunction, related_name='+',
@@ -718,8 +791,8 @@ class DirectSpread(AbstractSpread):
                   '. Specified for ' +
                   wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
-    latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
+    latent_units_can_infect_others = models.BooleanField(default=False,
+                                                         help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
     def __str__(self):
         return "%s" % (self.name, )
 
@@ -804,6 +877,14 @@ class ProductionType(BaseModel):
         #     raise ValidationError(self.name + " cannot start with a number.")
         if self.name in [z for z in Zone.objects.all().values_list('name', flat=True)]:  # forbid zone names
             raise ValidationError("You really shouldn't have matching Zone and Production Type names.  It makes the output confusing." + footer)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(ProductionType, self).save(force_insert, force_update, using, update_fields)
+        ControlMasterPlan.objects.get().save()  # updates production list
+
+    def delete(self, using=None):
+        super(ProductionType, self).delete(using)
+        ControlMasterPlan.objects.get().save()  # updates production list
 
     def __str__(self):
         return self.name
@@ -959,14 +1040,28 @@ class StopVaccination(FilteredVaccinationTrigger, InputSingleton):
         return format_html('{1} days with no more than {0} detections, in {2}', *bold_values)
 
     
+class VaccinationRingRule(BaseModel):
+    trigger_group = models.ManyToManyField(ProductionType, related_name="triggers_vaccination_ring")
+    outer_radius = FloatField(validators=[MinValueValidator(0.001), ], )
+    inner_radius = FloatField(blank=True, null=True, validators=[MinValueValidator(0.001), ],)  # optional, can be null
+    target_group = models.ManyToManyField(ProductionType, related_name="targeted_by_vaccination_ring")
 
+    def clean_fields(self, exclude=None):
+        """Swap fields if their values are backwards"""
+        if self.inner_radius is not None and self.inner_radius > self.outer_radius:
+            temp = self.outer_radius
+            self.outer_radius = self.inner_radius
+            self.inner_radius = temp
 
-
-
-
-
-
-
+    def __str__(self):
+        bold_values = tuple(bold(str(x)) for x in [', '.join(pt.name for pt in self.trigger_group.all()),
+                                                   ', '.join(pt.name for pt in self.target_group.all()),
+                                                    self.outer_radius,])
+        if self.inner_radius:
+            inner = bold(str(self.inner_radius))
+            return format_html('{1} detection triggers {2} vaccination between {0} km to {3} km', inner, *bold_values)
+        else:
+            return format_html('{0} detection triggers {1} vaccination within {2} km', *bold_values)
 
 
 

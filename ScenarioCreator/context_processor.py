@@ -2,8 +2,9 @@ from django.db.models import F, Count
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Unit, Disease, DiseaseProgression, \
     DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
-    ProtocolAssignment, Zone, ZoneEffect, ProbabilityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
-    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup
+    ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
+    DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule, \
+    DestructionGlobal
 from Results.models import outputs_exist
 
 
@@ -48,12 +49,14 @@ def basic_context(request):
                'ControlMasterPlan': ControlMasterPlan.objects.count(),
                'VaccinationTrigger': any([m.objects.count() for m in 
                                           [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
+               'VaccinationRingRule': VaccinationRingRule.objects.count(),
+               'DestructionGlobal': DestructionGlobal.objects.get(id=0).validate(),
                'Protocols': ControlProtocol.objects.count(),
                'ProtocolAssignments': ProtocolAssignment.objects.count(),
                'Zones': Zone.objects.count(),
                'ZoneEffects': ZoneEffect.objects.count(),
                'ZoneEffectAssignments': ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() and Zone.objects.count(),
-               'ProbabilityFunctions': ProbabilityFunction.objects.count(),
+               'ProbabilityDensityFunctions': ProbabilityDensityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
                'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
                })

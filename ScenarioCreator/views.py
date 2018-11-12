@@ -2,11 +2,14 @@ import csv
 import subprocess
 import itertools
 import platform
+
+from collections import OrderedDict
+
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
-from django.db import OperationalError
+from django.db import OperationalError, transaction
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
@@ -14,16 +17,17 @@ from ScenarioCreator.forms import *  # This is absolutely necessary for dynamic 
 from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
+from ScenarioCreator.utils import convert_user_notes_to_unit_id
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
 from ScenarioCreator.utils import whole_scenario_validation
 
-singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings']
+singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings', "DestructionGlobal"]
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
-         ('ProbabilityFunction', ProbabilityFunction)],
+         ('ProbabilityDensityFunction', ProbabilityDensityFunction)],
     'DiseaseSpread':
         [('DirectSpread', DirectSpread),
          ('IndirectSpread', IndirectSpread),
@@ -117,10 +121,19 @@ def spread_inputs_json(request):
 
 
 def modify_spread_assignments(request):
+    """
+    called when a request to change the spread assignements is made. This function is called for all three spread assignment types
+    :param request:
+    :return: json summary of the request
+    """
+    # destinations is a list of integer ids
     destinations = [int(x) for x in request.POST.getlist('destinations[]')]
+    # if a non-blank selection was made
     if 'destinations[]' in request.POST.keys() and request.POST['source']:  # when a user selects ----- there's no PK at all
         data = request.POST.dict()
+        # if a spread assignment is being CREATED
         if 'POST' == data['action']:
+            # for each destination
             for destination_pk in destinations:
                 assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
                                                                        'destination_production_type_id': int(destination_pk)})
@@ -131,7 +144,9 @@ def modify_spread_assignments(request):
                 destination = ProductionType.objects.get(id=int(destination_pk)).name
                 print("ADD", field, "SOURCE:", source, "DESTINATION:", destination)
 
+        # if a spread assignment is being DELETED
         if 'DELETE' == data['action']:  # Django doesn't allow you to parametrize DELETE http_method
+            # for each destination
             for destination_pk in destinations:
                 assignment = DiseaseSpreadAssignment.objects.filter(**{'source_production_type_id': int(data['source']),
                                                                        'destination_production_type_id': int(destination_pk)})
@@ -252,6 +267,7 @@ def assign_protocols(request):
 def assign_progressions(request):
     """FormSet is pre-populated with existing assignments and it detects and fills in missing
     assignments with a blank form with production type filled in."""
+    initialize_spread_assignments()
     missing = ProductionType.objects.filter(diseaseprogressionassignment__isnull=True)
     ProgressionSet = modelformset_factory(DiseaseProgressionAssignment,
                                           extra=len(missing),
@@ -267,15 +283,15 @@ def protocols_json(request):
         entry = {'name': str(protocol.name),
                  'pk': protocol.id,
                  'tabs': [
-                     {'name':'Detection', 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
-                     {'name':'Tracing', 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
-                     {'name':'Testing', 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
-                     {'name':'Exams', 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
-                     {'name':'Destruction', 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
+                     {'name':'Detection', 'can_select': True, 'enabled':bool(protocol.use_detection), 'field':'use_detection', 'valid': protocol.tab_is_valid('use_detection')},
+                     {'name':'Tracing', 'can_select': True, 'enabled':bool(protocol.use_tracing), 'field':'use_tracing', 'valid': protocol.tab_is_valid('use_tracing')},
+                     {'name':'Testing', 'can_select': True, 'enabled':bool(protocol.use_testing), 'field':'use_testing', 'valid': protocol.tab_is_valid('use_testing')},
+                     {'name':'Exams', 'can_select': True, 'enabled':bool(protocol.use_exams), 'field':'use_exams', 'valid': protocol.tab_is_valid('use_exams')},
+                     {'name':'Destruction', 'can_select': True, 'enabled':bool(protocol.use_destruction), 'field':'use_destruction', 'valid': protocol.tab_is_valid(
                          'use_destruction')},
-                     {'name':'Vaccination', 'enabled':bool(protocol.use_vaccination), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
+                     {'name':'Vaccination', 'can_select': False, 'enabled':bool(vaccination_trigger_in_use(protocol)), 'field':'use_vaccination', 'valid': protocol.tab_is_valid(
                          'use_vaccination')},
-                     {'name':'Cost Accounting', 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
+                     {'name':'Cost Accounting', 'can_select': True, 'enabled':bool(protocol.use_cost_accounting), 'field':'use_cost_accounting', 'valid': protocol.tab_is_valid(
                          'use_cost_accounting')},
                      ]}
         data.append(entry)
@@ -442,6 +458,8 @@ def save_new_instance(initialized_form, request, context):
     context['model_name'] = model_name
     if model_name in singletons:  #they could have their own special page: e.g. Population
         return redirect('/setup/%s/1/' % model_name)
+    if request.is_ajax():
+        return HttpResponseRedirect('/setup/%s/%s' % (model_name, model_instance.id))
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)
 
 
@@ -457,8 +475,8 @@ def new_form(request, initialized_form, context):
         # #422 Singleton models now load in a fragment to be refreshed the same way that other forms
         #  are loaded dynamically
         return render(request, 'ScenarioCreator/MainPanel.html', context)
-    if model_name == 'ProbabilityFunction':
-        return render(request, 'ScenarioCreator/ProbabilityFunctionForm.html', context)
+    if model_name == 'ProbabilityDensityFunction':
+        return render(request, 'ScenarioCreator/ProbabilityDensityFunctionForm.html', context)
     return render(request, 'ScenarioCreator/crispy-model-form.html', context)  # render in validation error messages
 
 
@@ -520,9 +538,12 @@ def edit_entry(request, primary_key):
                'action': request.path}
     add_breadcrumb_context(context, model_name, primary_key)
 
-    if model_name == 'ProbabilityFunction':
+    if model_name == 'ProbabilityDensityFunction':
         context['backlinks'] = collect_backlinks(initialized_form.instance)
-        context['deletable'] = '/setup/ProbabilityFunction/%s/delete/' % primary_key
+        context['deletable'] = '/setup/ProbabilityDensityFunction/%s/delete/' % primary_key
+
+    if hasattr(initialized_form, 'soft_clean'):
+        initialized_form.soft_clean(request.method)
 
     return new_form(request, initialized_form, context)
 
@@ -599,6 +620,25 @@ def trigger_list(request):
     
     return context
 
+
+def vaccination_trigger_in_use(protocol):
+    vaccination_triggers = trigger_list({})
+
+    for category in vaccination_triggers['categories']:
+        if category['name'] == "Start Triggers":
+            for model in category['models']:
+                if model['entries'] and len(model['entries']) > 0:
+                    if not protocol.use_vaccination:
+                        protocol.use_vaccination = True
+                        protocol.save()
+                    return True
+
+    if protocol.use_vaccination:
+        protocol.use_vaccination = False
+        protocol.save()
+    return False
+
+
 def filtered_list_per_model(model_class, restart_trigger):
     model_name = model_class.__name__
     context = {'entries': model_class.objects.filter(restart_only=restart_trigger),
@@ -606,13 +646,15 @@ def filtered_list_per_model(model_class, restart_trigger):
                'name': spaces_for_camel_case(model_name)}
     return context
 
+
+
 def list_per_model(model_class):
     model_name = model_class.__name__
     context = {'entries': model_class.objects.all(),
                'class': model_name,
-               'name': spaces_for_camel_case(model_name)}
+               'name': spaces_for_camel_case(model_name),
+               'wiki_link': getattr(model_class, 'wiki_link', None)}
     return context
-
 
 def functions_panel(request, form=None):
     """Panel on the right that lists both Relational and Probability Functions with a graphic depiction"""
@@ -633,7 +675,7 @@ def control_protocol_list(request):
 def model_list(request, base_page='ScenarioCreator/ModelList.html'):
     model_name, model = get_model_name_and_model(request)
     model_name = promote_to_abstract_parent(model_name)
-    if model_name in 'Function RelationalFunction ProbabilityFunction'.split():
+    if model_name in 'Function RelationalFunction ProbabilityDensityFunction'.split():
         return functions_panel(request)
     if model_name == 'VaccinationTrigger':  # special case
         context = trigger_list(request)
@@ -691,6 +733,7 @@ def parse_population(file_path, session):
         return JsonResponse({"status": "failed", "message": message + str(error)})  # make sure to cast errors to string first
     # wait for Population parsing (up to 5 minutes)
     session.reset_population_upload_status()
+    convert_user_notes_to_unit_id()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
 
 
@@ -727,14 +770,17 @@ def population(request):
     if save_formset_succeeded(FarmSet, Unit, context, request):
         return redirect(request.path)
     if Population.objects.filter(id=1, ).exists():
+
         if not Unit.objects.count(): # #571 no units were imported: error, blank files
             Population.objects.all().delete()
             return population(request)  # delete blank and try again
+
         sort_type = request.GET.get('sort_by', 'initial_state')
         query_filter = Q()
         params = filtering_params(request)
         for key, value in params.items():  # loops through params and stacks filters in an AND fashion
             query_filter = query_filter & Q(**{key: value})
+
         initialized_formset = FarmSet(queryset=Unit.objects.filter(query_filter).order_by(sort_type)[:100])
         context['formset'] = initialized_formset
         context['filter_info'] = filter_info(request, params)
@@ -744,7 +790,7 @@ def population(request):
         context['Population'] = Unit.objects.count()
         context['Farms'] = Unit.objects.count()
     else:
-        context['xml_files'] = file_list([".sqlite3"])
+        context['xml_files'] = file_list([".xml", ".csv"])
     return render(request, 'ScenarioCreator/Population.html', context)
 
 
@@ -762,3 +808,89 @@ def validate_scenario(request):
                'whole_scenario_warnings': whole_scenario_validation(),
                'base_page': 'ScenarioCreator/Validation.html'}
     return render(request, 'ScenarioCreator/MainPanel.html', context)
+
+
+def vaccination_global(request):
+    instance = ControlMasterPlan.objects.get()
+    initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
+    if request.method == "POST":
+        if initialized_form.is_valid():
+            instance = initialized_form.save(commit=True)
+    context = {
+        'base_page': 'ScenarioCreator/VaccinationGlobal.html',
+        'title': 'Vaccination Global',
+        'ordering': json.loads(instance.vaccination_priority_order, object_pairs_hook=OrderedDict),
+        'form': initialized_form
+    }
+
+    return render(request, 'ScenarioCreator/navigationPane.html', context)
+
+
+def destruction_global(request):
+
+    instance = DestructionGlobal.objects.get()
+    initialized_form = DestructionMasterForm(request.POST or None, instance=instance)
+    if request.method == "POST":
+        if initialized_form.is_valid():
+            instance = initialized_form.save(commit=True)
+
+    context = {
+        'base_page': 'ScenarioCreator/DestructionGlobal.html',
+        'title': 'Destruction Global',
+        'reasons': match_data(instance.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring").split(","),
+        'priorities': instance.destruction_priority_order.split(","),
+        'form': initialized_form,
+    }
+    '''
+    #Destruction Priority Secondary Priority
+    'priorities': json.loads(json.dumps(match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
+    '''
+
+    return render(request, 'ScenarioCreator/navigationPane.html', context)
+
+
+def match_data(current, all_data):
+
+    def try_dict(current_dict, all_data_dict):
+        if "{" in current_dict and "{" in all_data_dict:
+            try:
+                try:
+                    all_data_dict = json.loads(all_data_dict, object_pairs_hook=OrderedDict)
+                except ValueError:
+                    return None
+                except SyntaxError:
+                    return current_dict
+                try:
+                    current_dict = json.loads(current_dict, object_pairs_hook=OrderedDict)
+                except ValueError:
+                    return None
+                except SyntaxError:
+                    return all_data_dict
+                if isinstance(current_dict, dict):
+                    for key in all_data_dict:
+                        current_dict.setdefault(key, all_data_dict[key])
+                    return current_dict
+            except ValueError:
+                return None
+
+    dict_return = try_dict(current, all_data)
+    if dict_return is not None:
+        return dict_return
+
+    was_string = False
+    if isinstance(current, str):
+        was_string = True
+        current = current.replace(", ", ",").split(",")
+        all_data = all_data.replace(", ", ",").split(",")
+
+    for element in all_data:
+        if element not in current:
+            current.append(element)
+    for element in current:
+        if element not in all_data:
+            current.remove(element)
+
+    if was_string:
+        current = ",".join(current)
+
+    return current

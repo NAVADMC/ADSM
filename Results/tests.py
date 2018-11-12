@@ -20,8 +20,8 @@ class SimulationTest(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
-        source_db = os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures', 'Roundtrip.sqlite3')
-        cls.destination_db = workspace_path('Roundtrip_test.sqlite3')
+        source_db = os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures', 'Roundtrip.db')
+        cls.destination_db = workspace_path('Roundtrip_test.db')
         shutil.copy(source_db, cls.destination_db)
         cls.scenario_directory = workspace_path('Roundtrip_test')
 
@@ -30,7 +30,7 @@ class SimulationTest(TransactionTestCase):
         os.remove(cls.destination_db)
 
     def setUp(self):
-        self.client.get('/app/OpenScenario/Roundtrip_test.sqlite3/')
+        self.client.get('/app/OpenScenario/Roundtrip_test.db/')
 
         settings = OutputSettings.objects.first()
         settings.stop_criteria = 'stop-days'

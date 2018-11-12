@@ -6,10 +6,10 @@ All forms now have their "submit" button restored and you can choose custom layo
 
 from floppyforms.__future__ import ModelForm
 from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import TabHolder, Tab, AppendedText
+from crispy_forms.bootstrap import TabHolder, Tab, AppendedText, PrependedAppendedText, PrependedText
 from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
-from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput
+from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput, TextInput
 from crispy_forms.helper import FormHelper
 import os
 
@@ -39,6 +39,10 @@ class FixedSelect(Select):
 
 
 def submit_button():
+    """
+    NOTE: This submit button is currently only used in the NonModelForm class which is only used in the ImportForm.
+    ALSO NOTE: When cancel is selected, the page is sent back to the base scenario setup page.
+    """
     edit_buttons = """
     {% if backlinks %}
     <h3>Referenced by:</h3>
@@ -52,7 +56,7 @@ def submit_button():
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" formnovalidate id="submit-id-submit">Delete Results and Apply changes</button>
     {% else %}
-        <button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button>
+        <a href="/setup/Scenario/1/"><button type="button" class="btn btn-default btn-cancel" id="id-cancel">Cancel</button></a>
         <button type="submit" class="btn btn-primary btn-save" formnovalidate id="submit-id-submit" disabled>Apply</button>
     {% endif %}
     {% if backlinks %}
@@ -98,20 +102,20 @@ class UnitForm(BaseForm):
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state']
+        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
         widgets = {}
         #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
 
-class ProbabilityFunctionForm(BaseForm):
+class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
-        model = ProbabilityFunction
+        model = ProbabilityDensityFunction
         exclude = []
         widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
 
     def clean(self):
-        cleaned_data = super(ProbabilityFunctionForm, self).clean()
-        for field in ProbabilityFunction._meta.fields:
+        cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
+        for field in ProbabilityDensityFunction._meta.fields:
             used_in = re.split(r": |, |\.", field.help_text)  # It's important that "Gaussian" doesn't match "Inverse Gaussian"
             mentioned = cleaned_data.get('equation_type') in used_in
             empty = cleaned_data.get(field.name) is None
@@ -151,31 +155,51 @@ class ControlMasterPlanForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            HTML(r"<h2>Global Destruction settings</h2>"),
-            HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
-            'destruction_program_delay',
-            'destruction_capacity',
-            'destruction_priority_order',
-            'destruction_reason_order',
-            HTML(r"<h2>Global Vaccination settings</h2>"),
-            HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
-            'vaccination_capacity',
-            'restart_vaccination_capacity',
-            'vaccination_priority_order',
-            'vaccinate_retrospective_days',
         )
         super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+
+        '''
+        HTML(r"<h2>Global Vaccination settings</h2>"),
+        HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
+        'vaccination_capacity',
+        'restart_vaccination_capacity',
+        'vaccination_priority_order',
+        'vaccinate_retrospective_days',
+        HTML(r"<h2>Global Destruction settings</h2>"),
+        HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
+        'destruction_program_delay',
+        'destruction_capacity',
+        'destruction_priority_order',
+        'destruction_reason_order',
+        '''
 
 
     class Meta(object):
         model = ControlMasterPlan
-        exclude = ['disable_all_controls']
+        fields = 'name'.split()
+        widgets = {}
+
+
+class VaccinationMasterForm(BaseForm):
+    class Meta(object):
+        model = ControlMasterPlan
+        fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
         widgets = {
-                 # 'disable_all_controls': CheckboxInput(attrs={'hidden':'hidden'}),
-                   'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   }
+            # 'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),
+            'vaccination_priority_order': HiddenInput(),
+            'vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+            'restart_vaccination_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+        }
+
+class DestructionMasterForm(BaseForm):
+    class Meta(object):
+        model = DestructionGlobal
+        fields = 'destruction_program_delay destruction_capacity destruction_priority_order destruction_reason_order'.split()
+        widgets = {
+                    'destruction_reason_order': HiddenInput(),
+                    'destruction_priority_order': HiddenInput(),
+                    'destruction_capacity': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
+                    }
 
 
 class ProtocolAssignmentForm(BaseForm):
@@ -193,7 +217,28 @@ class DiseaseProgressionAssignmentForm(BaseForm):
                    } #progression should NOT be an AddOrSelect
 
 
-class ControlProtocolForm(BaseForm):
+class SoftCleanForm(BaseForm):
+    def soft_clean(self, request_method):
+        errors = None
+        if hasattr(self.instance, 'soft_clean'):
+            errors = self.instance.soft_clean()
+        if errors:
+            if request_method == "GET":
+                errors = errors.error_dict
+
+                for field, error_list in errors.items():
+                    if field not in self.errors:
+                        if field != '__all__' and field not in self.fields:
+                            raise ValueError(
+                                "'%s' has no field named '%s'." % (self.__class__.__name__, field))
+                        if field == '__all__':
+                            self._errors[field] = self.error_class(error_class='nonfield')
+                        else:
+                            self._errors[field] = self.error_class()
+                    self._errors[field].extend(error_list)
+
+
+class ControlProtocolForm(SoftCleanForm):
     """https://speakerdeck.com/maraujop/advanced-django-forms-usage slide 47
     http://stackoverflow.com/questions/19625211/bootstrap-linking-to-a-tab-with-an-url"""
     def __init__(self, *args, **kwargs):
@@ -261,9 +306,6 @@ class ControlProtocolForm(BaseForm):
                     'minimum_time_between_vaccinations',
                     'days_to_immunity',
                     'vaccine_immune_period',
-                    'trigger_vaccination_ring',
-                    'vaccination_ring_radius',
-                    'vaccination_priority',
                     ),
                 Tab('Cost Accounting',
                     'use_cost_accounting',
@@ -281,15 +323,14 @@ class ControlProtocolForm(BaseForm):
         )
         super(ControlProtocolForm, self).__init__(*args, **kwargs)
 
-
     class Meta(object):
         model = ControlProtocol
         exclude = []
         widgets = {'detection_probability_for_observed_time_in_clinical': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
                    'detection_probability_report_vs_first_detection': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'trace_result_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'vaccine_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'test_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'destruction_ring_radius': FloatInput(),
                    'vaccination_ring_radius': FloatInput(),
                    'exam_direct_forward_success_multiplier': FloatInput(),
@@ -319,10 +360,10 @@ class DiseaseProgressionForm(BaseForm):
         model = DiseaseProgression
         exclude = ['_disease']
         widgets = {
-                   'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
-                   'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'disease_latent_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_subclinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_clinical_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
+                   'disease_immune_period': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'disease_prevalence': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/',
                                                             'data-visibility-context': 'use_within_unit_prevalence'})
         }
@@ -333,8 +374,8 @@ class IndirectSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            # 'latent_animals_can_infect_others',  # Indirect doesn't have this field
-            'subclinical_animals_can_infect_others',
+            # 'latent_units_can_infect_others',  # Indirect doesn't have this field
+            'subclinical_units_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
@@ -343,16 +384,16 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
-        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
+        self.fields['subclinical_units_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
         exclude = ['_disease']
         widgets = {'contact_rate': FloatInput(),
                    'infection_probability': FloatInput(),  # visibility settings acts differently from DirectSpread.infection_probability
-                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 
@@ -362,18 +403,19 @@ class DirectSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            'latent_animals_can_infect_others',
-            'subclinical_animals_can_infect_others',
+            'latent_units_can_infect_others',
+            'subclinical_units_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
+            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
-        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
-        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
+        self.fields['latent_units_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_units_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 
@@ -383,9 +425,9 @@ class DirectSpreadForm(BaseForm):
         widgets = {'contact_rate': FloatInput(),
                    'infection_probability': NumberInput(attrs={'data-visibility-context': 'use_within_unit_prevalence',
                                                                'data-visibility-flipped': 'true', 'step': 'any'}),
-                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/'}),
+                   'distance_distribution': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/'}),
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 
@@ -412,7 +454,7 @@ class AirborneSpreadForm(BaseForm):
                                                       'data-visibility-flipped': 'true',
                                                       'step': 'any'}),  # only visible when exponential is false
                    'movement_control': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'}),
-                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityFunction/new/',
+                   'transport_delay': AddOrSelect(attrs={'data-new-item-url': '/setup/ProbabilityDensityFunction/new/',
                                                          'data-visibility-controller': 'transport_delay',
                                                          'data-disabled-value': ''})}  # should lock itself invisible if null
 
@@ -514,7 +556,6 @@ class ProductionTypeList(SelectMultiple):
 
     def get_context(self, name, value, attrs=None, choices=()):
         context = super(SelectMultiple, self).get_context(name, value, attrs)
-        context['help_text'] = mark_safe("To remove production types, click on them below:")
         return context
 
 
@@ -598,6 +639,20 @@ class StopVaccinationForm(BaseForm):
         widgets = {'trigger_group': ProductionTypeList()}
 
 
-
-
+class VaccinationRingRuleForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(
+            PrependedText('trigger_group', 'Once a vaccination program has been initiated by any start/restart trigger, then detection of disease in these production type(s) '),
+            PrependedText('target_group', 'will result in vaccination of units of these production type(s) '),
+            PrependedAppendedText('inner_radius','within a ring with an inner radius of ',' km (optional)'),
+            PrependedAppendedText('outer_radius','and outer radius of ',' km'),
+        )
+        super(VaccinationRingRuleForm, self).__init__(*args, **kwargs)
+    class Meta(object):
+        model = VaccinationRingRule
+        exclude = []
+        widgets = {'trigger_group': ProductionTypeList(),
+                   'target_group': ProductionTypeList()}
 

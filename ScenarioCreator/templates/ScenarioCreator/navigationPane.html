@@ -28,10 +28,16 @@
                        data-toggle="toggle" data-size="mini" data-onstyle="success">
                 {% endif %}
                 {% if controls_enabled %}
-                 <h3><a href="/setup/VaccinationTrigger/" class="{{"VaccinationTrigger"|active:active_link}}">
-                        <span class="pull-right {{VaccinationTrigger|completed}}"> </span>Vaccination Triggers</a></h3>
                  <h3><a href="/setup/ControlProtocol/" class="{{"ControlProtocol"|active:active_link}}">
                         <span class="pull-right {{Protocols|completed}}"> </span>Control Protocol</a></h3>
+                 <h3><a href="/setup/VaccinationTrigger/" class="{{"VaccinationTrigger"|active:active_link}}">
+                        <span class="pull-right {{VaccinationTrigger|completed}}"> </span>Vaccination Triggers</a></h3>
+                 <h3><a href="/setup/VaccinationRingRule/" class="{{"VaccinationRingRule"|active:active_link}}">
+                        <span class="pull-right {{VaccinationRingRule|completed}}"> </span>Vaccination Rings</a></h3>
+                 <h3><a href="/setup/VaccinationGlobal/" class="{{"VaccinationGlobal"|active:active_link}}">
+                        <span class="pull-right {{VaccinationRingRule|completed}}"> </span>Vaccination Global</a></h3>{# not a separate completed flag #}
+                 <h3><a href="/setup/DestructionGlobal/" class="{{"DestructionGlobal"|active:active_link}}">
+                        <span class="pull-right {{ DestructionGlobal|completed}}"> </span>Destruction Global</a></h3>{# not a separate completed flag #}
                     <h4><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active:active_link}}">
                         <span class="pull-right {{ProtocolAssignments|completed}}"> </span>Assign Protocols</a></h4>
                     <h3><a href="/setup/Zone/" class="{{"Zone/"|active:active_link}}">
@@ -47,14 +53,14 @@
 
             <h2 id="RunSimulationIn">
                 {% if outputs_exist %}
-                    <a href="/results/" class="completed ">
+                    <a href="/results/" class="completed " onclick="disableOverlay();">
                     View Results </a>
                 {% else %}
                     {% if dry_run_passed %}
-                        <a href="/LoadingScreen/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}">
+                        <a href="/LoadingScreen/?loading_url=/results/RunSimulation/" class=" {{Simulation_ready|completed}}" onclick="disableOverlay();">
                         Run Simulation </a>
                     {% else %}
-                        <a href="/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
+                        <a href="/LoadingScreen/?loading_url=/setup/ValidateScenario/" class=" {{Simulation_ready|completed}}">
                         Validate Scenario </a>
                     {% endif %}
             {% endif %}
