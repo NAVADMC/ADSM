@@ -39,7 +39,7 @@ def launch_viewer(server_port):
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
     console_log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'console.log')
     try:
-        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Beta_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
+        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
         if viewer_status != 0 and viewer_status != 9:  # The 9 is to ignore X Window System error BadDrawable when closing. TODO: Debug viewer
             raise RuntimeError("Error launching Viewer!")
     except:
@@ -71,7 +71,7 @@ def find_available_ports():
     return server_port, app_port
 
 
-parser = argparse.ArgumentParser(prog='ADSM-Beta.exe')
+parser = argparse.ArgumentParser(prog='ADSM.exe')
 # TODO: Tests don't run currently as the test runner won't find compiled tests.
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
@@ -80,7 +80,7 @@ args = parser.parse_args()
 
 # Respond to an updater query
 if args.update_name:
-    print("ADSM_Beta")
+    print("ADSM")
     sys.exit(0)
 elif args.version:
     from ADSM import __version__
