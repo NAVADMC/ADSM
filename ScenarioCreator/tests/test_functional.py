@@ -175,13 +175,13 @@ class FunctionalTests(StaticLiveServerTestCase):
         assigned_type = DiseaseProgressionAssignment.objects.create(production_type=production_type,
             progression=disease_progression)
         self.dc_ds1 = DirectSpread.objects.create(name="Dairy Cattle Large",
-            latent_animals_can_infect_others=True,
+            latent_units_can_infect_others=True,
             contact_rate=5,
             infection_probability=1,
             distance_distribution=dcd,
             movement_control=um)
         dc_ds2 = DirectSpread.objects.create(name="Dairy Cattle Small",
-            latent_animals_can_infect_others=True,
+            latent_units_can_infect_others=True,
             contact_rate=0.5,
             infection_probability=1,
             distance_distribution=dcd,

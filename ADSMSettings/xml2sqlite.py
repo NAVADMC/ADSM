@@ -653,8 +653,8 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         distance_distribution = distance,
                         transport_delay = delay,
                         infection_probability = probInfect,
-                        latent_animals_can_infect_others = latentCanInfect,
-                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                        latent_units_can_infect_others = latentCanInfect,
+                        subclinical_units_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_direct_contact_spread = True
                 elif el.attrib['contact-type'] == 'indirect':
@@ -666,7 +666,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
                         distance_distribution = distance,
                         transport_delay = delay,
                         infection_probability = probInfect,
-                        subclinical_animals_can_infect_others = subclinicalCanInfect
+                        subclinical_units_can_infect_others = subclinicalCanInfect
                     )
                     disease.include_indirect_contact_spread = True
                 else:

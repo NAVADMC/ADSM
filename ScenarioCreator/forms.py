@@ -374,8 +374,8 @@ class IndirectSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            # 'latent_animals_can_infect_others',  # Indirect doesn't have this field
-            'subclinical_animals_can_infect_others',
+            # 'latent_units_can_infect_others',  # Indirect doesn't have this field
+            'subclinical_units_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
@@ -384,7 +384,7 @@ class IndirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(IndirectSpreadForm, self).__init__(*args, **kwargs)
-        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
+        self.fields['subclinical_units_can_infect_others'].label = 'Subclinical units can infect others'
 
     class Meta(object):
         model = IndirectSpread
@@ -403,8 +403,8 @@ class DirectSpreadForm(BaseForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
-            'latent_animals_can_infect_others',
-            'subclinical_animals_can_infect_others',
+            'latent_units_can_infect_others',
+            'subclinical_units_can_infect_others',
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
@@ -414,8 +414,8 @@ class DirectSpreadForm(BaseForm):
             'movement_control',
         )
         super(DirectSpreadForm, self).__init__(*args, **kwargs)
-        self.fields['latent_animals_can_infect_others'].label = 'Latent units can infect others'
-        self.fields['subclinical_animals_can_infect_others'].label = 'Subclinical units can infect others'
+        self.fields['latent_units_can_infect_others'].label = 'Latent units can infect others'
+        self.fields['subclinical_units_can_infect_others'].label = 'Subclinical units can infect others'
         if not Disease.objects.get().use_within_unit_prevalence:
             self.fields['infection_probability'].widget.attrs['required'] = 'required'  # only required when the field is visible, enforced by browser
 

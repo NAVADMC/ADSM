@@ -752,8 +752,8 @@ class DiseaseSpread(BaseModel):
 
 
 class AbstractSpread(DiseaseSpread):  # lots of fields between Direct and Indirect that were not in Airborne
-    subclinical_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
+    subclinical_units_can_infect_others = models.BooleanField(default=False,
+                                                              help_text='Indicates if ' + wiki("Subclinical", "subclinically-infectious") +
                   ' units of the source type can spread disease. ', )
     contact_rate = FloatField(validators=[MinValueValidator(0.0)],
          # Important: Contact_rate help_text has been given special behavior vial two data-visibility-controller 's.
@@ -791,8 +791,8 @@ class DirectSpread(AbstractSpread):
                   '. Specified for ' +
                   wiki("direct", "direct-contact") + ' or '+
                   wiki("indirect contact") + ' models.', )
-    latent_animals_can_infect_others = models.BooleanField(default=False,
-        help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
+    latent_units_can_infect_others = models.BooleanField(default=False,
+                                                         help_text='Indicates if '+wiki("latent", "latent-state")+' units of the source type can spread disease.', )
     def __str__(self):
         return "%s" % (self.name, )
 
