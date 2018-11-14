@@ -316,7 +316,7 @@ def launch_external_program_and_exit(launch, code=0, close_self=True, cmd_args=N
     else:
         launch_args.update(preexec_fn=os.setsid)
         launch_args.update(start_new_session=True)
-    subprocess.Popen(launch, stdin=subprocess.PIPE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
+    subprocess.Popen(launch, stdin=subprocess.PIPE, shell=(platform.system() != 'Darwin'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, **launch_args)
     if close_self:
         sys.exit(code)
 
@@ -327,7 +327,7 @@ def check_simulation_version():
     version = None
     try:
         executable = adsm_executable_command()[0]
-        process = subprocess.Popen(executable + " --version --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen([executable, "--version --silent"], shell=(platform.system() != 'Darwin'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             output, error = process.communicate(timeout=200)
             exit_code = process.returncode
@@ -356,7 +356,7 @@ def npu_update_info():
     new_version = None
     try:
         npu = os.path.join(settings.BASE_DIR, 'npu'+settings.EXTENSION)
-        process = subprocess.Popen(npu + " --check_update --silent", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen([npu, "--check_update", "--silent"], shell=(platform.system() != 'Darwin'), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             output, error = process.communicate(timeout=60000)
             exit_code = process.returncode
