@@ -1,5 +1,6 @@
 import subprocess
 import os
+import platform
 
 from django.core.management import BaseCommand, call_command
 from django.conf import settings
@@ -32,7 +33,7 @@ class Command(BaseCommand):
         os.chdir(settings.BASE_DIR)
 
         command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
-        command = command_path + ' --config %s' % config_file
-        webpack = subprocess.Popen(command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        command = [command_path, '--config %s' % config_file]
+        webpack = subprocess.Popen(command, cwd=os.path.join(settings.BASE_DIR), shell=(platform.system() != 'Darwin'))
         webpack.communicate()  # Wait for webpack to finish compile
         call_command('collectstatic')

@@ -2,6 +2,7 @@ import sys
 import os
 import stat
 import pip
+import platform
 import shutil
 import subprocess
 
@@ -210,8 +211,9 @@ class BuildADSM(build_exe):
 
         print("Preparing to pack client files...")
         webpack_command_path = os.path.join('.', 'node_modules', '.bin', 'webpack')
-        webpack_command = webpack_command_path + ' --config webpack.config.js'
-        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=True)
+        webpack_command = [webpack_command_path, '--config webpack.config.js']
+        webpack = subprocess.Popen(webpack_command, cwd=os.path.join(settings.BASE_DIR), shell=(platform.system() != 'Darwin'))
+
         print("Packing client files...")
         outs, errs = webpack.communicate()  # TODO: Possible error checking
         print("Done packing.")
