@@ -1,5 +1,8 @@
 # ADSM (Animal Disease Spread Model)
 A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  
+
+Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@aphis.usda.gov
+
 This repo is the primary repo for the ADSM project and houses the main Frontend that users will be interacting with.  
 It creates scenarios by storing their parameters in a SQLite file and displays results after running a simulation.  
 A more detailed breakdown of this application will follow.
