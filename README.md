@@ -1,5 +1,5 @@
 # ADSM (Animal Disease Spread Model)
-A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  An upgrade of the NAADSM application.
+A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  ADSM is an upgrade of the NAADSM application.
 
 Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@aphis.usda.gov
 
