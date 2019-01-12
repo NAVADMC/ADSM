@@ -439,6 +439,7 @@ class AirborneSpreadForm(BaseForm):
             'name',
             AppendedText('spread_1km_probability', 'example: 0.37 = 37%'),
             'max_distance',
+            HTML('<p class="help-block">"Max distance" is used only if Linear Airborne Decay is selected (in the Disease tab). If using Exponential Airborne Decay "Max Distance" will not be an available option.</p>'),
             'exposure_direction_start',
             'exposure_direction_end',
             'transport_delay',
