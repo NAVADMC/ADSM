@@ -1063,5 +1063,5 @@ class VaccinationRingRule(BaseModel):
         else:
             return format_html('{0} detection triggers {1} vaccination within {2} km', *bold_values)
 
-
-
+    def title(self):
+        return self.__str__().replace('<strong>', '').replace('</strong>', '')
