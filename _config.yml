@@ -1,1 +1,4 @@
-theme: jekyll-theme-minimal
+source          : ./_site_assets
+destination     : ./_site
+
+encoding        : "utf-8"
