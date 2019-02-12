@@ -8,7 +8,7 @@ It creates scenarios by storing their parameters in a SQLite file and displays r
 A more detailed breakdown of this application will follow.
 
 ## Installing ADSM As An End User
-ADSM can be installed on either x86-64 Windows 7 - 10 or x86-64 Debian based Linux Systems (Ubuntu preferred).  
+ADSM can be installed on either x86-64 Windows 7 - 10 or x86-64 Debian based Linux Systems (Ubuntu preferred) running under the English Locale (language). Other Locales may work, but have not been tested and are not supported at this time.  
 There is a Beta and Release channel available for installation.
 
 ### Windows Release Channel
