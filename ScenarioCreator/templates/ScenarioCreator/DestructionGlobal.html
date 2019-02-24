@@ -1,167 +1,171 @@
-{% extends "ScenarioCreator/Fragment.html" %}
+{% extends "ScenarioCreator/MainPanel.html" %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags  %}
 
 
 
-{% block content %}
+{% block main_layout %}
+    <section id="main_panel" class="layout-panel col-xs-8" style="margin-left: 210px;">
+        <div class="fragment">
 
-    <!--suppress ALL -->
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
-    <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+            <!--suppress ALL -->
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
+            <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
-    <h1 id="title">{{ title }}</h1>
-
-
-    <label>Destruction Priority Order</label>
-    <!--
-    //Destruction Priority Secondary Priority
-   <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
-        {% for key, value in priorities.items %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>
-            {{  key }}
-                <ul class="sub-priorities ui-sortable">
-                    {% for sub_priority in value %}
-                        <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-    --->
-    <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
-        {% for value in priorities %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>
-                {{  value }}
-            </li>
-        {% endfor %}
-    </ul>
-    <p class="help-block">{{ form.destruction_priority_order.help_text }}</p>
+            <h1 id="title" style="margin-top: 0px;">{{ title }}</h1>
 
 
-    <form class="ajax" method="post" action="" id="destruction-global-form">
-        {% crispy form %}
-        {% if form_errors %}
-            <div id='form-errors'>{{ form_errors }}</div>
-        {% endif %}
-    </form>
-
-
-    <label>Destruction Reason Order</label>
-    <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
-        {% for value in reasons %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority reasons" title="Drag to change Destruction Reason"><span class="pull-right completed"></span>
-                {% if value == "Basic" %}
-                    Detection
-                {% else %}
-                    {{  value }}
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-    <p class="help-block">{{ form.destruction_reason_order.help_text }}</p>
-
-
-    <script>
-            function submitDestructionGlobalForm() {
-                var priorityString = "";
-                var topLevelItems = document.getElementsByClassName("reasons");
-
-                for (var i = 0; i < topLevelItems.length; ++i) {
-                    var priority = topLevelItems[i].textContent.split(',')[0].split("\n")[2].trim();
-
-                    if(priority == "Detection"){
-                        priority = "Basic"
-                    }
-
-                    priorityString += priority + ", ";
-
-                }
-                priorityString = priorityString.slice(0, priorityString.length - 2);
-
-                document.getElementById("id_destruction_reason_order").value = priorityString;
-
-                document.getElementById("destruction-global-form").submit();
-            }
-
-            /*
+            <label>Destruction Priority Order</label>
+            <!--
             //Destruction Priority Secondary Priority
-            function submitDestructionPriorityOrder() {
-                var priorityString = "{";
-                var priorityList = document.getElementById("priorities");
-                var topLevelItems = priorityList.getElementsByClassName("priorities");
+           <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
+                {% for key, value in priorities.items %}
+                    <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>
+                    {{  key }}
+                        <ul class="sub-priorities ui-sortable">
+                            {% for sub_priority in value %}
+                                <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Destruction Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+            --->
+            <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
+                {% for value in priorities %}
+                    <li class="ui-state-default ui-sortable-handle tab-list top-level-priority priorities" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>
+                        {{  value }}
+                    </li>
+                {% endfor %}
+            </ul>
+            <p class="help-block">{{ form.destruction_priority_order.help_text }}</p>
 
-                for (var i = 0; i < topLevelItems.length; ++i) {
-                    var priority = topLevelItems[i].textContent.split(',');
-                    priority = priority[0].split("\n");
 
-                    priorityString += "\"" + priority[1].trim() + "\": [";
+            <form class="ajax" method="post" action="" id="destruction-global-form">
+                {% crispy form %}
+                {% if form_errors %}
+                    <div id='form-errors'>{{ form_errors }}</div>
+                {% endif %}
+            </form>
 
-                    var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
 
-                    for (var k = 0; k < subLevelItems.length; ++k) {
-                        var temp = subLevelItems[k].textContent.trim();
-                        if (temp) {
-                            priorityString += "\"" + temp + "\", ";
+            <label>Destruction Reason Order</label>
+            <ul id="priorities" class="ui-sortable" style="text-transform: capitalize;">
+                {% for value in reasons %}
+                    <li class="ui-state-default ui-sortable-handle tab-list top-level-priority reasons" title="Drag to change Destruction Reason"><span class="pull-right completed"></span>
+                        {% if value == "Basic" %}
+                            Detection
+                        {% else %}
+                            {{  value }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <p class="help-block">{{ form.destruction_reason_order.help_text }}</p>
+
+
+            <script>
+                    function submitDestructionGlobalForm() {
+                        var priorityString = "";
+                        var topLevelItems = document.getElementsByClassName("reasons");
+
+                        for (var i = 0; i < topLevelItems.length; ++i) {
+                            var priority = topLevelItems[i].textContent.split(',')[0].split("\n")[2].trim();
+
+                            if(priority == "Detection"){
+                                priority = "Basic"
+                            }
+
+                            priorityString += priority + ", ";
+
                         }
-                    }
-
-                    if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
                         priorityString = priorityString.slice(0, priorityString.length - 2);
+
+                        document.getElementById("id_destruction_reason_order").value = priorityString;
+
+                        document.getElementById("destruction-global-form").submit();
                     }
-                    priorityString += "], "
 
-                }
-                priorityString = priorityString.slice(0, priorityString.length - 2);
-                priorityString += "}";
+                    /*
+                    //Destruction Priority Secondary Priority
+                    function submitDestructionPriorityOrder() {
+                        var priorityString = "{";
+                        var priorityList = document.getElementById("priorities");
+                        var topLevelItems = priorityList.getElementsByClassName("priorities");
 
-                document.getElementById("id_destruction_priority_order").value = priorityString;
+                        for (var i = 0; i < topLevelItems.length; ++i) {
+                            var priority = topLevelItems[i].textContent.split(',');
+                            priority = priority[0].split("\n");
 
-                document.getElementById("destruction-global-form").submit();
-            }
-            */
-            function submitDestructionPriorityOrder() {
-                var priorityString = "";
-                var topLevelItems = document.getElementsByClassName("priorities");
+                            priorityString += "\"" + priority[1].trim() + "\": [";
 
-                for (var  i = 0; i < topLevelItems.length; ++i){
-                    var priority = topLevelItems[i].textContent.split(",")[0].split("\n")[1].trim();
+                            var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
 
-                    priorityString += priority + ", ";
-                }
-                priorityString = priorityString.slice(0, priorityString.length - 2);
+                            for (var k = 0; k < subLevelItems.length; ++k) {
+                                var temp = subLevelItems[k].textContent.trim();
+                                if (temp) {
+                                    priorityString += "\"" + temp + "\", ";
+                                }
+                            }
 
-                document.getElementById("id_destruction_priority_order").value = priorityString;
+                            if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
+                                priorityString = priorityString.slice(0, priorityString.length - 2);
+                            }
+                            priorityString += "], "
 
-                document.getElementById("destruction-global-form").submit();
-            }
+                        }
+                        priorityString = priorityString.slice(0, priorityString.length - 2);
+                        priorityString += "}";
 
-            $(function() {
-                $( ".ui-sortable" ).sortable({
-                    update: function(event, ui) {
-                        $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
+                        document.getElementById("id_destruction_priority_order").value = priorityString;
+
+                        document.getElementById("destruction-global-form").submit();
                     }
-                });
-                $( ".ui-sortable" ).disableSelection();
+                    */
+                    function submitDestructionPriorityOrder() {
+                        var priorityString = "";
+                        var topLevelItems = document.getElementsByClassName("priorities");
 
-                $('#priorities>.ui-sortable-handle').mouseenter(function(){
-                    $('#priorities>.ui-sortable-handle').removeClass('active')
-                    $(this).addClass('active')
-                });
-                $(':input').hover(function(){
-                    $('#priorities *').removeClass('active')
-                })
-            });
-        </script>
+                        for (var  i = 0; i < topLevelItems.length; ++i){
+                            var priority = topLevelItems[i].textContent.split(",")[0].split("\n")[1].trim();
 
-    <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
-        {% if outputs_exist %}
-            <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="submitDestructionPriorityOrder(); submitDestructionGlobalForm();">Delete Results and Apply changes</button>
-        {% else %}
-            <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitDestructionPriorityOrder(); submitDestructionGlobalForm();">Apply</button>
-        {% endif %}
-    </div>
+                            priorityString += priority + ", ";
+                        }
+                        priorityString = priorityString.slice(0, priorityString.length - 2);
+
+                        document.getElementById("id_destruction_priority_order").value = priorityString;
+
+                        document.getElementById("destruction-global-form").submit();
+                    }
+
+                    $(function() {
+                        $( ".ui-sortable" ).sortable({
+                            update: function(event, ui) {
+                                $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
+                            }
+                        });
+                        $( ".ui-sortable" ).disableSelection();
+
+                        $('#priorities>.ui-sortable-handle').mouseenter(function(){
+                            $('#priorities>.ui-sortable-handle').removeClass('active')
+                            $(this).addClass('active')
+                        });
+                        $(':input').hover(function(){
+                            $('#priorities *').removeClass('active')
+                        })
+                    });
+                </script>
+
+            <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
+                {% if outputs_exist %}
+                    <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="submitDestructionPriorityOrder(); submitDestructionGlobalForm();">Delete Results and Apply changes</button>
+                {% else %}
+                    <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitDestructionPriorityOrder(); submitDestructionGlobalForm();">Apply</button>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 {% endblock %}

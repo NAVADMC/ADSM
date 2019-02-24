@@ -817,13 +817,12 @@ def vaccination_global(request):
         if initialized_form.is_valid():
             instance = initialized_form.save(commit=True)
     context = {
-        'base_page': 'ScenarioCreator/VaccinationGlobal.html',
         'title': 'Vaccination Global',
         'ordering': json.loads(instance.vaccination_priority_order, object_pairs_hook=OrderedDict),
         'form': initialized_form
     }
 
-    return render(request, 'ScenarioCreator/navigationPane.html', context)
+    return render(request, 'ScenarioCreator/VaccinationGlobal.html', context)
 
 
 def destruction_global(request):
@@ -835,7 +834,6 @@ def destruction_global(request):
             instance = initialized_form.save(commit=True)
 
     context = {
-        'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',
         'reasons': match_data(instance.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring").split(","),
         'priorities': instance.destruction_priority_order.split(","),
@@ -846,7 +844,7 @@ def destruction_global(request):
     'priorities': json.loads(json.dumps(match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
     '''
 
-    return render(request, 'ScenarioCreator/navigationPane.html', context)
+    return render(request, 'ScenarioCreator/DestructionGlobal.html', context)
 
 
 def match_data(current, all_data):
