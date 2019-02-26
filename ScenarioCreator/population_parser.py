@@ -87,6 +87,14 @@ class PopulationParser(object):
              'status': 'initial_state',
              'daysinstate': 'days_in_initial_state',
              'daysleftinstate': 'days_left_in_initial_state'},
+            {'unit_id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid
+             'productiontype': 'production_type',
+             'unitsize': 'initial_size',
+             'lat': 'latitude',
+             'lon': 'longitude',
+             'status': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
             {'productiontype': 'production_type',  # NAADSM CSV no HerdSize, with status and state timers
              'unitsize': 'initial_size',
              'lat': 'latitude',
