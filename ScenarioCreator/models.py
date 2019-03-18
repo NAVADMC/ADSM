@@ -924,9 +924,9 @@ class Zone(BaseModel):
 class ZoneEffect(BaseModel):
     name = models.CharField(max_length=255, blank=True, null=True)
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes direct movement rate.', )
+        help_text='Function that describes direct movement rate.', )
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes indirect movement rate.', )
+        help_text='Function that describes indirect movement rate.', )
     zone_detection_multiplier = FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' +
                   wiki("production type") + ' in this '+wiki("Zone")+'.', )
