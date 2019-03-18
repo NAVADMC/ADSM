@@ -800,7 +800,7 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
+    max_distance = FloatField(validators=[MinValueValidator(1.1)], default=1.1,
         help_text='The maximum distance in KM of ' + wiki("airborne spread", "airborne-transmission") + '.')
     exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
