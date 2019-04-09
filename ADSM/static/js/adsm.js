@@ -170,6 +170,16 @@ $(function(){
         }
     })
 
+    $(document).on('click', '[data-discard-changes-link]', function(event){ // #new_scenario is handled by [data-copy-link]
+        var dialog = check_file_saved();
+        if(dialog){
+            event.preventDefault();
+            var link = $(this).attr('data-discard-changes-link');
+            dialog.$modal.on('hidden.bs.modal', function(){
+                window.location = link})
+        }
+    })
+
     $('.filename input').on('change', function(){
         $(this).closest('form').trigger('submit');
     });
