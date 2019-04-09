@@ -842,7 +842,7 @@ class OutputSettings(InputSingleton):
 
     ## Outputs requested:
     save_daily_unit_states = models.BooleanField(default=False,
-        help_text='Create a plain text file with the state of each unit on each day of each iteration.', )
+        help_text='Save all daily non-susceptible states for each unit in a supplemental file.', )
     save_daily_events = models.BooleanField(default=False,
         help_text='Save all daily events in a supplemental file.', )
     save_daily_exposures = models.BooleanField(default=False,
