@@ -582,6 +582,9 @@ def delete_entry(request, primary_key):
             VaccinationRingRuleModel = globals()["VaccinationRingRule"]
             VaccinationRingRuleModel.objects.get(pk=1).delete()
 
+            ControlMasterPlanModel = globals()["ControlMasterPlan"]
+            ControlMasterPlanModel.objects.get(pk=1).delete()
+
             DiseaseDetectionModel = globals()["DiseaseDetection"]
             DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
             for DiseaseDetectionObject in DiseaseDetectionObjects:
