@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError, transaction
+from django.contrib.contenttypes.models import ContentType
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
@@ -18,6 +19,7 @@ from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
+from ScenarioCreator.models import VaccinationRingRule
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -575,6 +577,20 @@ def delete_entry(request, primary_key):
     if model_name not in singletons:
         return redirect('/setup/%s/' % model_name)  # model list
     else:
+        if model_name == "Population":
+            print("Deleting Population Dependant Models.")
+            VaccinationRingRuleModel = globals()["VaccinationRingRule"]
+            VaccinationRingRuleModel.objects.get(pk=1).delete()
+
+            DiseaseDetectionModel = globals()["DiseaseDetection"]
+            DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
+            for DiseaseDetectionObject in DiseaseDetectionObjects:
+                DiseaseDetectionObject.delete()
+
+            StopVaccinationModel = globals()["StopVaccination"]
+            StopVaccinationObjects = StopVaccinationModel.objects.all()
+            for StopVaccinationObject in StopVaccinationObjects:
+                StopVaccination.delete()
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 

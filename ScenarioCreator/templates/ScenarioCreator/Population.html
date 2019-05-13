@@ -31,7 +31,7 @@
 {% else %}
 <section id="population_main_panel" class="layout-panel" >
     <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)
-        <a href="#" data-delete-link="{{deletable}}" additional-warning="Warning: This action will delete production type assignments, existing vaccination triggers, and existing vaccination rings." id="replace_population" class="action_link direct_link btn btn-danger">Replace Population</a>
+        <a href="#" data-delete-link="{{deletable}}" additional-warning="Warning: This action will delete production type assignments, remove all vaccination global settings, delete existing vaccination triggers, and delete existing vaccination rings." id="replace_population" class="action_link direct_link btn btn-danger">Replace Population</a>
     </h1>
     <div id="edit-mask"></div>
     <div id="population_grid_wraper">
