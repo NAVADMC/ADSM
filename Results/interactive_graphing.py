@@ -63,10 +63,32 @@ def define_color_mappings():
     return [ListedColormap(x) for x in [zone_blues, red_infected, green_vaccinated]]
 
 
+'''
+Desc:       gragh_zones actually places down the blue infection zones shown on the results map, darker circles are 
+            placed down when more simulations had infections over a population. The size of each zone is determined by 
+            the largest zone size created by the user (larger user zones = larger map zones).
+        
+Params:     in:ax matplotlib dependant variable
+            in:latitude height of the map
+            in:longitude width of the map
+            in:total_iterations integer value for total iterations run by the simulation
+            in:zone_blues list of tuples holding color values for the zones
+            in:zone_focus list of zone locations
+        
+Returns:    None
+
+Tickets:    #896 Zones were being drawn much larger than expected but turns out the bug was due to scalling on the
+            population and this code was working as expected.
+        
+'''
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
+    # get the largest_zone radius from the Zones in the database
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
+    # if this is false, no zones exist
     if largest_zone_radius:
+        # for each zone location, enumerated so the number of zones in tha location is stored in freq
         for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
+            # add the circle to the map
             ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                                 color=zone_blues(freq / total_iterations),
                                 radius= largest_zone_radius / kilometers_in_one_latitude_degree,
