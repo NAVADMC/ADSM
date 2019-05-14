@@ -980,3 +980,8 @@ function rebuild_protocols_list() {
     $('#protocol_list #accordion').remove();
     build_protocols_list(); // build from js rather than reload HTML
 }
+
+function hideCenterPanel() {
+    center_panel = document.getElementById("center-panel");
+    center_panel.classList.remove("reveal");
+}
