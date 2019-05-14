@@ -77,13 +77,21 @@ Params:     in:ax matplotlib dependant variable
         
 Returns:    None
 
-Tickets:    #896 Zones were being drawn much larger than expected but turns out the bug was due to scalling on the
-            population and this code was working as expected.
-        
+Tickets:    #896 Zones were being drawn much larger than expected. draw_radius was added to replace
+            largest_zone_radius / kilometers_in_one_latitude_degree as the radius size with a scalar of 50
+            so regularly sized populations still display as expected. This change means the largest user zone
+            radius is no longer relivent for zone display on the results graph and "zones" displayed are a more
+            generalized reference of how the disease spread.
 '''
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
     # get the largest_zone radius from the Zones in the database
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
+
+    if max(latitude) - min(latitude) > max(longitude) - min(longitude):
+        draw_radius = (max(latitude) - min(latitude)) / 50
+    else:
+        draw_radius = (max(longitude) - min(longitude)) / 50
+
     # if this is false, no zones exist
     if largest_zone_radius:
         # for each zone location, enumerated so the number of zones in tha location is stored in freq
@@ -91,11 +99,11 @@ def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focu
             # add the circle to the map
             ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                                 color=zone_blues(freq / total_iterations),
-                                radius= largest_zone_radius / kilometers_in_one_latitude_degree,
+                                radius=draw_radius,  # old radius largest_zone_radius / kilometers_in_one_latitude_degree,
                                 linewidth=0,
                                 zorder=freq,
             ))
-
+    return
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
     #size = min(100, 3000 / sqrt(Unit.objects.count()))  # TODO: reconcile with ScenarioCreator Population Map marker size
