@@ -492,10 +492,28 @@ function load_target_link(callback){
         
     }
 
+/*
+Desc:       This function is called when the population panel (right-panel) is opened from inside the page instead of
+            from the right-toolbar. It performs two actions, the first of which is to open the population panel itself,
+            the second of which is to active the right-toolbar so it is clear to the user where the panel is comming
+            from (and the right-toolbar button does not have to be pushed twice to clear the panel).
+
+Params:     None
+
+Returns:    None
+
+Tickets:    #922 Added right-toolbar activation.
+ */
 function open_population_panel() {
+    // get the population panel
     var pop = $('#population_panel');
-    pop.removeClass('TB_panel_closed')
-    pop.addClass('add-pt')
+    // open the population panel
+    pop.removeClass('TB_panel_closed');
+    pop.addClass('add-pt');
+    // get the right-toolbar population button
+    control = document.getElementById('TB_population');
+    // activate it
+    control.classList.add('active');
 }
 
 function open_panel_if_needed() {
