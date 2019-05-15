@@ -1,1 +1,1 @@
-__version__ = '3.5.10.0'  # SimulationMajor.SimulationMinor.UIRelease.UIMinor/Beta
+__version__ = '3.5.10.1'  # SimulationMajor.SimulationMinor.UIRelease.UIMinor/Beta
