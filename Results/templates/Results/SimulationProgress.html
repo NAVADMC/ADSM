@@ -8,6 +8,7 @@
     {% if is_simulation_stopped %}
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
         <script type="text/javascript" src="{{ STATIC_URL }}js/summary_csv.js"></script>
+        <script src="{{ STATIC_URL }}js/combine_outputs.js" type="text/javascript"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script>
         <div class="mapwrapper">
@@ -79,15 +80,32 @@
             </div>
             <div class="panel-body">
                 <ul class="file_list">
-                    <li id="summary_csv">
-                        <button class="btn btn-mini btn-default has-spinner">
-                            <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
-                            Calculate Summary CSV
-                        </button>
-                    </li>
+                       <table>
+                        <tr>
+                            <td>
+                                <li id="summary_csv">
+                                    <button class="btn btn-mini btn-default has-spinner">
+                                        <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
+                                        Calculate Summary CSV
+                                    </button>
+                                </li>
+                            </td>
+                            <td>
+                                <li id="combine_outputs">
+                                    <button class="btn btn-mini btn-default has-spinner">
+                                        <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
+                                        Combine Output Files
+                                    </button>
+                                </li>
+                            </td>
+                            <td>
+                                <b>Warning:</b> These operations may take very long for large scenarios.
+                            </td>
+                        </tr>
+                    </table>
 
                     {% for file in supplemental_files %}
-                        <li><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
+                        <li class="file_list_item"><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
                             <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                             <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>

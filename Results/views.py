@@ -19,6 +19,7 @@ from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_o
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
 from Results.csv_generator import SummaryCSVGenerator, SUMMARY_FILE_NAME
+from Results.combine_outputs import CombineOutputsGenerator
 
 
 def back_to_inputs(request):
@@ -40,14 +41,21 @@ def simulation_status(request):
 
 def results_home(request):
     from Results.csv_generator import SUMMARY_FILE_NAME
-    path_ex = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + "/*.csv")
+    path_ex = workspace_path(scenario_filename() + "/" + "Supplemental Output Files")
     start = workspace_path()
-    context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
+    context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/*.csv")]}
+
+    for combined_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Combined Outputs/*.txt")]:
+        context['supplemental_files'].append(combined_file)
+    for combined_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Combined Outputs/*.csv")]:
+        context['supplemental_files'].append(combined_file)
+
     summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
     try:
         context['supplemental_files'].remove(summary_path)
     #             context['supplemental_files'] = [file for file in context['supplemental_files'] if not file.endswith(SUMMARY_FILE_NAME)] # filter out summary.csv
-    except ValueError: pass
+    except ValueError:
+        pass
     context['summary_file_name'] = summary_path
 
     if os.path.exists(map_zip_file()):
@@ -232,6 +240,26 @@ def summary_csv(request):
     if request.method == "POST":
         csv_generator = SummaryCSVGenerator()
         csv_generator.start()  # starts a new thread
+        return HttpResponseAccepted()
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])
+
+
+def combine_outputs(request):
+
+    class HttpResponseAccepted(HttpResponse):
+        status_code = 202
+
+    if request.method == "GET":
+        if SmSession.objects.get().combining_outputs:
+            return HttpResponseAccepted()
+        elif not DailyControls.objects.all().count() or is_simulation_running():
+            return HttpResponseBadRequest()
+        else:
+            return HttpResponse()
+    if request.method == "POST":
+        outputs_generator = CombineOutputsGenerator()
+        outputs_generator.start()  # starts a new thread
         return HttpResponseAccepted()
     else:
         return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])

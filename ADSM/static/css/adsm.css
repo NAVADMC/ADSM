@@ -1440,7 +1440,6 @@ select {
 .file_list {
     list-style: none;
     margin-bottom: 15px;
-    max-width: 600px;
     position: relative;
 }
 
@@ -1453,6 +1452,11 @@ select {
     position: absolute;
     right: 5px;
     top: 0;
+}
+
+.file_list_item {
+    background: #f5f5f5;
+    margin-bottom: 3px;
 }
 
 .file_list .icon {
