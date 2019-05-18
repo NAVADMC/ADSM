@@ -358,7 +358,7 @@ class RelationalPoint(BaseModel):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
-class ControlMasterPlan(InputSingleton):
+class VaccinationGlobal(InputSingleton):
     name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") +
@@ -371,6 +371,7 @@ class ControlMasterPlan(InputSingleton):
         help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
         help_text='Once a trigger has been activated, detected units prior to the trigger day can be retrospectively included in the vaccination strategy. This number defines how many days before the trigger to step back, and incorporate detected units.', )
+    control_plan = models.TextField(blank=True)
 
     def update_production_type_listing(self):
         data = json.loads(self.vaccination_priority_order, object_pairs_hook=OrderedDict)  # preserve priority ordering is important
@@ -386,7 +387,7 @@ class ControlMasterPlan(InputSingleton):
     def save(self, *args, **kwargs):
         if self.vaccination_priority_order.startswith('{'):  # after the data migration
             self.update_production_type_listing()
-        super(ControlMasterPlan, self).save(*args, **kwargs)
+        super(VaccinationGlobal, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.name)
@@ -664,10 +665,10 @@ class ControlProtocol(BaseModel):
 
 class ProtocolAssignment(BaseModel):
     def save(self, *args, **kwargs):
-        self._master_plan = ControlMasterPlan.objects.get()
+        self._master_plan = VaccinationGlobal.objects.get()
         super(ProtocolAssignment, self).save(*args, **kwargs)
 
-    _master_plan = models.ForeignKey('ControlMasterPlan',
+    _master_plan = models.ForeignKey('VaccinationGlobal',
                                      help_text='Points back to a master plan for grouping purposes.')
     production_type = models.OneToOneField('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -880,11 +881,11 @@ class ProductionType(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super(ProductionType, self).save(force_insert, force_update, using, update_fields)
-        ControlMasterPlan.objects.get().save()  # updates production list
+        VaccinationGlobal.objects.get().save()  # updates production list
 
     def delete(self, using=None):
         super(ProductionType, self).delete(using)
-        ControlMasterPlan.objects.get().save()  # updates production list
+        VaccinationGlobal.objects.get().save()  # updates production list
 
     def __str__(self):
         return self.name
