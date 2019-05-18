@@ -67,6 +67,8 @@ $(function(){
             $('#functions_panel select').prop('disabled', true);
             $('#functions_panel textarea').prop('disabled', true);
         };
+        // activate the corresponding toolbar button
+        document.getElementById('TB_functions').classList.add('active');
     })
 
     $('form[action^="/setup/ProbabilityDensityFunction"]').livequery(function(){
@@ -82,6 +84,8 @@ $(function(){
             $('#functions_panel select').prop('disabled', true);
             $('#functions_panel textarea').prop('disabled', true);
         };
+        // activate the corresponding toolbar button
+        document.getElementById('TB_functions').classList.add('active');
     })
 
 
