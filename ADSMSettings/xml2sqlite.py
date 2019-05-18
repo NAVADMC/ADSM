@@ -739,7 +739,7 @@ def readParameters( parameterFileName, saveIterationOutputsForUnits ):
     )
 
     if useDetection or useTracing or useVaccination or useDestruction:
-        plan = ControlMasterPlan()
+        plan = VaccinationGlobal()
         plan.save()
     
     if useDestruction:

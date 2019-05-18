@@ -66,7 +66,7 @@ _point_order, IntegerField,
 x, FloatField, The x value of the point.
 y, FloatField, The y value of the point.
 
-class ControlMasterPlan
+class VaccinationGlobal
 name, CharField, 
 destruction_program_delay, IntegerField, The number of days that must pass after the first detection before a destruction program can begin.
 destruction_capacity_relid, ForeignKey, The relational function used to define the daily destruction capacity.

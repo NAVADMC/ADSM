@@ -150,13 +150,13 @@ class RelationalFunctionForm(BaseForm):
         exclude = []
 
 
-class ControlMasterPlanForm(BaseForm):
+class VaccinationGlobalForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
         )
-        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
+        super(VaccinationGlobalForm, self).__init__(*args, **kwargs)
 
         '''
         HTML(r"<h2>Global Vaccination settings</h2>"),
@@ -175,14 +175,14 @@ class ControlMasterPlanForm(BaseForm):
 
 
     class Meta(object):
-        model = ControlMasterPlan
+        model = VaccinationGlobal
         fields = 'name'.split()
         widgets = {}
 
 
 class VaccinationMasterForm(BaseForm):
     class Meta(object):
-        model = ControlMasterPlan
+        model = VaccinationGlobal
         fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
         widgets = {
             # 'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),

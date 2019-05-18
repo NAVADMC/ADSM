@@ -20,9 +20,9 @@
                          <h4><a href="/setup/AssignSpreads/" class="{{"AssignSpreads"|active:active_link}}">
                             <span class="pull-right {{AssignSpreads|completed}}"> </span>Review Disease Spread</a></h4> </h3>
                  </h2>
-            <h2><a href="/setup/ControlMasterPlan/1/" class="{{"ControlMasterPlan"|active:active_link}}">
+            <h2><a VaccinationGlobal class="{{"href="/setup/VaccinationGlobal/1/""|active:active_link}}">
 
-                <span class="pull-right {{ControlMasterPlan|completed}}"> </span>Controls</a>
+                <span class="pull-right {{VaccinationGlobal|completed}}"> </span>Controls</a>
                 {% if 'Import' not in active_link %}<input id="id_disable_all_controls" type="checkbox"
                        {%if controls_enabled %}checked {% endif %}
                        data-toggle="toggle" data-size="mini" data-onstyle="success">
@@ -35,7 +35,7 @@
                  <h3><a href="/setup/VaccinationRingRule/" class="{{"VaccinationRingRule"|active:active_link}}">
                         <span class="pull-right {{VaccinationRingRule|completed}}"> </span>Vaccination Rings</a></h3>
                  <h3><a href="/setup/VaccinationGlobal/" class="{{"VaccinationGlobal"|active:active_link}}">
-                        <span class="pull-right {{VaccinationRingRule|completed}}"> </span>Vaccination Global</a></h3>{# not a separate completed flag #}
+                        <span class="pull-right {{VaccinationGlobal|completed}}"> </span>Vaccination Global</a></h3>{# not a separate completed flag #}
                  <h3><a href="/setup/DestructionGlobal/" class="{{"DestructionGlobal"|active:active_link}}">
                         <span class="pull-right {{ DestructionGlobal|completed}}"> </span>Destruction Global </a></h3>
                     <h4><a href="/setup/AssignProtocols/" class="{{"AssignProtocols"|active:active_link}}">

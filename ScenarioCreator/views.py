@@ -25,7 +25,7 @@ from ScenarioCreator.models import VaccinationRingRule
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
 from ScenarioCreator.utils import whole_scenario_validation
 
-singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings', "DestructionGlobal"]
+singletons = ['Scenario', 'Population', 'Disease', 'VaccinationGlobal', 'OutputSettings', "DestructionGlobal"]
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
@@ -184,12 +184,12 @@ def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
         set_to = new_value == 'false'  # logical inversion because of use_controls vs disable_controls
-        controls = ControlMasterPlan.objects.get()
+        controls = VaccinationGlobal.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
         return JsonResponse({'status': 'success'})
     else:
-        return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
+        return JsonResponse({'disable_all_controls': VaccinationGlobal.objects.get().disable_all_controls})
     
 
 def initialize_spread_assignments():
@@ -582,8 +582,8 @@ def delete_entry(request, primary_key):
             VaccinationRingRuleModel = globals()["VaccinationRingRule"]
             VaccinationRingRuleModel.objects.get(pk=1).delete()
 
-            ControlMasterPlanModel = globals()["ControlMasterPlan"]
-            ControlMasterPlanModel.objects.get(pk=1).delete()
+            VaccinationGlobalModel = globals()["VaccinationGlobal"]
+            VaccinationGlobalModel.objects.get(pk=1).delete()
 
             DiseaseDetectionModel = globals()["DiseaseDetection"]
             DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
@@ -830,7 +830,7 @@ def validate_scenario(request):
 
 
 def vaccination_global(request):
-    instance = ControlMasterPlan.objects.get()
+    instance = VaccinationGlobal.objects.get()
     initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
     if request.method == "POST":
         if initialized_form.is_valid():

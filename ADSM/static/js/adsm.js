@@ -341,7 +341,7 @@ $(function(){
             var label = $('nav').find('a.active').first().text()
             $.each(['Vaccination', 'Protocol', 'Zone'], function(index, value){
                 if(label.indexOf(value) != -1){
-                    new_link = '/setup/ControlMasterPlan/1/'
+                    new_link = '/setup/VaccinationGlobal/1/'
                 }
             })
         }

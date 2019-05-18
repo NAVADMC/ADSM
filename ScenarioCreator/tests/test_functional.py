@@ -17,7 +17,7 @@ from selenium.webdriver.common.keys import Keys
 from ScenarioCreator.models import Scenario, Disease, DiseaseProgression, \
     ProbabilityDensityFunction, RelationalFunction, RelationalPoint, Population, \
     DirectSpread, IndirectSpread, AirborneSpread, ProductionType, \
-    DiseaseProgressionAssignment, Unit, ControlMasterPlan, Zone, ZoneEffect
+    DiseaseProgressionAssignment, Unit, VaccinationGlobal, Zone, ZoneEffect
 from ADSMSettings.utils import workspace_path
 from Results.utils import delete_all_outputs
 
@@ -451,7 +451,7 @@ class FunctionalTests(StaticLiveServerTestCase):
         self.setup_scenario()
         delete_all_outputs()
 
-        ControlMasterPlan.objects.get_or_create(disable_all_controls=True)
+        VaccinationGlobal.objects.get_or_create(disable_all_controls=True)
         self.click_navbar_element("Controls")
         control_items = [
             "Vaccination Triggers",
