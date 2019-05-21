@@ -1,13 +1,3 @@
-try:
-    import tkinter as tk
-    import tkinter.ttk as ttk
-    from tkinter import filedialog
-except ImportError:
-    import Tkinter as tk
-    import ttk
-    import tkFileDialog as filedialog
-
-
 import os
 import re
 import time
