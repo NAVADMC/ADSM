@@ -594,6 +594,7 @@ def delete_entry(request, primary_key):
             StopVaccinationObjects = StopVaccinationModel.objects.all()
             for StopVaccinationObject in StopVaccinationObjects:
                 StopVaccination.delete()
+            print("Population Deletion Complete. Redirecting...")
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 

@@ -33,7 +33,7 @@
     <h1><strong>Population File:</strong> {{ population_file }} ({{ Farms|intcomma }} units)
         <a additional-warning="<b>Warning:</b> This action will delete production type assignments, remove all vaccination global settings, delete existing vaccination triggers, and delete existing vaccination rings.
            <b>Note:</b> All other parameter blocks will be preserved and will be available to assign to production types provided in the replacement population." class="action_link direct_link btn btn-danger"
-           data-delete-link="{{deletable}}"
+           data-delete-link="/LoadingScreen/?loading_url={{deletable}}"
            href="#" id="replace_population">Replace Population</a>
     </h1>
     <div id="edit-mask"></div>
