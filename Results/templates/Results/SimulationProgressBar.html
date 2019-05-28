@@ -9,7 +9,7 @@
     {% else %}
         <div id="sim_progress_and_button">
             <div id="running_message">Running Simulation</div>
-            <a class="btn hidden" href="/results/abort_simulation" id="sim_abort_btn">Abort</a>
+            <a class="btn hidden" href="/LoadingScreen/?loading_url=/results/abort_simulation" id="sim_abort_btn">Abort</a>
             <div class="progress">
                 <span class="simulation-status status-text"></span>
                 <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>
