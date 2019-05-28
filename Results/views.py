@@ -255,6 +255,8 @@ def combine_outputs(request):
             return HttpResponseAccepted()
         elif not DailyControls.objects.all().count() or is_simulation_running():
             return HttpResponseBadRequest()
+        elif len([file_name for file_name in os.listdir(workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Combined Outputs/"))]) != 4:
+            return HttpResponseNotFound()
         else:
             return HttpResponse()
     if request.method == "POST":

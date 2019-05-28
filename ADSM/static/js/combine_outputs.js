@@ -8,9 +8,8 @@ $(function(){
         $.get(endpoint, function(data, textStatus, xhr){
             switch(xhr.status){
                 case 200: {  // if file is ready
-                    console.log(200);
                     $combineOutputs.find('button').removeClass('active');
-                    //$combineOutputs.find('button').addClass('hidden');
+                    $combineOutputs.find('button').addClass('hidden');
                     stop_poll();
                     if (requested) {
                         location.reload();
@@ -18,17 +17,14 @@ $(function(){
                     return
                 }
                 case 202: {  // already started, but not done
-                    console.log(202);
                     start_poll();
                     return
                 }
                 case 400:
-                    console.log("There aren't results to compute on.");
                     $combineOutputs.find('button').addClass('hidden');
                     return;
                 case 404: //results haven't been started computing yet
                     //display the button for user to press
-                    console.log(404);
                     return
             }
 
