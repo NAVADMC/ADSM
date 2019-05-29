@@ -246,7 +246,7 @@ $(function(){
         $(this).parent('form').submit();
     })
 
-    $(document).on('click', '[data-delete-link], [additional-warning]', function(){
+    $(document).on('click', '[data-delete-link], [additional-warning], [custom-deletable]', function(){
         var link = $(this).attr('data-delete-link')
         var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
         var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
@@ -259,16 +259,20 @@ $(function(){
         }
         var additional_msg = ''
         var additional_warning = ''
+        var custom_deletable = ''
         if(deleting_outputs){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
         }
         if ($(this).attr('additional-warning') != undefined) {
             additional_warning = $(this).attr('additional-warning')
         }
+        if ($(this).attr('custom-deletable') != undefined) {
+            custom_deletable = $(this).attr('custom-deletable')
+        }
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete the selected ' + object_type + additional_msg + '?\n' + additional_warning,
+            message: 'Are you sure you want to delete the selected ' + ((custom_deletable == '') ? object_type : custom_deletable) + additional_msg + '?\n' + additional_warning,
             buttons: [
                 {
                     label: 'Cancel',
