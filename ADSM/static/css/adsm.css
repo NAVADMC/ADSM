@@ -1959,7 +1959,7 @@ section#population_main_panel h1:first-of-type {
     #population_grid_wraper form:first-of-type{
         float: left !important;
         padding-right: 0;
-        margin-top: 303px;
+        margin-top: 383px;
     }
     #population_filters {
         position: absolute;
@@ -2059,6 +2059,7 @@ section#population_main_panel h1:first-of-type {
     }
     #edit_population {
         right: 10px;
+        margin-top: 65px;
         top: calc(100vh + 131px);
     }
 }
