@@ -1743,7 +1743,7 @@ section#population_main_panel h1:first-of-type {
 /*************** Farm_list **********/
 #farm_list_container{
     float: right;
-    width: 49.98vw;
+    width: 55.00vw;
     overflow-x: auto;
     padding-left: 0px;
 }
@@ -1785,10 +1785,10 @@ section#population_main_panel h1:first-of-type {
     position: relative;
 }
 #farm_list td {
-    width: 17%;
+    width: 12.5%;
 }
 #farm_list th { /**--- this accounts for the 6px scroll bar taking up width in the table body---**/
-    width: calc(17% - 1px);
+    width: calc(12.5% - 1px);
 }
 
 #farm_list tbody{

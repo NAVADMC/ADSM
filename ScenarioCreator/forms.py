@@ -102,7 +102,8 @@ class UnitForm(BaseForm):
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
+        exclude = ['_population', 'user_notes']
+        # fields included: production type, latitude, longitude, initial state, initial size, unit id, 'days_in_initial_state', 'days_left_in_initial_state'
         widgets = {}
         #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
