@@ -359,7 +359,6 @@ class RelationalPoint(BaseModel):
 
 
 class VaccinationGlobal(InputSingleton):
-    name = models.CharField(default="Control Master Plan", max_length=255)
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") +
                   ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
@@ -389,8 +388,12 @@ class VaccinationGlobal(InputSingleton):
             self.update_production_type_listing()
         super(VaccinationGlobal, self).save(*args, **kwargs)
 
+
+class ControlMasterPlan(InputSingleton):
+    name = models.CharField(default="Control Master Plan", max_length=255)
+
     def __str__(self):
-        return str(self.name)
+        return self.name
 
 
 class DestructionGlobal(InputSingleton):

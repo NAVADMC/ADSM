@@ -25,7 +25,7 @@ from ScenarioCreator.models import VaccinationRingRule
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
 from ScenarioCreator.utils import whole_scenario_validation
 
-singletons = ['Scenario', 'Population', 'Disease', 'VaccinationGlobal', 'OutputSettings', "DestructionGlobal"]
+singletons = ['Scenario', 'Population', 'Disease', 'VaccinationGlobal', 'OutputSettings', "DestructionGlobal", "ControlMasterPlan"]
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
@@ -51,6 +51,8 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         if primary_key is not None:
             context['model_link'] += primary_key + '/'
     else:  # for singletons, don't list the specific name, just the type
+        if model_name == "VaccinationGlobal":
+            model_name = "ControlMasterPlan"
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 

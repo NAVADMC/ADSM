@@ -151,32 +151,17 @@ class RelationalFunctionForm(BaseForm):
         exclude = []
 
 
-class VaccinationGlobalForm(BaseForm):
+class ControlMasterPlanForm(BaseForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'name',
         )
-        super(VaccinationGlobalForm, self).__init__(*args, **kwargs)
-
-        '''
-        HTML(r"<h2>Global Vaccination settings</h2>"),
-        HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
-        'vaccination_capacity',
-        'restart_vaccination_capacity',
-        'vaccination_priority_order',
-        'vaccinate_retrospective_days',
-        HTML(r"<h2>Global Destruction settings</h2>"),
-        HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
-        'destruction_program_delay',
-        'destruction_capacity',
-        'destruction_priority_order',
-        'destruction_reason_order',
-        '''
+        super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
 
 
     class Meta(object):
-        model = VaccinationGlobal
+        model = ControlMasterPlan
         fields = 'name'.split()
         widgets = {}
 
