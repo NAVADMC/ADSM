@@ -51,8 +51,6 @@ def add_breadcrumb_context(context, model_name, primary_key=None):
         if primary_key is not None:
             context['model_link'] += primary_key + '/'
     else:  # for singletons, don't list the specific name, just the type
-        if model_name == "VaccinationGlobal":
-            model_name = "ControlMasterPlan"
         context['title'] = 'Edit the ' + spaces_for_camel_case(model_name)
 
 
