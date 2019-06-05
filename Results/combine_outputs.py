@@ -33,17 +33,43 @@ def combine_outputs(supplemental_output_folder, db_location, simulation_name):
     events_files = [file for file in all_files if "daily_events" in file]
 
     output_dir = supplemental_output_folder + "Combined Outputs\\"
-    try:
-        os.mkdir(output_dir)
-    except FileExistsError:
-        shutil.rmtree(output_dir)
-        os.mkdir(output_dir)
+
+    building_dir = True
+    while building_dir:
+        try:
+            os.mkdir(output_dir)
+            building_dir = False
+        except FileExistsError:
+            shutil.rmtree(output_dir)
+            os.mkdir(output_dir)
+        except PermissionError:
+            pass
 
     iterations_run = max([len(exposures_files), len(events_files), len(states_files)])
 
-    exposure_days = build_exposures(supplemental_output_folder, exposures_files, output_dir)
-    events_days = build_events(supplemental_output_folder, events_files, output_dir)
-    states_days = build_states(supplemental_output_folder, states_files, output_dir)
+    if iterations_run == 0:
+        iterations_run = "UNKNOWN"
+
+    if len(exposures_files) > 0:
+        exposure_days = build_exposures(supplemental_output_folder, exposures_files, output_dir)
+    else:
+        exposure_days = 0
+        file = open(supplemental_output_folder + "/Combined Outputs/" + "combined_daily_exposures.csv", "w")
+        file.close()
+
+    if len(events_files) > 0:
+        events_days = build_events(supplemental_output_folder, events_files, output_dir)
+    else:
+        events_days = 0
+        file = open(supplemental_output_folder + "/Combined Outputs/" + "combined_daily_events.csv", "w")
+        file.close()
+
+    if len(states_files) > 0:
+        states_days = build_states(supplemental_output_folder, states_files, output_dir)
+    else:
+        states_days = 0
+        file = open(supplemental_output_folder + "/Combined Outputs/" + "combined_states.csv", "w")
+        file.close()
 
     # days_per_iteration = get_days_from_database(db_location)
     # total_outbreak_days = sum(days_per_iteration)
