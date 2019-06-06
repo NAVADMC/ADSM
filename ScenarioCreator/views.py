@@ -756,6 +756,11 @@ def parse_population(file_path, session):
     convert_user_notes_to_unit_id()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
 
+def export_population(request, format):
+    parser = ScenarioCreator.population_parser.ExportPopulation(format)
+    parser.export()
+    return redirect("/setup/Populations/")
+
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:

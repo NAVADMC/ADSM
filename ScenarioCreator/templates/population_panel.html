@@ -22,4 +22,11 @@
         <div id="group-creator"></div> {#load target#}
         <a href='/setup/ProductionGroup/new' load-target='#group-creator'>+ define new group</a>
     </div>
+
+    <div style="position:absolute;bottom:20px;width:50%;left:25%;right:25%;">
+        <a href="/LoadingScreen/?loading_url=/setup/ExportPopulation/xml" class="btn btn-info">Export Population as XML</a>
+        <a href="/LoadingScreen/?loading_url=/setup/ExportPopulation/csv" class="btn btn-info">Export Population as CSV</a>
+        <p class="help-text">Exported population will be saved in the current scenario's workspace folder.</p>
+    </div>
+
 </div>

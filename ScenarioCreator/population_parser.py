@@ -4,6 +4,8 @@ import os
 import xml.etree.ElementTree as ET
 import ScenarioCreator.models
 
+from ADSMSettings.utils import workspace_path, scenario_filename
+
 
 def gettext(elem):
     return ",".join(elem.itertext())
@@ -12,7 +14,6 @@ def gettext(elem):
 def lowercase_header(iterator):
     """Source: http://stackoverflow.com/questions/16937457/python-dictreader-how-to-make-csv-column-names-lowercase"""
     return itertools.chain([next(iterator).lower()], iterator)
-
 
 
 def convert_numeric_status_codes(entry):
@@ -71,7 +72,7 @@ class PopulationParser(object):
         This is because a format that has fewer options, but same names will match to a format that has more options
         containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
         possible_formats = [
-            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid
+            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid. Also format for ADSM csv export
              'productiontype': 'production_type',
              'unitsize': 'initial_size',
              'lat': 'latitude',
@@ -136,8 +137,6 @@ class PopulationParser(object):
         if not parsing_success:
             raise ET.ParseError('Unrecognized csv header format! Please refer to the <a href="https://github.com/NAVADMC/ADSM/wiki/Population-File-Requirements" class="wiki" target="_blank">wiki</a> for help.')
 
-
-
     def __parse_xml_population_fields(self, text_fields):
         for herd in self.top_level.iter('herd'):
             self.population.append( dict() ) #empty
@@ -158,3 +157,91 @@ class PopulationParser(object):
         if str(xml_name).lower() in ('id', 'unitid') and text:
              field_name = "unit_id"
         self.population[-1][field_name] = text
+
+
+class ExportPopulation(object):
+
+    def __init__(self, format):
+        self.population = ScenarioCreator.models.Unit.objects
+        self.save_location = workspace_path(scenario_filename() + "\\")  # Note: scenario_filename uses the database
+        self.format = format
+        return
+
+    def export(self):
+        if self.format == "csv":
+            self.__export_csv()
+        else:
+            self.__export_xml()
+        return
+
+    def __export_xml(self):
+        file = open(self.save_location + "pop_" + scenario_filename().replace(" ", "") + ".xml", "w")
+        file.write('<?xml version="1.0" encoding="UTF-16" ?>\n')
+        file.write("<herds\n")
+        file.write('\txmlns:naadsm="http://www.naadsm.org/schema"\n')
+        file.write('\txmlns:xsd="http://www.w3.org/2001/XMLSchema"\n')
+        file.write('\txmlns:gml="http://www.opengis.net/gml"\n')
+        file.write('\txmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n')
+        file.write("\n")
+        for unit in self.population.all():
+            file.write(self.__write_next_xml_herd(unit) + "\n\n")
+        file.write("</herds>")
+        return
+
+    def __write_next_xml_herd(self, unit):
+        herd_text = "\t<herd>\n"
+
+        herd_text += "\t\t<id>"
+        herd_text += str(unit.id)
+        herd_text += "</id>\n"
+
+        herd_text += "\t\t<production-type>"
+        herd_text += str(unit.production_type)
+        herd_text += "</production-type>\n"
+
+        herd_text += "\t\t<size>"
+        herd_text += str(unit.initial_size)
+        herd_text += "</size>\n"
+
+        herd_text += "\t\t<location>\n"
+        herd_text += "\t\t\t<latitude>"
+        herd_text += str(unit.latitude)
+        herd_text += "</latitude>\n"
+        herd_text += "\t\t\t<longitude>"
+        herd_text += str(unit.longitude)
+        herd_text += "</longitude>\n"
+        herd_text += "\t\t</location>\n"
+
+        herd_text += "\t\t<status>"
+        herd_text += str(unit.initial_state)
+        herd_text += "</status>\n"
+
+        herd_text += "\t\t<days-in-initial-state>"
+        herd_text += (str(unit.days_in_initial_state) if str(unit.days_in_initial_state) != "None" else '')
+        herd_text += "</days-in-initial-state>\n"
+
+        herd_text += "\t\t<days-left-in-initial-state>"
+        herd_text += (str(unit.days_left_in_initial_state) if str(unit.days_left_in_initial_state) != "None" else '')
+        herd_text += "</days-left-in-initial-state>\n"
+
+        herd_text += "\t</herd>"
+        return herd_text
+
+    def __export_csv(self):
+        csv_order = ["id", "productiontype", "unitsize", "lat", "lon", "status", "daysinstate", "daysleftinstate"]
+        file = open(self.save_location + "pop_" + scenario_filename().replace(" ", "") + ".csv", "w")
+        for key in csv_order:
+            file.write(key + ",")
+        file.write("\n")
+        for unit in self.population.all():
+            file.write(str(unit.id) + "," +
+                       str(unit.production_type) + "," +
+                       str(unit.initial_size) + "," +
+                       str(unit.latitude) + "," +
+                       str(unit.longitude) + "," +
+                       str(unit.initial_state) + "," +
+                       (str(unit.days_in_initial_state) if str(unit.days_in_initial_state) != "None" else '') + "," +
+                       (str(unit.days_left_in_initial_state) if str(unit.days_left_in_initial_state) != "None" else '') + ",")
+            file.write("\n")
+        file.close()
+        return
