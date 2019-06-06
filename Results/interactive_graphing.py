@@ -157,7 +157,9 @@ def population_results_map():
                 u.unitstats.cumulative_destroyed,
                 u.unitstats.cumulative_zone_focus, 
                 u.initial_size,
-                ) for u in queryset]
+                ) if hasattr(u, "unitstats") else
+               (u.latitude, u.longitude, -1, -1, -1, -1, u.initial_size)
+                for u in queryset]
     total_iterations = float(len(list_of_iterations()))
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
