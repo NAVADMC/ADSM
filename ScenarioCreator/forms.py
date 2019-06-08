@@ -112,7 +112,7 @@ class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityDensityFunction
         exclude = []
-        widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+        widgets = {'graph': AddOrSelect()}
 
     def clean(self):
         cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
