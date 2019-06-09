@@ -27,6 +27,8 @@ class AddOrSelect(Select):
     #     context = super(AddOrSelect, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
 
+class SelectExisting(Select):
+    template_name = 'floppyforms/function_select.html'
 
 class FixedSelect(Select):
     template_name = 'floppyforms/fixed_select.html'
@@ -112,7 +114,7 @@ class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityDensityFunction
         exclude = []
-        widgets = {'graph': AddOrSelect()}
+        widgets = {'graph': SelectExisting()}
 
     def clean(self):
         cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
