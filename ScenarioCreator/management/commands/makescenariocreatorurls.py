@@ -67,6 +67,7 @@ class Command(BaseCommand):
              "url('^ModifySpreadAssignments/$', 'ScenarioCreator.views.modify_spread_assignments')",
 
              "url('^ExportPopulation/(?P<format>.+)$', 'ScenarioCreator.views.export_population')",
+             "url('^ExportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.export_functions')",
             ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \

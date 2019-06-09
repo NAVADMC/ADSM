@@ -342,6 +342,7 @@ class ProbabilityDensityFunction(Function):
         help_text='Functions: Binomial, Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
         help_text='A series of points used in: Histogram, Piecewise.')
+    export_fields = ["x_axis_units","notes","equation_type","mean","std_dev","min","mode","max","alpha","alpha2","beta","location","scale","shape","n","p","m","d","theta","a","s","graph","name"]
 
 
 class RelationalFunction(Function):

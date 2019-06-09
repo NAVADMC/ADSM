@@ -33,6 +33,7 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^DiseaseSpreadAssignments.json/$', 'ScenarioCreator.views.disease_spread_assignments_json'),
          url('^ModifySpreadAssignments/$', 'ScenarioCreator.views.modify_spread_assignments'),
          url('^ExportPopulation/(?P<format>.+)$', 'ScenarioCreator.views.export_population'),
+         url('^ExportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.export_functions'),
          url('^BaseModel/$',                      'ScenarioCreator.views.model_list'),
          url('^BaseModel/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^BaseModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

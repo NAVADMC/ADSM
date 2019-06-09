@@ -20,6 +20,7 @@ from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, 
 from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
 from ScenarioCreator.models import VaccinationRingRule
+from ScenarioCreator.exporter import *
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -345,6 +346,14 @@ def initialize_relational_form(context, primary_key, request):
     context['model'] = model
     return context
 
+def export_functions(request, block):
+    if block == "rel":
+        pass
+    elif block == "pdf":
+        pdf_model = globals()["ProbabilityDensityFunction"]
+        pdf_objects = pdf_model.objects.all()
+        export_pdfs(pdf_objects)
+    return redirect("/setup/Scenario/1/")
 
 def deepcopy_points(request, primary_key, created_instance):
     queryset = RelationalPoint.objects.filter(relational_function_id=primary_key)
