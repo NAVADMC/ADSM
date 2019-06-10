@@ -342,7 +342,8 @@ class ProbabilityDensityFunction(Function):
         help_text='Functions: Binomial, Negative Binomial.', )
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
         help_text='A series of points used in: Histogram, Piecewise.')
-    export_fields = ["x_axis_units","notes","equation_type","mean","std_dev","min","mode","max","alpha","alpha2","beta","location","scale","shape","n","p","m","d","theta","a","s","graph","name"]
+
+    export_fields = ["name", "x_axis_units", "notes", "equation_type", "mean", "std_dev", "min", "mode", "max", "alpha", "alpha2", "beta", "location", "scale", "shape", "n", "p", "m", "d", "theta", "a", "s", "graph"]
 
 
 class RelationalFunction(Function):
@@ -350,11 +351,16 @@ class RelationalFunction(Function):
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 
+    export_fields = ["name", "x_axis_units", "notes", "y_axis_units"]
+
 
 class RelationalPoint(BaseModel):
     relational_function = models.ForeignKey(RelationalFunction)
     x = FloatField(validators=[MinValueValidator(0.0)], )
     y = FloatField(validators=[MinValueValidator(0.0)], )
+
+    export_fields = ["x", "y"]
+
     def __str__(self):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 

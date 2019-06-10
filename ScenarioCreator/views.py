@@ -348,6 +348,11 @@ def initialize_relational_form(context, primary_key, request):
 
 def export_functions(request, block):
     if block == "rel":
+        relfunction_model = globals()["RelationalFunction"]
+        relfunction_objects = relfunction_model.objects.all()
+        relpoints_model = globals()["RelationalPoint"]
+        relpoints_objects = relpoints_model.objects.all()
+        export_relational_functions(relfunction_objects, relpoints_objects)
         pass
     elif block == "pdf":
         pdf_model = globals()["ProbabilityDensityFunction"]
