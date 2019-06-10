@@ -21,6 +21,7 @@ from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
 from ScenarioCreator.models import VaccinationRingRule
 from ScenarioCreator.exporter import *
+from ScenarioCreator.importer import *
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
@@ -358,6 +359,15 @@ def export_functions(request, block):
         pdf_model = globals()["ProbabilityDensityFunction"]
         pdf_objects = pdf_model.objects.all()
         export_pdfs(pdf_objects)
+    return redirect("/setup/Scenario/1/")
+
+def import_functions(request, block):
+    if block == "rel":
+        pass
+    elif block == "pdf":
+        pdf_model = globals()["ProbabilityDensityFunction"]
+        pdf_objects = pdf_model.objects.all()
+        import_pdfs(pdf_objects)
     return redirect("/setup/Scenario/1/")
 
 def deepcopy_points(request, primary_key, created_instance):

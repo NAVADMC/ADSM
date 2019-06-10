@@ -14,7 +14,7 @@
                     {% endfor %}
                 </ul>
             </div>
-            <div id="probability-options" class="collapse function_dropdown">
+            <div id="probability-options" class="collapse function_dropdown">c
                 <ul>
                     <li><a href="/setup/ProbabilityDensityFunction/new/" load-target="{{ load_target }}" data-toggle="collapse" data-target="#probability-options">New...</a></li>
                     {% for entry in models.1.entries %}
@@ -30,10 +30,18 @@
         {% else %}
             {% include 'ScenarioCreator/ModelList.html' %}
         {% endif %}
+
+        <p class="help-text">Exported functions will be saved in the current scenario's workspace folder with either "REL_" or "PDF_" prepended to their names.</p>
+        <div style="bottom:40px;width:40%;left:20px;margin-bottom:20px;">
+                <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/rel" class="btn btn-info">Export Relational Functions</a>
+                <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/pdf" class="btn btn-info">Export Probability Density Functions</a>
+        </div>
+
+        <p class="help-text">Imported functions are read from csv files in the current scenario's workspace folder that have either "REL_" or "PDF_" <strong>prepended</strong> to their names and do not contain the current scenario's name.</p>
+        <div style="bottom:20px;width:40%;left:20px;">
+                <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/rel" class="btn btn-info">Import Relational Functions</a>
+                <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/pdf" class="btn btn-info">Import Probability Density Functions</a>
+        </div>
+
     </div>
-</div>
-<div style="position:absolute;bottom:20px;width:50%;left:25%;right:25%;">
-        <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/rel" class="btn btn-info">Export Relational Functions</a>
-        <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/pdf" class="btn btn-info">Export Probability Density Functions</a>
-        <p class="help-text">Exported functions will be saved in the current scenario's workspace folder.</p>
 </div>
