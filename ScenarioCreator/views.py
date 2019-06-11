@@ -363,7 +363,9 @@ def export_functions(request, block):
 
 def import_functions(request, block):
     if block == "rel":
-        pass
+        relfunction_model = globals()["RelationalFunction"]
+        relfunction_objects = relfunction_model.objects.all()
+        import_relational_functions(relfunction_objects)
     elif block == "pdf":
         pdf_model = globals()["ProbabilityDensityFunction"]
         pdf_objects = pdf_model.objects.all()
