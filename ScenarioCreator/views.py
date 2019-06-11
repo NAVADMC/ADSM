@@ -348,27 +348,60 @@ def initialize_relational_form(context, primary_key, request):
     return context
 
 def export_functions(request, block):
+    '''
+    "Functions" as in relational functions and probability density functions.
+
+    Exports to a single file, delimited by "REL_" for relational functions and "PDF_" for probability density functions.
+    Files are saved in the same folder as the .db for each scenario. Exporting the same scenario multiple times overwrites
+    the existing file.
+    :param block: "rel" or "pdf" to determine which export to run.
+    :return: Redirect to the scenario description.
+    '''
     if block == "rel":
+        # get the relational function model
         relfunction_model = globals()["RelationalFunction"]
+        # get all of the relational functions
         relfunction_objects = relfunction_model.objects.all()
+        # get the relational function points model
         relpoints_model = globals()["RelationalPoint"]
+        # get all of the relational points
         relpoints_objects = relpoints_model.objects.all()
+        # export the relational functions, export_relational_functions() is located in exporter.py
         export_relational_functions(relfunction_objects, relpoints_objects)
         pass
     elif block == "pdf":
+        # get the pdf model
         pdf_model = globals()["ProbabilityDensityFunction"]
+        # get all of the pdfs
         pdf_objects = pdf_model.objects.all()
+        # export the pdfs, export_pdfs() is located in exporter.py
         export_pdfs(pdf_objects)
     return redirect("/setup/Scenario/1/")
 
 def import_functions(request, block):
+    '''
+    "Functions" as in relational functions and probability density functions.
+
+    Imports from all files located in the same location as the .db for each scenario that are delimited by "PDF_" for
+    Probability Density Functions or "REL_" for relational functions. Will not import functions from files that include
+    the current scenarios name.
+
+    :param block: "rel" or "pdf" to determine which export to run.
+    :return: Redirect to the scenario description.
+    '''
     if block == "rel":
+        # get the relational function model
         relfunction_model = globals()["RelationalFunction"]
+        # get all the existing relational functions
         relfunction_objects = relfunction_model.objects.all()
+        # import new relational functions, import_relational_functions() is located in importer.py
         import_relational_functions(relfunction_objects)
     elif block == "pdf":
+        # get the pdf model
         pdf_model = globals()["ProbabilityDensityFunction"]
+        # get all of the existing pdfs
         pdf_objects = pdf_model.objects.all()
+        # import new pdfs, import_pdfs() is located in importer.py
         import_pdfs(pdf_objects)
     return redirect("/setup/Scenario/1/")
 
