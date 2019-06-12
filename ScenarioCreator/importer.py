@@ -27,6 +27,9 @@ def import_relational_functions(existing_functions):
     rel_import_fields = ["name", "x_axis_units", "notes", "y_axis_units"]
     point_import_fields = ["x", "y"]
 
+    # this variable is opened here so it is never referenced unassigned
+    new_points = ""
+
     # for each file found
     for file_name in file_names:
         # open that file
