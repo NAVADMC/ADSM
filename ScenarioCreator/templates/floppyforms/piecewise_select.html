@@ -1,0 +1,14 @@
+{% load filters %}
+
+<select name="{{ name }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>
+    {% for group_name, group_choices in optgroups %}
+        {% for option in group_choices %}
+            {% if forloop.first %}
+                <option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>
+            {% endif %}
+            {% if option|is_piecewise and not forloops.first %}
+                <option value="{{ option.0 }}"{% if option.0 in value %} selected="selected"{% endif %}>{{ option.1 }}</option>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</select>

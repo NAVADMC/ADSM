@@ -11,7 +11,6 @@ from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput, TextInput
 from crispy_forms.helper import FormHelper
-import os
 
 
 class FloatInput(NumberInput):
@@ -27,8 +26,14 @@ class AddOrSelect(Select):
     #     context = super(AddOrSelect, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
 
+
 class SelectExisting(Select):
     template_name = 'floppyforms/function_select.html'
+
+
+class PiecewiseSelect(Select):
+    template_name = 'floppyforms/piecewise_select.html'
+
 
 class FixedSelect(Select):
     template_name = 'floppyforms/fixed_select.html'
@@ -114,7 +119,7 @@ class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityDensityFunction
         exclude = []
-        widgets = {'graph': SelectExisting()}
+        widgets = {'graph': PiecewiseSelect()}
 
     def clean(self):
         cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
