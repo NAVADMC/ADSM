@@ -1,0 +1,116 @@
+Field Name,Explanation,Mean,StdDev,Low,High,p5,p25,p50,p75,p95
+exmcUDet,Examination Cumulative Units because of Detection,0.0,0.0,0,0,0,0,0,0,0
+firstVaccination,First Vaccination For Any Reason,11.3,4.54,-1,18,-1,11,12,13,13
+descADirFwd,Destruction Cumulative Animals because of Direct Forward Trace,0.0,0.0,0,0,0,0,0,0,0
+vaccUIni,Vaccinations Cumulative Units Initially,0.0,0.0,0,0,0,0,0,0,0
+infcADir,Infection Cumulative Animals - Direct Contact,8010.6,8683.03,0,31480,0,2909,3474,7921,13152
+vaccAIni,Vaccinations Cumulative Animals Initially,0.0,0.0,0,0,0,0,0,0,0
+exmcU,Examination Cumulative Units For Any Reason,27.1,27.18,0,103,0,14,17,22,39
+tstcUIndBack,Lab Test Cumulative Units because of Indirect Back Trace,0.1,0.3,0,1,0,0,0,0,0
+trcADirp,Trace Cumulative Animals - Direct Contact Possible,14518.4,17977.28,0,65091,0,4073,6699,13807,22398
+adqcU,Adequate Exposures Cumulative Units For Any Reason,66.0,73.69,0,269,0,23,43,49,115
+infcUIni,Infection Cumulative Units Initially,1.0,0.0,1,1,1,1,1,1,1
+trcU,Trace Cumulative Units For Any Reason For Any Reason,53.4,63.14,0,232,0,23,28,41,83
+vacwAMax,Vaccination Wait Time Animals Max,2615.0,N/A,107.0,5701.0,107.0,1802.0,2546.0,2977.0,3251.0
+descADirBack,Destruction Cumulative Animals because of Direct Back Trace,0.0,0.0,0,0,0,0,0,0,0
+trcUp,Trace Cumulative Units For Any Reason Possible,150.9,180.01,4,666,4,63,72,132,205
+expcADir,Exposure Cumulative Animals - Direct Contact,16321.8,19569.88,0,70182,0,3865,9606,14620,27188
+tstcUFalsePos,Lab Test Cumulative Units False Positives,0.2,0.6,0,2,0,0,0,0,0
+tstcUDirBack,Lab Test Cumulative Units because of Direct Back Trace,3.7,4.52,0,16,0,2,2,2,7
+lastDetection,Last Detection For Any Reason,56.1,39.76,8,155,8,24,46,54,87
+infcAAir,Infection Cumulative Animals Airborne Spread,1789.8,1684.55,0,5757,0,439,1006,2429,2878
+descAIni,Destruction Cumulative Animals Initially,0.0,0.0,0,0,0,0,0,0,0
+descURing,Destruction Cumulative Units because of Ring,0.0,0.0,0,0,0,0,0,0,0
+vacwUMaxDay,Vaccination Wait Time Units Day with Max,16.4,5.99,8,28,8,12,14,17,25
+exmcUDirBack,Examination Cumulative Units because of Direct Back Trace,3.7,4.52,0,16,0,2,2,2,7
+expcU,Exposure Cumulative Units For Any Reason,582.5,573.91,8,2078,8,208,275,592,987
+tstcADirFwd,Lab Tests Cumulative Animals because of Direct Forward Trace,6336.5,6311.91,0,23000,0,2602,3079,6989,9645
+tstcAIndBack,Lab Tests Cumulative Animals because of Indirect Back Trace,9.4,28.2,0,94,0,0,0,0,0
+descADet,Destruction Cumulative Animals because of Detection,9602.8,9993.59,107,37294,107,3616,6212,7756,13686
+descUIndFwd,Destruction Cumulative Units because of Indirect Forward Trace,0.0,0.0,0,0,0,0,0,0,0
+exmcURing,Examination Cumulative Units because of Ring,0.0,0.0,0,0,0,0,0,0,0
+descUDirBack,Destruction Cumulative Units because of Direct Back Trace,0.0,0.0,0,0,0,0,0,0,0
+descAIndBack,Destruction Cumulative Animals because of Indirect Back Trace,0.0,0.0,0,0,0,0,0,0,0
+firstDetection,First Detection For Any Reason,8.6,0.92,7,10,7,8,8,9,10
+expcAInd,Exposure Cumulative Animals - Indirect Contact,87125.7,81721.52,2769,255172,2769,16535,38202,131470,180189
+exmcAIndFwd,Examination Cumulative Animals because of Indirect Forward Trace,335.1,407.19,0,1257,0,0,115,392,901
+infcUAir,Infection Cumulative Units Airborne Spread,4.3,3.85,0,13,0,2,3,5,9
+trcAp,Trace Cumulative Animals For Any Reason Possible,48148.7,55579.23,1202,206563,1202,18011,26900,47015,59303
+infcUDir,Infection Cumulative Units - Direct Contact,28.5,29.99,0,112,0,13,16,23,43
+trcAIndp,Trace Cumulative Animals - Indirect Contact Possible,33630.3,37819.59,1202,141472,1202,13171,20201,36668,37295
+exmcUIndBack,Examination Cumulative Units because of Indirect Back Trace,0.1,0.3,0,1,0,0,0,0,0
+tstcUIndFwd,Lab Test Cumulative Units because of Indirect Forward Trace,1.7,1.79,0,6,0,0,1,2,3
+infcAInd,Infection Cumulative Animals - Indirect Contact,1733.5,1711.79,0,5811,0,421,1077,1459,3255
+tstcUFalseNeg,Lab Test Cumulative Units False Negatives,0.8,1.4,0,4,0,0,0,0,3
+trcADir,Trace Cumulative Animals - Direct Contact For Any Reason,13245.4,16081.38,0,58423,0,4029,6605,12715,20522
+vaccURing,Vaccinations Cumulative Units because of Ring,22.8,16.51,0,61,0,12,16,22,37
+descUIni,Destruction Cumulative Units Initially,0.0,0.0,0,0,0,0,0,0,0
+infcAIni,Infection Cumulative Animals Initially,107.0,0.0,107,107,107,107,107,107,107
+detcU,Detection Cumulative Units For Any Reason,37.2,35.72,1,137,1,21,25,29,53
+descARing,Destruction Cumulative Animals because of Ring,0.0,0.0,0,0,0,0,0,0,0
+exmcADirBack,Examination Cumulative Animals because of Direct Back Trace,1154.3,1664.75,0,5607,0,153,210,801,2152
+trcUDir,Trace Cumulative Units - Direct Contact For Any Reason,42.5,49.2,0,181,0,17,22,32,66
+vacwAMaxDay,Vaccination Wait Time Animals Day with Max,18.9,7.15,8,32,8,12,16,21,27
+trcA,Trace Cumulative Animals For Any Reason For Any Reason,16532.7,20180.33,0,73411,0,4840,9112,13329,25551
+exmcARing,Examination Cumulative Animals because of Ring,0.0,0.0,0,0,0,0,0,0,0
+vaccA,Vaccinations Cumulative Animals For Any Reason,7267.9,5703.86,0,21125,0,3304,4466,8224,11079
+tstcUTrueNeg,Lab Test Cumulative Units True Negatives,2.3,2.05,0,6,0,1,2,2,6
+descUDirFwd,Destruction Cumulative Units because of Direct Forward Trace,0.0,0.0,0,0,0,0,0,0,0
+detcAClin,Detection Cumulative Animals Clinical,6728.7,6488.21,107,24440,107,2802,4613,5667,10450
+exmcADet,Examination Cumulative Animals because of Detection,0.0,0.0,0,0,0,0,0,0,0
+exmcA,Examination Cumulative Animals For Any Reason,7835.3,8112.35,0,29864,0,2886,4609,7199,12016
+trcUInd,Trace Cumulative Units - Indirect Contact For Any Reason,10.9,14.12,0,51,0,4,6,8,17
+tstcADirBack,Lab Tests Cumulative Animals because of Direct Back Trace,1154.3,1664.75,0,5607,0,153,210,801,2152
+detcA,Detection Cumulative Animals For Any Reason,10878.9,11255.7,107,41977,107,4543,6381,7882,16305
+infcA,Infection Cumulative Animals For Any Reason,11533.9,11712.25,0,43048,0,3509,7737,9390,19003
+vaccU,Vaccinations Cumulative Units For Any Reason,22.8,16.51,0,61,0,12,16,22,37
+descA,Destruction Cumulative Animals For Any Reason,9602.8,9993.59,107,37294,107,3616,6212,7756,13686
+expcUInd,Exposure Cumulative Units - Indirect Contact,260.9,289.36,8,972,8,48,80,293,522
+tstcUTruePos,Lab Test Cumulative Units True Positives,23.8,23.85,0,91,0,13,15,20,32
+firstDestruction,First Destruction For Any Reason,14.6,0.92,13,16,13,14,14,15,16
+detcUClin,Detection Cumulative Units Clinical,23.3,20.87,1,81,1,12,17,21,33
+expcA,Exposure Cumulative Animals For Any Reason,175163.9,157472.61,2769,563545,2769,60220,97152,219121,290127
+vacwUTimeMax,Vaccination Wait Time Units Max Time,0.8,0.6,-1,1,-1,1,1,1,1
+infcU,Infection Cumulative Units For Any Reason,39.1,39.35,0,147,0,16,27,32,63
+exmcAIndBack,Examination Cumulative Animals because of Indirect Back Trace,9.4,28.2,0,94,0,0,0,0,0
+descUIndBack,Destruction Cumulative Units because of Indirect Back Trace,0.0,0.0,0,0,0,0,0,0,0
+expcAAir,Exposure Cumulative Animals Airborne Spread,71716.4,61565.29,0,238191,0,40112,45763,75998,92047
+trcUDirp,Trace Cumulative Units - Direct Contact Possible,46.9,54.26,0,199,0,18,23,35,74
+descUDet,Destruction Cumulative Units because of Detection,33.5,32.59,1,125,1,17,24,25,46
+detcUTest,Detection Cumulative Units from Lab Tests,13.9,14.98,0,56,0,7,8,10,20
+trcUIndp,Trace Cumulative Units - Indirect Contact Possible,104.0,126.08,4,467,4,48,49,98,131
+detcATest,Detection Cumulative Animals from Lab Tests,4150.2,4804.14,0,17537,0,1768,2098,2848,5912
+tstcUDirFwd,Lab Test Cumulative Units because of Direct Forward Trace,21.6,21.51,0,81,0,10,14,18,30
+tstcA,Lab Tests Cumulative Animals For Any Reason,7835.3,8112.35,0,29864,0,2886,4609,7199,12016
+descU,Destruction Cumulative Units For Any Reason,33.5,32.59,1,125,1,17,24,25,46
+tstcU,Lab Test Cumulative Units For Any Reason,27.1,27.18,0,103,0,14,17,22,39
+trcAInd,Trace Cumulative Animals - Indirect Contact For Any Reason,3287.3,4211.39,0,14988,0,808,899,3031,5029
+tstcAIndFwd,Lab Tests Cumulative Animals because of Indirect Forward Trace,335.1,407.19,0,1257,0,0,115,392,901
+expcUAir,Exposure Cumulative Units Airborne Spread,262.4,221.36,0,853,0,128,189,282,368
+adqcUAir,Adequate Exposures Cumulative Units Airborne Spread,8.3,8.82,0,31,0,4,5,6,18
+descAIndFwd,Destruction Cumulative Animals because of Indirect Forward Trace,0.0,0.0,0,0,0,0,0,0,0
+exmcADirFwd,Examination Cumulative Animals because of Direct Forward Trace,6336.5,6311.91,0,23000,0,2602,3079,6989,9645
+vaccARing,Vaccinations Cumulative Animals because of Ring,7267.9,5703.86,0,21125,0,3304,4466,8224,11079
+exmcUDirFwd,Examination Cumulative Units because of Direct Forward Trace,21.6,21.51,0,81,0,10,14,18,30
+infcUInd,Infection Cumulative Units - Indirect Contact,6.3,6.44,0,22,0,2,4,4,12
+exmcUIndFwd,Examination Cumulative Units because of Indirect Forward Trace,1.7,1.79,0,6,0,0,1,2,3
+adqcUInd,Adequate Exposures Cumulative Units - Indirect Contact,13.4,14.19,0,47,0,4,6,12,29
+adqcUDir,Adequate Exposures Cumulative Units - Direct Contact,44.3,51.99,0,191,0,17,23,34,68
+vacwUMax,Vaccination Wait Time Units Max,8.1,4.57,1,18,1,5,7,10,12
+expcUDir,Exposure Cumulative Units - Direct Contact,59.2,69.97,0,253,0,17,30,48,97
+vacwUTimeAvg,Vaccination Wait Time Units Average Time,0.8,N/A,-1.0,1.0,-1.0,1.0,1.0,1.0,1.0
+deswUMax,Destruction Wait Time Units,7.1,4.44,1,14,1,4,4,11,13
+deswAMax,Destruction Wait Time Animals,1883.3,1220.57,107,4278,107,984,1364,2031,3729
+deswUMaxDay,Destruction Wait Time Units,14.5,4.86,8,28,8,13,14,14,15
+deswAMaxDay,Destruction Wait Time Animals,16.3,5.59,8,27,8,13,14,15,25
+deswUTimeMax,Destruction Wait Time Units,6.0,0.0,6,6,6,6,6,6,6
+deswUTimeAvg,Destruction Wait Time Units,2.0486960000000005,N/A,1.168,6.0,1.168,1.375,1.52941,1.97297,2.16
+deswUDaysInQueue,Destruction Wait Time Units,50.1,37.65,6,146,6,26,33,54,73
+deswADaysInQueue,Destruction Wait Time Animals,12784.3,11757.1,642,43512,642,5506,7978,11451,21072
+detOccurred,Detection For Any Reason,1.0,0.0,1,1,1,1,1,1,1
+firstDetUInf,firstDetUInf,9.7,7.93,0,25,0,4,6,13,19
+firstDetAInf,firstDetAInf,2661.7,2671.01,0,7428,0,735,1124,3130,7097
+vaccOccurred,Vaccinations Cumulative For Any Reason,0.9,0.3,0,1,0,1,1,1,1
+destrOccurred,Destruction For Any Reason,1.0,0.0,1,1,1,1,1,1,1
+diseaseDuration,diseaseDuration,82.6,50.76,14,193,14,41,72,105,123
+outbreakDuration,outbreakDuration,82.7,50.64,14,193,14,41,72,105,123

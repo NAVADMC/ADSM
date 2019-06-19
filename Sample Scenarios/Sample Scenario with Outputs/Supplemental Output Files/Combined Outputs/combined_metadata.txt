@@ -1,0 +1,7 @@
+Simulation Name: Sample Scenario with Outputs
+
+Number of Iterations Run: UNKNOWN
+
+Total Number of Lines in Exposures Combined Output: 0
+Total Number of Lines in Events Combined Output: 0
+Total Number of Lines in States Combined Output: 0
