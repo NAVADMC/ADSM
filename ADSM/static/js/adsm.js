@@ -496,8 +496,9 @@ function load_target_link(callback){
                 callback(element);
             }
         });
-        $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
-        
+        if(selector == "#center-panel") {
+            $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
+        }
     }
 
 /*
