@@ -70,6 +70,11 @@ def results_home(request):
             context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
         except:  # more specific exceptions kept leaking through
             pass
+
+    # get the had_memory_error boolean, this is used to display the error banner.
+    sm_session = SmSession.objects.get()
+    context['had_memory_error'] = sm_session.had_memory_error
+
     return render(request, 'Results/SimulationProgress.html', context)
 
 

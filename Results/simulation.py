@@ -13,7 +13,7 @@ from ADSMSettings.views import save_scenario
 from ADSMSettings.utils import adsm_executable_command
 from ADSMSettings.models import SimulationProcessRecord, SmSession
 from Results.models import DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
-from Results.utils import zip_map_directory_if_it_exists
+from Results.utils import zip_map_directory_if_it_exists, abort_simulation
 from ScenarioCreator.models import ProductionType, Zone
 
 
@@ -46,6 +46,8 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
     # import cProfile, pstats
     # profiler = cProfile.Profile()
     # profiler.enable()
+
+    memory_error = False
 
     # Start logging
     with open(os.path.join(log_path, 'iteration%s.log' % iteration_number), 'w') as log_file:
@@ -90,6 +92,8 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
         if errors:  # this will only print out error messages after the simulation has halted
             log_file.write("LOG: FINAL ERRORS:\n")
             log_file.write("%s\n" % errors)
+            if "MEMORY-ERROR" in errors:
+                memory_error = True
             print(errors)
     # End logging
     
@@ -118,7 +122,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
     # stats.sort_stats('time')
     # stats.print_stats(10)
     
-    return iteration_number, end-start
+    return iteration_number, end-start, memory_error
 
 
 class Simulation(multiprocessing.Process):
@@ -170,10 +174,17 @@ class Simulation(multiprocessing.Process):
             pool.close()
 
             simulation_times = []
+            stream_start = SmSession.objects.get()
+            print("Memory error value has been reset.")
+            stream_start.had_memory_error = False
+            stream_start.save()
             for status in statuses:
-                iteration_number, s_time = status.get()
+                iteration_number, s_time, memory_error = status.get()
                 stream = SmSession.objects.get()
                 stream.iteration_text += "<li>Iteration %i:  %is </li>" % (iteration_number, s_time)
+                if stream.had_memory_error == False and memory_error == True:
+                    print("A memory error has occured and was caught by the simulation process.")
+                    stream.had_memory_error = memory_error
                 stream.save()
                 simulation_times.append(round(s_time))
 

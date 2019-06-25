@@ -2584,6 +2584,19 @@ span.IndirectSpread {
         padding-bottom: 3px;
     }
 }
+.memory_error {
+    background-color: #d0343a;
+    height: 120px;
+    margin-bottom: 15px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 15px;
+    padding: 10px 10px 10px 10px;
+}
+.memory_error_text {
+    color: white;
+    display: block;
+}
 
 /*----------------------------------------------------*/
 /*----- global overrides -----*/

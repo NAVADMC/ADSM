@@ -67,7 +67,13 @@
     {% if not is_simulation_stopped %}
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
-    
+
+        {% if had_memory_error %}
+            <div class="memory_error">
+                <p class="memory_error_text">*** A Simulation Memory Error has been detected! ***</p>
+                <p class="memory_error_text">The produced results WILL NOT be acurate, and a full program restart is recommended before making any changes to the scenario. To avoid this error in the future, either add more memory to your computer or decrease the size of your scenario.</p>
+            </div>
+        {% endif %}
         <div id="summaryData">
             <p>Simulation Version: {{ version_number }}</p>
             {% include "Results/Summary.html" %}
