@@ -214,8 +214,8 @@ class PopulationWorker(threading.Thread):
         
 
 def population_zoom_png(request=None):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
+    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
     try:
         with open(path, "rb") as img_file:
             return HttpResponse(img_file.read(), content_type='image/png')
@@ -235,8 +235,8 @@ def population_zoom_png(request=None):
 
 
 def population_thumbnail_png(request, second_try=False):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
+    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
     try:
         with open(thumb_path, "rb") as f:
             return HttpResponse(f.read(), content_type="image/png")
