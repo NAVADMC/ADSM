@@ -763,7 +763,11 @@ def export_graph(request):
     line_graph = function_graphs.new_graph(x_label)
     plt.plot(x_series, y_series, color="black")
 
-    plt.savefig(workspace_path(scenario_filename() + "/" + graph_name + ".png"))
+    try:
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+    except FileExistsError:
+        pass
+    plt.savefig(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\" + graph_name + ".png"))
 
     return JsonResponse({})
 

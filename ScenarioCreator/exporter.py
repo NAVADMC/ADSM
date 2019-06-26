@@ -1,3 +1,4 @@
+import os
 from ADSMSettings.utils import workspace_path, scenario_filename
 from ScenarioCreator.models import ProbabilityDensityFunction, RelationalFunction, RelationalPoint
 
@@ -13,7 +14,11 @@ def export_relational_functions(functions, points):
     :return: None
     '''
     # open and erase or create the export file
-    file = open(workspace_path(scenario_filename() + "\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
+    try:
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+    except FileExistsError:
+        pass
+    file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
     # for all of the functions
     for function in functions:
         # for each of the export keys for each relational function
@@ -49,7 +54,11 @@ def export_pdfs(functions):
     :return: None
     '''
     # Open and erase or create the output file
-    file = open(workspace_path(scenario_filename() + "\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")
+    try:
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+    except FileExistsError:
+        pass
+    file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")
     # for each of the existing pdfs
     for function in functions:
         # for each key we need to output
