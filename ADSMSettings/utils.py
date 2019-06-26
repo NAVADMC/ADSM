@@ -157,8 +157,9 @@ def graceful_startup():
 
     print("Copying Sample Scenarios and Example Queries and Code...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
+    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs"]
     for dirpath, dirnames, files in os.walk(samples_dir):
-        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
+        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
         subdir = str(dirpath).replace(samples_dir, '')
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
