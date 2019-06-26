@@ -15,10 +15,10 @@ def export_relational_functions(functions, points):
     '''
     # open and erase or create the export file
     try:
-        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports\\"))
     except FileExistsError:
         pass
-    file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
+    file = open(workspace_path(scenario_filename() + "\\Exports\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
     # for all of the functions
     for function in functions:
         # for each of the export keys for each relational function
@@ -55,10 +55,10 @@ def export_pdfs(functions):
     '''
     # Open and erase or create the output file
     try:
-        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports\\"))
     except FileExistsError:
         pass
-    file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")
+    file = open(workspace_path(scenario_filename() + "\\Exports\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")
     # for each of the existing pdfs
     for function in functions:
         # for each key we need to output

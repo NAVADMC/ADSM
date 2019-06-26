@@ -764,10 +764,10 @@ def export_graph(request):
     plt.plot(x_series, y_series, color="black")
 
     try:
-        os.mkdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\"))
+        os.mkdir(workspace_path(scenario_filename() + "\\Exports\\"))
     except FileExistsError:
         pass
-    plt.savefig(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\" + graph_name + ".png"))
+    plt.savefig(workspace_path(scenario_filename() + "\\Exports\\" + graph_name + ".png"))
 
     return JsonResponse({})
 

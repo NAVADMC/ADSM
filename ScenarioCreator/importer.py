@@ -18,7 +18,7 @@ def import_relational_functions(existing_functions):
     '''
 
     # get a list of all file names delimited by "REL_", are .csv, and do not have the current scenario's name
-    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\")) if
+    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports\\")) if
                   str(file).startswith("REL_") and
                   str(file).endswith(".csv") and
                   scenario_filename().replace(" ", "") not in str(file)]
@@ -33,7 +33,7 @@ def import_relational_functions(existing_functions):
     # for each file found
     for file_name in file_names:
         # open that file
-        file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + file_name, "r")
+        file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
         # for each relational function saved within
         for rel in file.readlines():
             # create a new blank relational funciton
@@ -93,7 +93,7 @@ def import_pdfs(existing_functions):
     '''
 
     # get a list of all file names delimited by "PDF_", are .csv, and do not have the current scenario's name
-    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\")) if
+    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports\\")) if
              str(file).startswith("PDF_") and
              str(file).endswith(".csv") and
              scenario_filename().replace(" ", "") not in str(file)]
@@ -105,7 +105,7 @@ def import_pdfs(existing_functions):
     # for each of the located files
     for file_name in file_names:
         # open that file
-        file = open(workspace_path(scenario_filename() + "\\Exports, Imports, and Other Outputs\\") + file_name, "r")
+        file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
         # for each of the pdfs saved within
         for pdf in file.readlines():
             # create a blank new pdf object
