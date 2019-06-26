@@ -176,12 +176,12 @@ class ExportPopulation(object):
 
     def __export_xml(self):
         file = open(self.save_location + "pop_" + scenario_filename().replace(" ", "") + ".xml", "w")
-        file.write('<?xml version="1.0" encoding="UTF-16" ?>\n')
+        file.write('<?xml version="1.0" encoding="UTF-8" ?>\n')
         file.write("<herds\n")
-        file.write('\txmlns:naadsm="http://www.naadsm.org/schema"\n')
-        file.write('\txmlns:xsd="http://www.w3.org/2001/XMLSchema"\n')
-        file.write('\txmlns:gml="http://www.opengis.net/gml"\n')
-        file.write('\txmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n')
+        file.write('  xmlns:naadsm="http://www.naadsm.org/schema"\n')
+        file.write('  xmlns:xsd="http://www.w3.org/2001/XMLSchema"\n')
+        file.write('  xmlns:gml="http://www.opengis.net/gml"\n')
+        file.write('  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n')
         file.write("\n")
         for unit in self.population.all():
             file.write(self.__write_next_xml_herd(unit) + "\n\n")
@@ -189,42 +189,55 @@ class ExportPopulation(object):
         return
 
     def __write_next_xml_herd(self, unit):
-        herd_text = "\t<herd>\n"
+        herd_text = "  <herd>\n"
 
-        herd_text += "\t\t<id>"
+        herd_text += "    <id>"
         herd_text += str(unit.id)
         herd_text += "</id>\n"
 
-        herd_text += "\t\t<production-type>"
+        herd_text += "    <production-type>"
         herd_text += str(unit.production_type)
         herd_text += "</production-type>\n"
 
-        herd_text += "\t\t<size>"
+        herd_text += "    <size>"
         herd_text += str(unit.initial_size)
         herd_text += "</size>\n"
 
-        herd_text += "\t\t<location>\n"
-        herd_text += "\t\t\t<latitude>"
+        herd_text += "    <location>\n"
+        herd_text += "      <latitude>"
         herd_text += str(unit.latitude)
         herd_text += "</latitude>\n"
-        herd_text += "\t\t\t<longitude>"
+        herd_text += "      <longitude>"
         herd_text += str(unit.longitude)
         herd_text += "</longitude>\n"
-        herd_text += "\t\t</location>\n"
+        herd_text += "    </location>\n"
 
-        herd_text += "\t\t<status>"
-        herd_text += str(unit.initial_state)
+        herd_text += "    <status>"
+        if unit.initial_state == "S":
+            herd_text += "Susceptible"
+        elif unit.initial_state == "L":
+            herd_text += "Latent"
+        elif unit.initial_state == "B":
+            herd_text += "Subclinical"
+        elif unit.initial_state == "C":
+            herd_text += "Clinical"
+        elif unit.initial_state == "N":
+            herd_text += "Naturally Immune"
+        elif unit.initial_state == "V":
+            herd_text += "Vaccine Immune"
+        elif unit.initial_state == "D":
+            herd_text += "Destroyed"
         herd_text += "</status>\n"
 
-        herd_text += "\t\t<days-in-initial-state>"
+        herd_text += "    <days-in-initial-state>"
         herd_text += (str(unit.days_in_initial_state) if str(unit.days_in_initial_state) != "None" else '')
         herd_text += "</days-in-initial-state>\n"
 
-        herd_text += "\t\t<days-left-in-initial-state>"
+        herd_text += "    <days-left-in-initial-state>"
         herd_text += (str(unit.days_left_in_initial_state) if str(unit.days_left_in_initial_state) != "None" else '')
         herd_text += "</days-left-in-initial-state>\n"
 
-        herd_text += "\t</herd>"
+        herd_text += "  </herd>"
         return herd_text
 
     def __export_csv(self):
