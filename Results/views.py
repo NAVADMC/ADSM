@@ -23,7 +23,7 @@ from Results.combine_outputs import CombineOutputsGenerator
 
 
 def back_to_inputs(request):
-    SmSession.objects.all().update(simulation_crashed=False)
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
     return redirect('/setup/OutputSettings/1')
 
 

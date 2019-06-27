@@ -48,6 +48,7 @@ class SmSession(models.Model):
     combining_outputs = models.BooleanField(default=False)
     show_help_overlay = models.BooleanField(default=True)
     simulation_crashed = models.BooleanField(default=False)
+    crash_text = models.TextField(null=True, blank=True, default=None)
 
     @property
     def current_version(self):
