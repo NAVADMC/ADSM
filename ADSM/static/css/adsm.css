@@ -2584,7 +2584,7 @@ span.IndirectSpread {
         padding-bottom: 3px;
     }
 }
-.memory_error {
+.simulation_error {
     background-color: #d0343a;
     height: 120px;
     margin-bottom: 15px;
@@ -2593,7 +2593,7 @@ span.IndirectSpread {
     line-height: 15px;
     padding: 10px 10px 10px 10px;
 }
-.memory_error_text {
+.simulation_error_text {
     color: white;
     display: block;
 }

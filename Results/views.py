@@ -23,6 +23,7 @@ from Results.combine_outputs import CombineOutputsGenerator
 
 
 def back_to_inputs(request):
+    SmSession.objects.all().update(simulation_crashed=False)
     return redirect('/setup/OutputSettings/1')
 
 
@@ -73,7 +74,7 @@ def results_home(request):
 
     # get the had_memory_error boolean, this is used to display the error banner.
     sm_session = SmSession.objects.get()
-    context['had_memory_error'] = sm_session.had_memory_error
+    context['simulation_crashed'] = sm_session.simulation_crashed
 
     return render(request, 'Results/SimulationProgress.html', context)
 

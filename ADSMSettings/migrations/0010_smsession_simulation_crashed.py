@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='smsession',
-            name='had_memory_error',
+            name='simulation_crashed',
             field=models.BooleanField(default=False),
         ),
     ]

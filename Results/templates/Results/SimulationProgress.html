@@ -68,10 +68,11 @@
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
 
-        {% if had_memory_error %}
-            <div class="memory_error">
-                <p class="memory_error_text">*** A Simulation Memory Error has been detected! ***</p>
-                <p class="memory_error_text">The produced results WILL NOT be acurate, and a full program restart is recommended before making any changes to the scenario. To avoid this error in the future, either add more memory to your computer or decrease the size of your scenario.</p>
+        {% if simulation_crashed %}
+            <div class="simulation_error">
+                <p class="simulation_error_text">*** A Simulation Crash has been detected! ***</p>
+                <p class="simulation_error_text">The CEngine program exited in an unexpected way...</p>
+                <p class="simulation_error_text">Produced results WILL NOT be accurate, and a full program restart is recommended before making any changes to the scenario.</p>
             </div>
         {% endif %}
         <div id="summaryData">

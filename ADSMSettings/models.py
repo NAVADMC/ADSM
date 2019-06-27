@@ -47,8 +47,7 @@ class SmSession(models.Model):
     calculating_summary_csv = models.BooleanField(default=False)
     combining_outputs = models.BooleanField(default=False)
     show_help_overlay = models.BooleanField(default=True)
-    had_memory_error = models.BooleanField(default=False)
-
+    simulation_crashed = models.BooleanField(default=False)
 
     @property
     def current_version(self):
