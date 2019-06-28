@@ -69,10 +69,11 @@
     {% endif %}
 
         {% if simulation_crashed %}
-            <div class="simulation_error">
+            <div class="simulation_error" onclick="show_crash_text('{{ crash_text }}');">
                 <p class="simulation_error_text">*** A Simulation Crash has been detected! ***</p>
                 <p class="simulation_error_text">The CEngine program exited in an unexpected way...</p>
                 <p class="simulation_error_text">Produced results WILL NOT be accurate, and a full program restart is recommended before making any changes to the scenario.</p>
+                <div><p class="simulation_error_text">Click on this banner for more information...</p></div>
             </div>
         {% endif %}
         <div id="summaryData">

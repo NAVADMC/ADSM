@@ -1012,3 +1012,20 @@ function hideCenterPanel() {
     center_panel = document.getElementById("center-panel");
     center_panel.classList.remove("reveal");
 }
+
+function show_crash_text(error_text) {
+    const dialog = new BootstrapDialog.show({
+        title: 'Simulation Error Details',
+        type: BootstrapDialog.TYPE_WARNING,
+        message: error_text,
+        buttons: [
+            {
+                label: 'Close',
+                cssClass: 'btn-danger',
+                action: function (dialog) {
+                    dialog.close();
+                }
+            }
+        ]
+    });
+}

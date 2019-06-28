@@ -75,6 +75,7 @@ def results_home(request):
     # get the had_memory_error boolean, this is used to display the error banner.
     sm_session = SmSession.objects.get()
     context['simulation_crashed'] = sm_session.simulation_crashed
+    context['crash_text'] = sm_session.crash_text
 
     return render(request, 'Results/SimulationProgress.html', context)
 
