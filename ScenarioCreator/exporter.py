@@ -25,7 +25,7 @@ def export_relational_functions(functions, points):
         for key in RelationalFunction.export_fields:
             # try to write it, if this fails it is due to a NULL field and we pass
             try:
-                file.write(str(getattr(function, key)) + ",")
+                file.write("'" + str(getattr(function, key)) + "',")
             except AttributeError:
                 pass
         # for each point in ALL points
@@ -36,7 +36,7 @@ def export_relational_functions(functions, points):
                 for key in RelationalPoint.export_fields:
                     # try to write that values, if this fails it is due to a NULL field and we pass
                     try:
-                        file.write(str(getattr(point_set, key)) + ",")
+                        file.write("'" + str(getattr(point_set, key)) + "',")
                     except AttributeError:
                         pass
         # current function output complete, write a newline before the next function is output
@@ -65,7 +65,7 @@ def export_pdfs(functions):
         for key in ProbabilityDensityFunction.export_fields:
             # try to write that value, if this fails it is due to a NULL field and we pass
             try:
-                file.write(str(getattr(function, key)) + ",")
+                file.write("'" + str(getattr(function, key)) + "',")
             except AttributeError:
                 pass
             # write a newline before the next function

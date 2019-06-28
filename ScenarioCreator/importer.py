@@ -36,10 +36,14 @@ def import_relational_functions(existing_functions):
         file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
         # for each relational function saved within
         for rel in file.readlines():
+            if "'" not in rel:
+                continue
             # create a new blank relational funciton
             new_rel = RelationalFunction()
             # for each field found within
-            for index, field in enumerate(rel.split(",")):
+            for index, field in enumerate(rel.split("','")[:-1]):
+                # remove quotes from field.
+                field = field.replace("'", "")
                 # import the relational function fields
                 if index < 4:
                     # if it is the first field (name)
@@ -108,10 +112,14 @@ def import_pdfs(existing_functions):
         file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
         # for each of the pdfs saved within
         for pdf in file.readlines():
+            if "'" not in pdf:
+                continue
             # create a blank new pdf object
             new_pdf = ProbabilityDensityFunction()
             # for each field located in the file
-            for index, field in enumerate(pdf.split(",")[:-1]):
+            for index, field in enumerate(pdf.split("','")[:-1]):
+                # remove quotes from field
+                field = field.replace("'", "")
                 # if it is the first field (name field)
                 if index == 0:
                     # append " - imported" until the name is not a duplicate
