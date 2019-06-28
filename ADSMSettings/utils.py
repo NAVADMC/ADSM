@@ -157,7 +157,7 @@ def graceful_startup():
 
     print("Copying Sample Scenarios and Example Queries and Code...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
-    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs"]
+    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
     blacklisted_files = ["population_map.png", "population_thumbnail.png"]
     for dirpath, dirnames, files in os.walk(samples_dir):
         [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
