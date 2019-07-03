@@ -68,9 +68,16 @@ def zip_map_directory_if_it_exists():
 
 
 def abort_simulation(request=None):
+    # Import these things locally since several other modules import this utils
+    from django.db import close_old_connections
+    from ADSMSettings.views import save_scenario
+    from Results.interactive_graphing import population_zoom_png
+
+    # Kill each of the open processes
     for process in get_simulation_controllers():
         print("Aborting Simulation Thread")
         process.kill()
+
     if request is not None:
         return redirect('/results/')
 

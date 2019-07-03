@@ -20,6 +20,7 @@ import threading
 from django.http import HttpResponse
 from django.db.models import Max
 
+from ADSMSettings.models import SmSession
 from Results.models import Unit
 from Results.utils import is_simulation_stopped
 from Results.summary import list_of_iterations
@@ -211,41 +212,46 @@ class PopulationWorker(threading.Thread):
     def run(self):
         self.make_population_map_file()
         
-        
 
 def population_zoom_png(request=None):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
-    try:
-        with open(path, "rb") as img_file:
-            return HttpResponse(img_file.read(), content_type='image/png')
-    except IOError:
-        save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
-        if not save_image:  # in order to avoid database locked Issue #150
-            return population_png(request, 58.5, 52)
-        else:
-
-            if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
-                print("Waiting on a Population Map")
-                sleep(5)
+    if not SmSession.objects.get().simulation_crashed:
+        path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+        thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
+        try:
+            with open(path, "rb") as img_file:
+                return HttpResponse(img_file.read(), content_type='image/png')
+        except IOError:
+            save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
+            if not save_image:  # in order to avoid database locked Issue #150
+                return population_png(request, 58.5, 52)
             else:
-                PopulationWorker(path, thumb_path).start()
-                sleep(.5)
-            return population_zoom_png(request)
+
+                if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
+                    print("Waiting on a Population Map")
+                    sleep(5)
+                else:
+                    PopulationWorker(path, thumb_path).start()
+                    sleep(.5)
+                return population_zoom_png(request)
+    else:
+        return HttpResponse()
 
 
 def population_thumbnail_png(request, second_try=False):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
-    try:
-        with open(thumb_path, "rb") as f:
-            return HttpResponse(f.read(), content_type="image/png")
-    except IOError:
-        if os.path.exists(path):
-            if second_try:
-               sleep(1) 
-            thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
-            return population_thumbnail_png(request, second_try=True)
-        else:
-            sleep(5)
-            return population_thumbnail_png(request, second_try=False)
+    if not SmSession.objects.get().simulation_crashed:
+        path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+        thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
+        try:
+            with open(thumb_path, "rb") as f:
+                return HttpResponse(f.read(), content_type="image/png")
+        except IOError:
+            if os.path.exists(path):
+                if second_try:
+                   sleep(1)
+                thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
+                return population_thumbnail_png(request, second_try=True)
+            else:
+                sleep(5)
+                return population_thumbnail_png(request, second_try=False)
+    else:
+        return HttpResponse()
