@@ -95,7 +95,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
             if not SmSession.objects.get().simulation_crashed:
                 error_text = errors.decode()
                 if "MEMORY-ERROR" in error_text:
-                    error_text += "\n\nTo avoid this error in the future, either add more memory to your computer or decrease the size of your scenario."
+                    error_text += "To avoid this error in the future, either add more memory to your computer or decrease the size of your scenario."
                 SmSession.objects.all().update(simulation_crashed=True, crash_text=error_text)
             abort_simulation()
     # End logging
