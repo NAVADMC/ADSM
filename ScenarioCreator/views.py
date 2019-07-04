@@ -576,7 +576,8 @@ def new_entry(request, second_try=False):
         initialized_form = form(request.POST or None)
         context = {'form': initialized_form,
                    'title': "Create a new " + spaces_for_camel_case(model_name),
-                   'action': request.path}
+                   'action': request.path,
+                   'new_form': True}
         add_breadcrumb_context(context, model_name)
         return new_form(request, initialized_form, context)
     except OperationalError:
