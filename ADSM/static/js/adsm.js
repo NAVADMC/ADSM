@@ -311,7 +311,8 @@ $(function(){
                                     dialog.close();
                                 });
                             }
-                        } 
+                        }
+                        hideCenterPanel();
                     }
                 }
             ]
