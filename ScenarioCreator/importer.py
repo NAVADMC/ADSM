@@ -2,6 +2,7 @@ from ADSMSettings.utils import workspace_path, scenario_filename
 from ScenarioCreator.models import ProbabilityDensityFunction, RelationalFunction, RelationalPoint
 
 from os import listdir
+import csv
 
 
 def import_relational_functions(existing_functions):
@@ -34,53 +35,51 @@ def import_relational_functions(existing_functions):
     for file_name in file_names:
         # open that file
         file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
+        csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
         # for each relational function saved within
-        for rel in file.readlines():
-            if "'" not in rel:
-                continue
-            # create a new blank relational funciton
-            new_rel = RelationalFunction()
-            # for each field found within
-            for index, field in enumerate(rel.split("','")[:-1]):
-                # remove quotes from field.
-                field = field.replace("'", "")
-                # import the relational function fields
-                if index < 4:
-                    # if it is the first field (name)
-                    if index == 0:
-                        # append " - imported" until the name is no longer a duplicate name
-                        while field in existing_rel_names:
-                            field += " - imported"
-                    # if the field is blank or a newline, pass
-                    if field == "" or field == "\n":
-                        pass
-                    # else save that field to the corresponding object part
+        for rel in csvreader:
+            if len(rel) > 0:
+                # create a new blank relational funciton
+                new_rel = RelationalFunction()
+                # for each field found within
+                for index, field in enumerate(rel):
+                    # import the relational function fields
+                    if index < 4:
+                        # if it is the first field (name)
+                        if index == 0:
+                            # append " - imported" until the name is no longer a duplicate name
+                            while field in existing_rel_names:
+                                field += " - imported"
+                        # if the field is blank or a newline, pass
+                        if field == "" or field == "\n":
+                            pass
+                        # else save that field to the corresponding object part
+                        else:
+                            setattr(new_rel, rel_import_fields[index], field)
+                    # import the relational function points
                     else:
-                        setattr(new_rel, rel_import_fields[index], field)
-                # import the relational function points
-                else:
-                    # if the index is 4, it is the first point
-                    if index == 4:
-                        # save the relational function already created
-                        new_rel.save()
-                    # if the index % 2 == 0, the cell is the first in a set of points.
-                    if index % 2 == 0:
-                        # create a new relational point
-                        new_points = RelationalPoint()
-                        # assign the new point to the previously created relational function
-                        new_points.relational_function_id = new_rel.id
+                        # if the index is 4, it is the first point
+                        if index == 4:
+                            # save the relational function already created
+                            new_rel.save()
+                        # if the index % 2 == 0, the cell is the first in a set of points.
+                        if index % 2 == 0:
+                            # create a new relational point
+                            new_points = RelationalPoint()
+                            # assign the new point to the previously created relational function
+                            new_points.relational_function_id = new_rel.id
 
-                    # if the field is blank or a newline, pass
-                    if field == "" or field == "\n":
-                        pass
-                    # else save that field to the corresponding object part
-                    else:
-                        setattr(new_points, point_import_fields[index % 2], float(field.replace("\n", "")))
+                        # if the field is blank or a newline, pass
+                        if field == "" or field == "\n":
+                            pass
+                        # else save that field to the corresponding object part
+                        else:
+                            setattr(new_points, point_import_fields[index % 2], float(field.replace("\n", "")))
 
-                    # if the index % 2 == 1, the cell is the last in a set of points
-                    if index % 2 == 1:
-                        # save the relational point object.
-                        new_points.save()
+                        # if the index % 2 == 1, the cell is the last in a set of points
+                        if index % 2 == 1:
+                            # save the relational point object.
+                            new_points.save()
         # close the file to avoid corruption
         file.close()
     return
@@ -110,29 +109,29 @@ def import_pdfs(existing_functions):
     for file_name in file_names:
         # open that file
         file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
+        csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
         # for each of the pdfs saved within
-        for pdf in file.readlines():
-            if "'" not in pdf:
-                continue
-            # create a blank new pdf object
-            new_pdf = ProbabilityDensityFunction()
-            # for each field located in the file
-            for index, field in enumerate(pdf.split("','")[:-1]):
-                # remove quotes from field
-                field = field.replace("'", "")
-                # if it is the first field (name field)
-                if index == 0:
-                    # append " - imported" until the name is not a duplicate
-                    while field in existing_pdf_names:
-                        field += " - imported"
-                # if the field is blank, pass
-                if field == "None" or field == "None\n":
-                    pass
-                # else set the attribute of the new object to that value
-                else:
-                    setattr(new_pdf, import_fields[index], field)
-            # save the object before moving on to the next line
-            new_pdf.save()
+        for pdf in csvreader:
+            if len(pdf) > 0:
+                # create a blank new pdf object
+                new_pdf = ProbabilityDensityFunction()
+                # for each field located in the file
+                for index, field in enumerate(pdf):
+                    # remove quotes from field
+                    field = field.replace("'", "")
+                    # if it is the first field (name field)
+                    if index == 0:
+                        # append " - imported" until the name is not a duplicate
+                        while field in existing_pdf_names:
+                            field += " - imported"
+                    # if the field is blank, pass
+                    if field == "None" or field == "None\n":
+                        pass
+                    # else set the attribute of the new object to that value
+                    else:
+                        setattr(new_pdf, import_fields[index], field)
+                # save the object before moving on to the next line
+                new_pdf.save()
         # close the file to avoid corruption.
         file.close()
     return
