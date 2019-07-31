@@ -641,21 +641,35 @@ def delete_entry(request, primary_key):
     else:
         if model_name == "Population":
             print("Deleting Population Dependant Models.")
-            VaccinationRingRuleModel = globals()["VaccinationRingRule"]
-            VaccinationRingRuleModel.objects.get(pk=1).delete()
 
-            VaccinationGlobalModel = globals()["VaccinationGlobal"]
-            VaccinationGlobalModel.objects.get(pk=1).delete()
+            try:
+                VaccinationRingRuleModel = globals()["VaccinationRingRule"]
+                VaccinationRingRuleModel.objects.get(pk=1).delete()
+            except VaccinationRingRule.DoesNotExist:
+                pass
 
-            DiseaseDetectionModel = globals()["DiseaseDetection"]
-            DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
-            for DiseaseDetectionObject in DiseaseDetectionObjects:
-                DiseaseDetectionObject.delete()
+            try:
+                VaccinationGlobalModel = globals()["VaccinationGlobal"]
+                VaccinationGlobalModel.objects.get(pk=1).delete()
+            except VaccinationGlobal.DoesNotExist:
+                pass
 
-            StopVaccinationModel = globals()["StopVaccination"]
-            StopVaccinationObjects = StopVaccinationModel.objects.all()
-            for StopVaccinationObject in StopVaccinationObjects:
-                StopVaccination.delete()
+            try:
+                DiseaseDetectionModel = globals()["DiseaseDetection"]
+                DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
+                for DiseaseDetectionObject in DiseaseDetectionObjects:
+                    DiseaseDetectionObject.delete()
+            except DiseaseDetection.DoesNotExist:
+                pass
+
+            try:
+                StopVaccinationModel = globals()["StopVaccination"]
+                StopVaccinationObjects = StopVaccinationModel.objects.all()
+                for StopVaccinationObject in StopVaccinationObjects:
+                    StopVaccination.delete()
+            except StopVaccination.DoesNotExist:
+                pass
+
             print("Population Deletion Complete. Redirecting...")
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
