@@ -2862,3 +2862,7 @@ span.IndirectSpread {
         height: auto
     }
 }
+
+.react-select-box-container {
+    background-color: white;
+}
