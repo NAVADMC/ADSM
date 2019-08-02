@@ -2866,3 +2866,35 @@ span.IndirectSpread {
 .react-select-box-container {
     background-color: white;
 }
+
+.download-overlay-image {
+    opacity: 1;
+    transition: .5s ease;
+    backface-visibility: hidden;
+}
+
+.download-overlay-base {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 115px;
+  left: 190px;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.download-overlay-text {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 18px;
+  padding: 16px 32px;
+}
+
+.download-overlay-container:hover .download-overlay-image {
+    opacity: 0.3;
+}
+
+.download-overlay-container:hover .download-overlay-base {
+    opacity: 1;
+}
