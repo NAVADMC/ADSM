@@ -574,7 +574,7 @@ class ControlProtocol(BaseModel):
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination.', )
     vaccinate_detected_units = models.BooleanField(default=False,
-        help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
+        help_text='Indicates if detection in units of this ' + wiki("production type") + ' will be included in vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
     minimum_time_between_vaccinations = models.PositiveIntegerField(blank=False, null=False, default=99999,
