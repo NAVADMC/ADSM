@@ -19,10 +19,9 @@ def import_relational_functions(existing_functions):
     '''
 
     # get a list of all file names delimited by "REL_", are .csv, and do not have the current scenario's name
-    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports\\")) if
+    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
                   str(file).startswith("REL_") and
-                  str(file).endswith(".csv") and
-                  scenario_filename().replace(" ", "") not in str(file)]
+                  str(file).endswith(".csv")]
     # get a list of the existing rels names.
     existing_rel_names = [rel.name for rel in existing_functions]
     rel_import_fields = ["name", "x_axis_units", "notes", "y_axis_units"]
@@ -34,7 +33,7 @@ def import_relational_functions(existing_functions):
     # for each file found
     for file_name in file_names:
         # open that file
-        file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
+        file = open(workspace_path(scenario_filename() + "\\Imports\\") + file_name, "r")
         csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
         # for each relational function saved within
         for rel in csvreader:
@@ -96,10 +95,9 @@ def import_pdfs(existing_functions):
     '''
 
     # get a list of all file names delimited by "PDF_", are .csv, and do not have the current scenario's name
-    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Exports\\")) if
+    file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
              str(file).startswith("PDF_") and
-             str(file).endswith(".csv") and
-             scenario_filename().replace(" ", "") not in str(file)]
+             str(file).endswith(".csv")]
     # get a list of the existing pdf's names.
     existing_pdf_names = [pdf.name for pdf in existing_functions]
     # list of fields that need to be imported
@@ -108,7 +106,7 @@ def import_pdfs(existing_functions):
     # for each of the located files
     for file_name in file_names:
         # open that file
-        file = open(workspace_path(scenario_filename() + "\\Exports\\") + file_name, "r")
+        file = open(workspace_path(scenario_filename() + "\\Imports\\") + file_name, "r")
         csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
         # for each of the pdfs saved within
         for pdf in csvreader:

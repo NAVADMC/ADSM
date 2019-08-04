@@ -763,28 +763,6 @@ def functions_panel(request, form=None):
         context['models'].append(list_per_model(local_model))
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
-def export_graph(request):
-
-    graph_src = str(request.GET.get('graph_src', None))
-    graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
-
-    rel_graph = ScenarioCreator.models.RelationalFunction.objects.get(pk=graph_pk)
-
-    x_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('x', flat=True))
-    y_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('y', flat=True))
-    x_label = rel_graph.x_axis_units
-    graph_name = rel_graph.name
-
-    line_graph = function_graphs.new_graph(x_label)
-    plt.plot(x_series, y_series, color="black")
-
-    try:
-        os.mkdir(workspace_path(scenario_filename() + "\\Exports\\"))
-    except FileExistsError:
-        pass
-    plt.savefig(workspace_path(scenario_filename() + "\\Exports\\" + graph_name + ".png"))
-
-    return JsonResponse({})
 
 def control_protocol_list(request):
     return model_list(request, 'ScenarioCreator/ControlProtocolList.html')

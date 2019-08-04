@@ -31,13 +31,13 @@
             {% include 'ScenarioCreator/ModelList.html' %}
         {% endif %}
 
-        <p class="help-text">Exported functions will be saved in the current scenario's workspace folder with either "REL_" or "PDF_" prepended to their names.</p>
+        <p class="help-text">Exported functions will be saved in a folder titled "Exports" in your workspace folder with either "REL_" or "PDF_" prepended to their names.</p>
         <div style="bottom:40px;width:40%;left:20px;margin-bottom:20px;">
                 <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/rel" class="btn btn-info">Export Relational Functions</a>
                 <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/pdf" class="btn btn-info">Export Probability Density Functions</a>
         </div>
 
-        <p class="help-text">Imported functions are read from csv files in the current scenario's workspace folder that have either "REL_" or "PDF_" <strong>prepended</strong> to their names and do not contain the current scenario's name.</p>
+        <p class="help-text">Imported functions are read from csv files in the current scenario's workspace "Imports" folder that have either "REL_" or "PDF_" <strong>prepended</strong> to their names.<br>If the "Imports" folder does not exist save the current scenario to create it.</p>
         <div style="bottom:20px;width:40%;left:20px;">
                 <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/rel" class="btn btn-info">Import Relational Functions</a>
                 <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/pdf" class="btn btn-info">Import Probability Density Functions</a>
