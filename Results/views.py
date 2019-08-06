@@ -203,7 +203,6 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['iterations'] = iterations[:5]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk', 'last_day']
-        context['excluded_fields'] += ['vacwU', 'vacwUMax', 'vacwUMaxDay', 'vacwUTimeMax', 'vacwUTimeAvg', 'vacwUDaysInQueue', 'vacwA', 'vacwAMax', 'vacwAMaxDay', 'vacATimeMax', 'vacATimeAvg', 'vacwADaysInQueue']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = all_empty_fields(model_class, context['excluded_fields'])
         context['headers'] = class_specific_headers(model_name, prefix)
