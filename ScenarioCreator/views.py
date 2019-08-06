@@ -761,7 +761,6 @@ def functions_panel(request, form=None):
         context['form'] = form
     for local_name, local_model in abstract_models['Function']:
         context['models'].append(list_per_model(local_model))
-    print("\n\nModels Context", context['models'][1], "\n\n")
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
 
