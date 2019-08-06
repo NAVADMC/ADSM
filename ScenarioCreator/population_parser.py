@@ -72,7 +72,15 @@ class PopulationParser(object):
         This is because a format that has fewer options, but same names will match to a format that has more options
         containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
         possible_formats = [
-            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid. Also format for ADSM csv export
+            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with initial_state and state timers, and with unitid. Also format for ADSM csv export
+             'productiontype': 'production_type',
+             'unitsize': 'initial_size',
+             'lat': 'latitude',
+             'lon': 'longitude',
+             'initial_state': 'initial_state',
+             'daysinstate': 'days_in_initial_state',
+             'daysleftinstate': 'days_left_in_initial_state'},
+            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid. Old format for ADSM csv export
              'productiontype': 'production_type',
              'unitsize': 'initial_size',
              'lat': 'latitude',
@@ -153,7 +161,15 @@ class PopulationParser(object):
             element = next(herd.iter(xml_name))
             text = gettext(element)
         except:
-            raise IOError("Couldn't find '%s' label in xml" % xml_name)
+            if xml_name == "status":
+                xml_name = "initial_state"
+                try:
+                    element = next(herd.iter(xml_name))
+                    text = gettext(element)
+                except:
+                    raise IOError("Couldn't find '%s' label in xml" % xml_name)
+            else:
+                raise IOError("Couldn't find '%s' label in xml" % xml_name)
         if str(xml_name).lower() in ('id', 'unitid') and text:
              field_name = "unit_id"
         self.population[-1][field_name] = text
@@ -216,7 +232,7 @@ class ExportPopulation(object):
         herd_text += "</longitude>\n"
         herd_text += "    </location>\n"
 
-        herd_text += "    <status>"
+        herd_text += "    <initial_state>"
         if unit.initial_state == "S":
             herd_text += "Susceptible"
         elif unit.initial_state == "L":
@@ -231,7 +247,7 @@ class ExportPopulation(object):
             herd_text += "Vaccine Immune"
         elif unit.initial_state == "D":
             herd_text += "Destroyed"
-        herd_text += "</status>\n"
+        herd_text += "</initial_state>\n"
 
         herd_text += "    <days-in-initial-state>"
         herd_text += (str(unit.days_in_initial_state) if str(unit.days_in_initial_state) != "None" else '')
@@ -245,7 +261,7 @@ class ExportPopulation(object):
         return herd_text
 
     def __export_csv(self):
-        csv_order = ["id", "productiontype", "unitsize", "lat", "lon", "status", "daysinstate", "daysleftinstate"]
+        csv_order = ["id", "productiontype", "unitsize", "lat", "lon", "initial_state", "daysinstate", "daysleftinstate"]
         file = open(self.save_location + "pop_" + scenario_filename().replace(" ", "") + ".csv", "w")
         for key in csv_order:
             file.write(key + ",")
