@@ -1024,6 +1024,15 @@ function hideCenterPanel() {
     }
 }
 
+function hideFunctionsPanel() {
+    functions_panel = document.getElementById('functions_panel');
+    functions_panel.classList.remove("TB_panel");
+    functions_panel.classList.add("TB_panel_closed");
+
+    toolbar_btn = document.getElementById("TB_functions");
+    toolbar_btn.classList.remove('active');
+}
+
 function show_crash_text(error_text) {
     const dialog = new BootstrapDialog.show({
         title: 'Simulation Error Details',

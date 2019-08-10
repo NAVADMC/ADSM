@@ -2,10 +2,10 @@
 
 <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
     {% if outputs_exist %}
-        <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit">Delete Results and Apply changes</button>
+        <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="hideFunctionsPanel();">Delete Results and Apply changes</button>
     {% else %}
         <button type="button" class="btn btn-default btn-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} id="id-cancel" onclick="hideCenterPanel()">Cancel</button>
-        <button type="submit" class="btn btn-primary btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" disabled>Apply</button>
+        <button type="submit" class="btn btn-primary btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" disabled onclick="hideFunctionsPanel();">Apply</button>
     {% endif %}
     {% if backlinks %}
         <button type="submit" disabled class="btn btn-danger" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} >Remove References before Deleting</button>
