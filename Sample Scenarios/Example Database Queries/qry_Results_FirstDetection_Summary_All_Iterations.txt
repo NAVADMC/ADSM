@@ -1,0 +1,20 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: Results First Detection Summary
+--    Date:         8/14/2019
+--    By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             -- allows for line to be commented  (omitted)
+--            This query shows only the first detection
+--            Results will have only one first detection per iteration
+--            This query can easily be modified to show any of the Firsts or Lasts
+--            by changing the firstdetection field to the desired field (e.g. Firstdestruction)
+----------------------------------------------------------------------------------------
+Select firstdetection as day, 
+count(firstdetection) as cnt 
+FROM  Results_dailybyproductiontype r 
+where 1=1 
+AND last_day = 1 
+AND production_type_id is null 
+group by firstdetection -- group by is necessary when aggregating (count in this case)
+ORDER BY 1
