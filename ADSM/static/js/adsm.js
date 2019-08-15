@@ -1014,12 +1014,12 @@ function hideCenterPanel() {
     center_panel.classList.remove("reveal");
 
     // Next two loops is for un-focusing user disease spreads when the center panel is closed.
-    let active_list_elements = document.getElementsByClassName("defined_name");
-    for (let i = 0; i < active_list_elements.length; i++){
+    var active_list_elements = document.getElementsByClassName("defined_name");
+    for (var i = 0; i < active_list_elements.length; i++){
         $(active_list_elements[i]).removeClass("active");
     }
-    let active_list_div = document.getElementsByClassName("defined");
-    for (let i = 0; i < active_list_div.length; i++){
+    var active_list_div = document.getElementsByClassName("defined");
+    for (var i = 0; i < active_list_div.length; i++){
         $(active_list_div[i]).removeClass("focused");
     }
 }
