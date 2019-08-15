@@ -1,6 +1,7 @@
 {% load db_status_tags %}
 
-<div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
+<!-- <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;"> Old formatting placed button on the bottom of the right of panels -->
+<div class="buttonHolder" style="position:static;">
     {% if outputs_exist %}
         <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="hideFunctionsPanel();">Delete Results and Apply changes</button>
     {% else %}
