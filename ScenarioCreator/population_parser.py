@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import ScenarioCreator.models
 
 from ADSMSettings.utils import workspace_path, scenario_filename
+from django.conf import settings
 
 
 def gettext(elem):
@@ -179,15 +180,17 @@ class ExportPopulation(object):
 
     def __init__(self, format):
         self.population = ScenarioCreator.models.Unit.objects
-        self.save_location = workspace_path("\\Exports\\Exported Populations\\")  # Note: scenario_filename uses the database
-        self.format = format
-        return
 
-    def export(self):
+        self.save_location = settings.WORKSPACE_PATH + "\\Exports\\Exported Populations\\"  # Note: scenario_filename uses the database
         try:
             os.mkdir(self.save_location)
         except FileExistsError:
             pass
+
+        self.format = format
+        return
+
+    def export(self):
         if self.format == "csv":
             self.__export_csv()
         else:
