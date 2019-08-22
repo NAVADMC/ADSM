@@ -701,9 +701,9 @@ class Disease(InputSingleton):
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
-        help_text = "Indicates if the decrease in probability by "
+        help_text = "Indicates if the decrease in probability of disease spread by "
                     + wiki("airborne transmission", "/Model-Specification#airborne-spread")
-                    + " is simulated by the exponential or linear algorithm.",)
+                    + " is simulated by the exponential decay algorithm. Linear decay is the default setting algorithm for disease spread.",)
     use_within_unit_prevalence = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("within unit prevalence", "/Model-Specification#prevalence") + ' should be used in the model.', )
     def __str__(self):
