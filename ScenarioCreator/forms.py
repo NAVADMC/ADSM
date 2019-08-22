@@ -349,6 +349,18 @@ class DiseaseForm(BaseForm):
 
 
 class DiseaseProgressionForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout (
+            "name",
+            "disease_latent_period",
+            "diease_subclinical_period",
+            "disease_clinical_period",
+            "disease_immune_period",
+            "disease_prevalence" if Disease.objects.get().use_within_unit_prevalence else HTML('<p class="help-block">Within unit prevalence is not being used.<br/></p>')
+        )
+        super(DiseaseProgressionForm, self).__init__(*args, **kwargs)
+
     class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
@@ -401,7 +413,7 @@ class DirectSpreadForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
-            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>'),
+            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>') if Disease.objects.get().use_within_unit_prevalence else HTML('<p class="help-block">Probability of infection is NOT determined by within unit prevalence.</p>'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
