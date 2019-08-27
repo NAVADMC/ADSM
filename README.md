@@ -49,7 +49,7 @@ If ADSM is selecting the Workspace directory automatically both the Release and 
 1. On the latest pre-release page, download either "ADSM_vx.x.x.x-beta_windows.zip" or "ADSM_vx.x.x.x-beta_linux.tar.gz"
 1. Extract the package into the folder in which you want ADSM Beta to be installed. It is best to do this somewhere in your User space (a directory your user owns).
 1. If you need to specify a different Workspace Folder to avoid a conflict with a Production Release, follow these steps.
-   1. In your ADSM Beta folder, create a file called "settings.ini".
+   1. In your ADSM Beta folder, create a file called "workspace.ini".
    1. Using your favorite text editor, add one of the following lines:
       1. Windows: `WORKSPACE_PATH = 'DRIVE:\\desired\\path\\to\ADSM Beta Workspace'`
       1. Linux: `WORKSPACE_PATH = '/desired/path/to/ADSM Beta Workspace'`  
@@ -141,7 +141,7 @@ The base app which holds the settings and site wide static files.
 There are a few things to note about the settings of this project.
 
 1. The 'settings' file will attempt to detect where to create the workspace directory.
-   1. It first looks to see if there is a user defined workspace in a 'settings.ini' file.
+   1. It first looks to see if there is a user defined workspace in a 'workspace.ini' file.
    1. If not, it will take the path as defined in either 'development_settings' or 'production_settings' (depending on which is used).
    1. If still not defined, it will find the User's Home directory and place the workspace there.
 1. There are 'development_settings' and a reference 'production_settings'.

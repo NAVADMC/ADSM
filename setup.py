@@ -31,7 +31,6 @@ build_exe_options = {
     'optimize': 2,
     'excludes': [
         'PyInstaller',
-        'tkinter',
         # CHANGE ME for any python packages in your project that you want excluded
         'development_scripts',
     ],

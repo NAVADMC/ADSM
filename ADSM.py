@@ -25,10 +25,16 @@ multiprocessing.freeze_support()
 # ----------BEGIN MAIN PROGRAM----------
 import subprocess
 import argparse
+import json
 import threading
 import _thread
 import psutil
 import socket
+
+from tkinter import Tk
+from tkinter.filedialog import askdirectory
+from tkinter.messagebox import askyesno, Message
+
 from django.utils.timezone import now
 
 
@@ -98,6 +104,22 @@ for proc in psutil.process_iter():
         print("\nPress any key to exit...")
         input()
         sys.exit(1)
+
+print("\nPreparing Workspace...")
+user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
+if not os.path.isfile(user_settings_file):
+    Tk().withdraw()
+    pick_custom_workspace = askyesno("Pick a Custom Workspace Directory?", 'Do you want to pick a custom Workspace directory?\nIf not, your installation will be considered "Portable" and a Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your Workspace with other users, then you should select a custom directory.')
+    if pick_custom_workspace:
+        custom_directory = askdirectory(initialdir=BASE_DIR, title="Select Workspace Directory", mustexist=True)
+        if not str(custom_directory).strip():
+            custom_directory = "."
+            Message(title="Notice!", message="You did not select a directory!\nDefaulting to a Portable installation in the root folder of this installation.").show()
+    else:
+        custom_directory = "."
+
+    with open(user_settings_file, 'w') as user_settings:
+        user_settings.write('WORKSPACE_PATH = %s' % json.dumps(custom_directory))
 
 print("\nPreparing Django environment...")
 
