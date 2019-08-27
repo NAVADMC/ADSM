@@ -34,10 +34,10 @@ if OVERRIDE_DEBUG:
 
 # Look for any settings to import from the installer.
 # Installer settings are to be used globally across all users.
-install_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
-if os.path.isfile(install_settings_file):
+INSTALL_SETTINGS_FILE = os.path.join(BASE_DIR, 'workspace.ini')
+if os.path.isfile(INSTALL_SETTINGS_FILE):
     from importlib import machinery
-    install_settings = machinery.SourceFileLoader('install_settings', install_settings_file).load_module()
+    install_settings = machinery.SourceFileLoader('install_settings', INSTALL_SETTINGS_FILE).load_module()
     WORKSPACE_PATH = install_settings.WORKSPACE_PATH
     if str(WORKSPACE_PATH).strip() == ".":
         WORKSPACE_PATH = os.path.join(BASE_DIR, "workspace")
@@ -54,7 +54,7 @@ if not os.path.exists(WORKSPACE_PATH):
     try:
         os.makedirs(WORKSPACE_PATH, exist_ok=True)
     except:
-        os.remove(install_settings_file)
+        os.remove(INSTALL_SETTINGS_FILE)
         raise ValueError("Could not create selected Workspace path! Please re-launch ADSM and select a new Workspace directory.")
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)

@@ -278,3 +278,8 @@ def show_help_overlay_json(request):
         return JsonResponse({'status':'success'})
     else:  # GET
         return JsonResponse({'show_help_overlay': SmSession.objects.get().show_help_overlay})
+
+
+def delete_workspace_setting(request):
+    os.remove(settings.INSTALL_SETTINGS_FILE)
+    return HttpResponse("Please close ADSM and restart to select a new Workspace directory.")
