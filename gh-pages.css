@@ -1,0 +1,36 @@
+a {
+	text-decoration: none;
+	font-style: italic;
+	color: #7cb9ff;
+}
+body, body * {
+	font-family: 'Source Sans Pro', sans-serif;
+}
+h1 {
+	font-size: 42pt;
+}
+li {
+	padding-bottom: 20px;
+}
+
+.left-panel {
+    float: left;
+    padding: 0 10% 100% 10%;
+    color: #00477f;
+    background-image: url("background-left-2.png");
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: 550px 1050px;
+    margin: 2%;
+}
+
+.title-box {
+    background-color: white;
+    opacity: 80%;
+    padding: 8%;
+    margin-top: 15%;
+}
+
+.body {
+    padding: 1.5% 10% 5% 0;
+}
