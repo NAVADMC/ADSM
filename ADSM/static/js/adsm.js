@@ -39,7 +39,9 @@ $(function(){
                 if(parent_select.attr('data-new-item-url').indexOf(model) != -1){ //correct model
                     if(pk != 'new'){
                         parent_select.val(pk)
-                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+                        parent_select.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+                        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
                     }
                 }else{
                     $(this).popover({'content': "Cannot assign a probability function to a relational field, or vice versa",
