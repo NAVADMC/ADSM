@@ -210,7 +210,7 @@ $(function(){
         populate_pdf_panel(select);
 
     })
-    
+
     $(document).on('change', ':input, select', function(){
         $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     });
@@ -218,7 +218,6 @@ $(function(){
     $(document).on('input', 'input, textarea', function(){
         $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
     });
-    
     
     $('[data-visibility-controller]').livequery(function(){
         attach_visibility_controller(this)
