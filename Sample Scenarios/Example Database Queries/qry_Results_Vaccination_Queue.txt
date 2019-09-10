@@ -1,0 +1,55 @@
+-----------------------------------------------------------------------------------------------
+--    Sample Query: Results Vaccination Queue (vaccination waiting)
+--    Date:         9/10/2019
+--    By:           Schoenbaum, Missy
+--
+--    Notes: It is important to understand how the Vaccination queue works to understand what these 
+--    results mean. There are many input parameters determining when a vaccination is applied. 
+--    In short, vaccination waiting variables may include duplicate records.
+--
+--    Units to vaccinate are identified when they fall into a vaccination ring, set on the Vaccination Ring tab. 
+--    It is possible that a unit can fall into multiple vaccination rings, if multiple detected unit are in 
+--    the surrounding area and triggering vaccination rings. Recall this is dependent on the production type 
+--    of the triggering unit, the production type of the recipient unit and the radius of the vaccination ring. 
+--    The identified unit then becomes a target (candidate) for vaccination and is put into the vaccination queue 
+--    to wait for its turn to be vaccinated, based on the vaccination capacity set on the Vaccination Global form.
+--
+--    When filling the variables in the database, the target unit is counted in the vaccination waiting output data 
+--    EVERY TIME it meets the criteria to be considered for vaccination. The vaccination queue could include duplicate units. 
+--    As the simulation processes units that are waiting in the vaccination queue, it considered if each 
+--    target unit is eligible for vaccination. At that point the simulation determines if a vaccination    
+--    actually is applied to the target unit. The simulation considers if the target unit has 
+--    already been vaccinated within the simulation (or set to V as the initial state from population file). 
+--    If the target unit has been vaccinated, the simulation determines how many days have to pass 
+--    before the unit can be vaccinated again, based on the minimum time between vaccination in the Control Protocol/Vaccination form. 
+--    This parameter allows a unit to have a second vaccination (a “booster”) if necessary. 
+--    The default value on minimum time between vaccination is set to 99,999 
+--    to force a single vaccination within 99,999 days, unless the parameter is changed.  
+--    Otherwise, minimum time between vaccination set to null or zero would allow the target unit to be 
+--    immediately eligible for another vaccination every new day it appeared in the vaccination queue.
+----------------------------------------------------------------------------------------
+SELECT
+iteration,
+day,
+--production_type_id -- not useful, instead use case statement to pull in real name or assign name
+CASE WHEN name IS NULL  THEN "ALL" ELSE  name END as productiontype,
+last_day,
+vacwU,       
+vacwUDaysInQueue,
+vacwUMax,
+vacwUMaxDay,
+vacwUTimeAvg,
+vacwUTimeMax,
+vacwA,       
+vacwADaysInQueue,
+vacwAMax,
+vacwAMaxDay,
+vacwATimeAvg,
+vacwATimeMax
+FROM  Results_dailybyproductiontype r
+LEFT JOIN   -- left join here because the NULL production type indcates ALL, note case statement to manage this
+ScenarioCreator_productiontype pt
+ON r.production_type_id = pt.id -- defines how tables are connected
+ -- Example of WHERE clause
+WHERE 1=1
+AND production_type_id is null
