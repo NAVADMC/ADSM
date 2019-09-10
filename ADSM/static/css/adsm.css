@@ -208,6 +208,7 @@ form.editable input{
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
+    padding-bottom: 2px;
 }
 
 .hide-help-text .help-block {
