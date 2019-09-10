@@ -182,15 +182,16 @@ class ExportPopulation(object):
         self.population = ScenarioCreator.models.Unit.objects
 
         self.save_location = settings.WORKSPACE_PATH + "\\Exports\\Exported Populations\\"  # Note: scenario_filename uses the database
+        self.format = format
+        return
+
+    def export(self):
+
         try:
             os.mkdir(self.save_location)
         except FileExistsError:
             pass
 
-        self.format = format
-        return
-
-    def export(self):
         if self.format == "csv":
             self.__export_csv()
         else:
