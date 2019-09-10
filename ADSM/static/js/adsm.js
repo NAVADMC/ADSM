@@ -212,11 +212,15 @@ $(function(){
     })
 
     $(document).on('change', ':input, select', function(){
-        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        $(this).closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     });
     
     $(document).on('input', 'input, textarea', function(){
-        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        $(this).closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     });
     
     $('[data-visibility-controller]').livequery(function(){
@@ -687,7 +691,9 @@ function add_model_option_to_selects(html, selectInput) {
         .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
-        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        selectInput.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     }
     //add functions to their panel lists
     var $new_link = $('.function_dropdown [href="' + model_link + '"]')

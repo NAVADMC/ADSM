@@ -347,6 +347,14 @@ header .filename {
 #unsaved-header {
     color: white;
     position: fixed;
+    top: 0;
+    right: 3%;
+    z-index: 130;
+    /* font-size: 18px !important; */
+}
+#unsaved-form-header {
+    color: white;
+    position: fixed;
     top: 25px;
     right: 3%;
     z-index: 130;

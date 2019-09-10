@@ -25,6 +25,7 @@
         {% endif %}
         <div class="scenario-status{% if unsaved_changes %} unsaved{% endif %}">
             <p>The file contains unsaved changes.  <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p>
-            <p id="unsaved-header">changes not saved to file... <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p> <!--It is necessary for styling and immediate response time for this element to be part of the same div-->
+            <p id="unsaved-header">Changes not saved to file... <input id="save_scenario" type="submit" value="Save" class="action_link"> changes?</p> <!--It is necessary for styling and immediate response time for this element to be part of the same div-->
+            <p id="unsaved-form-header" class="hidden">Current form is not saved, press "Apply" to save changes.</p> <!--It is necessary for styling and immediate response time for this element to be part of the same div-->
         </div>
     </form>
