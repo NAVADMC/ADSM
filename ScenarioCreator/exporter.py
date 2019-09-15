@@ -16,7 +16,7 @@ def export_relational_functions(functions, points):
     '''
     # open and erase or create the export file
     try:
-        os.mkdir(workspace_path("\\Exports\\Exported Functions\\"))
+        os.makedirs(workspace_path("\\Exports\\Exported Functions\\"))
     except FileExistsError:
         pass
     file = open(workspace_path("\\Exports\\Exported Functions\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
@@ -42,7 +42,7 @@ def export_pdfs(functions):
     '''
     # Open and erase or create the output file
     try:
-        os.mkdir(workspace_path("\\Exports\\Exported Functions\\"))
+        os.makedirs(workspace_path("\\Exports\\Exported Functions\\"))
     except FileExistsError:
         pass
     file = open(workspace_path("\\Exports\\Exported Functions\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")

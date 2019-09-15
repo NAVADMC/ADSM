@@ -188,7 +188,7 @@ class ExportPopulation(object):
     def export(self):
 
         try:
-            os.mkdir(self.save_location)
+            os.makedirs(self.save_location)
         except FileExistsError:
             pass
 

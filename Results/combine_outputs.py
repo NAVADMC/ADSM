@@ -37,11 +37,11 @@ def combine_outputs(supplemental_output_folder, db_location, simulation_name):
     building_dir = True
     while building_dir:
         try:
-            os.mkdir(output_dir)
+            os.makedirs(output_dir)
             building_dir = False
         except FileExistsError:
             shutil.rmtree(output_dir)
-            os.mkdir(output_dir)
+            os.makedirs(output_dir)
         except PermissionError:
             pass
 

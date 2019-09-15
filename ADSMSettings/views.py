@@ -191,7 +191,7 @@ def save_scenario(request=None):
             return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
     try:
-        os.mkdir(workspace_path(scenario_filename() + "\\Imports\\"))
+        os.makedirs(workspace_path(scenario_filename() + "\\Imports\\"))
     except FileExistsError:
         pass
 
