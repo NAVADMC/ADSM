@@ -6,6 +6,7 @@ import ScenarioCreator.models
 
 from ADSMSettings.utils import workspace_path, scenario_filename
 from django.conf import settings
+from . import csv_formats
 
 
 def gettext(elem):
@@ -72,69 +73,8 @@ class PopulationParser(object):
         """Make sure that formats with more keys are at the top and formats with fewer keys are at the bottom.
         This is because a format that has fewer options, but same names will match to a format that has more options
         containing all the options of the smaller one. This case will end up throwing an error for missing columns."""
-        possible_formats = [
-            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with initial_state and state timers, and with unitid. Also format for ADSM csv export
-             'productiontype': 'production_type',
-             'unitsize': 'initial_size',
-             'lat': 'latitude',
-             'lon': 'longitude',
-             'initial_state': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid. Old format for ADSM csv export
-             'productiontype': 'production_type',
-             'unitsize': 'initial_size',
-             'lat': 'latitude',
-             'lon': 'longitude',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'unitid': 'unit_id', # NAADSM CSV no HerdSize, with status and state timers, and with unitid
-             'productiontype': 'production_type',
-             'unitsize': 'initial_size',
-             'lat': 'latitude',
-             'lon': 'longitude',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'unit_id': 'unit_id',  # NAADSM CSV no HerdSize, with status and state timers, and with unitid
-             'productiontype': 'production_type',
-             'unitsize': 'initial_size',
-             'lat': 'latitude',
-             'lon': 'longitude',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV no HerdSize, with status and state timers
-             'unitsize': 'initial_size',
-             'lat': 'latitude',
-             'lon': 'longitude',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym
-             'lon': 'longitude',
-             'lat': 'latitude',
-             'herdsize': 'initial_size',
-             'status': 'initial_state',
-             'daysinstate': 'days_in_initial_state',
-             'daysleftinstate': 'days_left_in_initial_state'},
-            {'production-type': 'production_type',  # NAADSM CSV mapping
-             'longitude': 'longitude',
-             'latitude': 'latitude',
-             'size': 'initial_size',
-             'status': 'initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV includes HerdSize synonym without state timers
-             'lon': 'longitude',
-             'lat': 'latitude',
-             'herdsize': 'initial_size',
-             'status': 'initial_state'},
-            {'productiontype': 'production_type',  # NAADSM CSV population export without state timers
-             'lon': 'longitude',
-             'lat': 'latitude',
-             'unitsize': 'initial_size',
-             'status': 'initial_state'},
-        ]
+        possible_formats = csv_formats.csv_formats()
+
         parsing_success = False
         for mapping in possible_formats:
             if not parsing_success:
