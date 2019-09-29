@@ -354,7 +354,7 @@ class DiseaseProgressionForm(BaseForm):
         self.helper.layout = Layout (
             "name",
             "disease_latent_period",
-            "diease_subclinical_period",
+            "disease_subclinical_period",
             "disease_clinical_period",
             "disease_immune_period",
             "disease_prevalence" if Disease.objects.get().use_within_unit_prevalence else HTML('<p class="help-block">Within unit prevalence is not being used.<br/></p>')
