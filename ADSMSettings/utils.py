@@ -214,6 +214,7 @@ def graceful_startup():
         reset_db('scenario_db')
 
     update_db_version()
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
 
     if getattr(sys, 'frozen', False):
         check_for_updates()

@@ -144,6 +144,7 @@ def open_scenario(request, target, wrap_target=True):
     convert_user_notes_to_unit_id()
     unsaved_changes(False)  # File is now in sync
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=outputs_exist())  # This is also reset from delete_all_outputs
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
