@@ -227,6 +227,9 @@ def copy_file(request, target, destination):
         os.makedirs(os.path.dirname(destination), exist_ok=True)
     shutil.copy(target, destination)
     print("Done copying", target)
+    if target.endswith(".db"):
+        # We just copied a scenario, so we should open it
+        return redirect("/LoadingScreen/?loading_url=/app/OpenScenario/%s/" % os.path.basename(destination))
     return redirect('/')
 
 
