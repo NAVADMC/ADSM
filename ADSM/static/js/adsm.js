@@ -1033,7 +1033,6 @@ function hideCenterPanel() {
 
 function hideFunctionsPanel() {
     functions_panel = document.getElementById('functions_panel');
-    functions_panel.classList.remove("TB_panel");
     functions_panel.classList.add("TB_panel_closed");
 
     toolbar_btn = document.getElementById("TB_functions");
