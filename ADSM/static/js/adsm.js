@@ -694,6 +694,7 @@ function add_model_option_to_selects(html, selectInput) {
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
         selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        parent_select.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
         selectInput.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
         document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     }
