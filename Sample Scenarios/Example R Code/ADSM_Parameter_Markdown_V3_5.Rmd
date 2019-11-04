@@ -1,0 +1,1013 @@
+---
+title: "Parameter Global Report"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+output:
+  word_document: default
+fontsize: 10pt
+params:
+   dat: "~/ADSM Beta Workspace/AlmostANewSample/AlmostANewSample.db"
+
+---
+
+<!---
+#
+# Title:   Parameter Global Report
+#  Author:  Missy Schoenbaum
+#  Date:    9/19/2018
+#  Update Date: 
+#  Notes: Enter your database above in the dat: line
+# 
+#
+# Parameter Global Report returns a report in Word format
+# The word document details the parametes entered into the database using R Markdown
+# This is an attempt to report all the parameters. Things change over time and 
+# may require some updates that you may have to figure out.
+#
+# Preparation for running
+# Know what directory your scenario file is in, fill in variable
+# Clean out any old files if you previously attempted to run this script
+# 
+--->
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r setup, include=FALSE}
+
+#install.packages("RSQLite")
+#install.packages("DBI")
+#install.packages("knitr")
+#install.packages("bit")
+
+
+library("RSQLite") #to connect to SQLite from R 
+library("DBI")     #(this is what I am using)
+library("knitr")   #to do rmarkdown documents
+```
+
+```{r, include=F}
+# connect to the sqlite file of the scenario, customize this line to point to the scenario file
+# the default is set to the Sample Scenario with Outputs which is included with all ADSM implementations
+
+MyCurrentDB <- dbConnect(RSQLite::SQLite(), path.expand(params$dat))
+
+splitpath = strsplit(params$dat, "/")
+scenarioname = strsplit(splitpath[[1]][length(splitpath[[1]])], ".db")[[1]]
+
+```
+
+# Running notes
+
+  - Database file: ``r path.expand(params$dat)``
+  - Scenario name: ``r scenarioname``
+  - Report run date: ``r format(Sys.time(), '%m/%d/%Y %I:%M%p')``
+
+# Overview 
+
+The purpose of this document is to provide a printable version of input parameters into ADSM, and has been created using R Markdown. It is attached directly to the database the user has selected.  ADSM is designed with parameter blocks that can be assigned to production types. It is recommended that the user name these parameter blocks in a descriptive way to more easily understand the purpose. 
+
+Please Note: This document is a reported representation of the data entered into ADSM Version 3.4. In order to change a parameter value, the user must change the value in ADSM interface, apply and save the changes to expect an update. Changing this document does NOT change ADSM. Every ADSM database has exactly the same structure, but users may or may not use given parameters. Lack of parameters may cause blanks in this report. The Word document output can be formatted using MS Word after Knit process. Some suggestions include changing the page orientation to landscape, reducing the font size, and adding page numbers.
+
+A description of each function is provided in another report. This text can be removed/replaced as needed in actual report.
+
+## Database Connection - select a specific scenario 
+
+First step is to connect R to the SQLite database. For example, this report is run after connecting to the SQLite database at 
+
+> ``r path.expand(params$dat)`` 
+
+The user chooses the SQLite database to generate this report every time the report is compiled. Second, we use the SQLite queries to get the subset of data required for the analyses. 
+
+# Parameter Report
+
+The Scenario is characterized by a description. The Random Seed allows users to force the iterations to start with the same seed.  If the Random Seed is blank, then the simulation will randomize a seed as is expected in a normal simulation setting.  A forced seed is usually used for testing to produce a similar result. ADSM will never produce a 100% matching iteration, as each pdf parameter randomizes a value when it is called into action. 
+
+```{r, include=F}
+
+ScenarioDescription <- dbSendQuery(MyCurrentDB, statement = paste("SELECT description, random_seed",
+                                                                  "FROM ScenarioCreator_scenario "))
+
+#creates the data frame from where analyses will be done
+ScDesc<-dbFetch(ScenarioDescription) 
+
+ScDescTable<-cbind(ScDesc)
+
+ScDescTable<-as.data.frame(ScDescTable)
+colnames(ScDescTable)<-c("Description","Random Seed")
+
+```
+
+```{r, results = "asis", echo = FALSE}
+kable((ScDescTable),  caption = "Scenario Description", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+Population - Production Types are an attribute of each unit. The use of a production type allows the inclusion of both species specific details and management practices.  As few or as many production types as needed can be used, and are usually determined based on the level of parameters that are known. This document will not detail all the attributes of each unit.
+
+
+Units in a non-susceptible state will be listed at the end of this report.
+
+
+```{r, results = "asis", echo = FALSE}
+
+PT <- dbSendQuery(MyCurrentDB, statement = paste("SELECT id, name, description",
+                                      "FROM scenariocreator_productiontype"))
+
+#creates the data frame with list
+PTList<-dbFetch(PT)  
+
+PT_df<-as.data.frame(PTList)
+#colnames(ScDescTable)<-c("Description","Random Seed")
+
+kable((PT_df),  caption = "Production Type List", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+Disease Progression describes how the Production Types move through each state of the disease, including Latent, subclinical infection, clinical infection and immune period. Within unit prevalence is also set with the Disease Progression. The user-defined name is provided in this list.
+
+
+```{r, results = "asis", echo = FALSE}
+
+DiseaseStates <- dbSendQuery(MyCurrentDB, statement = paste("SELECT d.name block, lt.ltname latent_pdf, sb.sbname subclinical_pdf, cl.clname clinical_pdf, imname immune_pdf, prevalence",
+                                      "FROM scenariocreator_diseaseprogression  d",
+                                  "left  JOIN( Select id,  name as ltname from scenariocreator_probabilitydensityfunction ) lt ",
+                                  "ON d.disease_latent_period_id  = lt.id",
+                                  "left JOIN( Select id,  name as sbname from scenariocreator_probabilitydensityfunction ) sb ",
+                                  "ON d.disease_subclinical_period_id  = sb.id",
+                                  "left JOIN( Select id,  name as clname from scenariocreator_probabilitydensityfunction ) cl ",
+                                  "ON d.disease_clinical_period_id  = cl.id",
+                                  "left JOIN( Select id,  name as imname from scenariocreator_probabilitydensityfunction ) im ",
+                                  "ON d.disease_immune_period_id  = im.id",
+                                  "left JOIN( Select id,  name as prevalence from scenariocreator_probabilitydensityfunction ) pr ",
+                                  "ON d.disease_prevalence_id  = pr.id"))
+
+#creates the data frame from where list will be done
+DStates<-dbFetch(DiseaseStates)  
+
+DStates<-as.data.frame(DStates)
+#colnames(ScDescTable)<-c("Description","Random Seed")
+
+kable((DStates),  caption = "Disease Progression - states of disease", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+Disease Progression assignment details with block of disease progression parameters are assigned to a given production type. The user-defined name is provided in this list.
+
+
+```{r, results = "asis", echo = FALSE}
+
+DiseaseStatesAssign <- dbSendQuery(MyCurrentDB, statement = paste("SELECT pt.name, d.name",
+                                  "FROM scenariocreator_diseaseprogression  d ",
+                                  "JOIN (SELECT a.*, p.*, name FROM scenariocreator_diseaseprogressionassignment a ",
+                                    "JOIN scenariocreator_Productiontype p ON a.production_type_id = p.id) as pt ",
+                                  "ON  d.id = pt.progression_id"))
+
+#creates the data frame from where list will be done
+DStatesAssign<-dbFetch(DiseaseStatesAssign)  
+
+DStatesAssign_df<-as.data.frame(DStatesAssign)
+
+colnames(DStatesAssign_df)<-c("Production Type","Disease Progression Name")
+
+kable((DStatesAssign_df),  caption = "Disease Progression Assignment", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+Disease Transmission - Source Production Type to Destination Production Type Overview. Parameter blocks describe the probability that disease moves between farms of a given Production type that share a contact method. The parameter blocks have a user-defined name.
+
+This table is equivalent to the data represented in the Review Disease Spread Module.
+
+
+```{r, results = "asis", echo = FALSE}
+
+DiseaseSpread <- dbSendQuery(MyCurrentDB, statement = paste("SELECT distinct Source,  'contacts ',  Dest, 'through',  IFNULL(direct_contact, 'No'),  ",
+									"'direct contact, ', IFNULL(indirect_contact, 'No'), 'indirect contact and ', IFNULL(airborne, 'No') , ' airborne spread'",
+									"FROM scenariocreator_Diseasespreadassignment assign",
+									"JOIN (select id, name as source FROM  scenariocreator_productiontype) spt ON assign.source_production_type_id  = spt.id",
+									"JOIN (select id, name as dest FROM  scenariocreator_productiontype) dpt ON assign.destination_production_type_id  = spt.id",
+									"LEFT JOIN (Select id, name as direct_contact FROM ScenarioCreator_directSpread) direct ON assign.direct_contact_spread_id = direct.id",
+									"LEFT JOIN (Select id, name as indirect_contact FROM ScenarioCreator_indirectSpread) indirect on assign.indirect_contact_spread_id = indirect.id",
+									"LEFT JOIN (Select id, name as airborne FROM ScenarioCreator_airborneSpread) airborne ON assign.airborne_spread_id = airborne.id",
+									"order by source_production_type_id"))
+
+#creates the data frame from where list will be done
+DSpread<-dbFetch(DiseaseSpread)  
+
+DSpread_df<-as.data.frame(DSpread)
+colnames(DSpread_df)<-c("Source","Action","Destination","method","Direct Contact Block"," ","Indirect Contact Block"," ","Airborne Block"," ") 
+
+kable((DSpread_df),  caption = "Disease Transmission", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+Disease Spread Transmission Parameter blocks - Direct Spread
+
+
+```{r, results = "asis", echo = FALSE}
+
+DirectSpread <- dbSendQuery(MyCurrentDB, statement = paste("SELECT Name, CASE WHEN use_fixed_contact_rate  = 0  THEN 'No' ELSE  'Yes' END as use_fixed_contact_rate,",
+															"contact_rate, infection_probability, ",
+															#"CASE WHEN latent_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as latent_can_infect,",
+															"CASE WHEN latent_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as latent_can_infect,",
+															#"CASE WHEN subclinical_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as subclinical_can_infect,",
+															"CASE WHEN subclinical_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as subclinical_can_infect,",
+															"distance_pdf,  movement_control_pdf ",
+															"FROM scenariocreator_directspread ds",
+															"LEFT JOIN(SELECT id,  name as distance_pdf from scenariocreator_probabilitydensityfunction) dd ON ds.distance_distribution_id  = dd.id",
+															"LEFT JOIN(SELECT id,  name as movement_control_pdf from scenariocreator_probabilitydensityfunction) mc ",
+															" ON ds.movement_control_id  = mc.id"))
+
+#creates the data frame from where list will be done
+DirSpread<-dbFetch(DirectSpread)  
+
+DirSpread_df<-as.data.frame(DirSpread)
+colnames(DirSpread_df)<-c("Spread Name","FixedContactRate?","Set Contact Rate","Infection Probability","Latent Spread?","Subclinical #Spread?","Shipment Distance","Movement Control") 
+
+kable((DirSpread_df),  caption = "Direct Contact Parameters", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+Disease Spread Transmission Parameter blocks - Indirect Spread
+
+
+```{r, results = "asis", echo = FALSE}
+
+IndirectSpread <- dbSendQuery(MyCurrentDB, statement = paste("SELECT Name,  CASE WHEN use_fixed_contact_rate  = 0  THEN 'No' ELSE  'Yes' END as use_fixed_contact_rate,",
+															"contact_rate, infection_probability, ",
+															#"CASE WHEN subclinical_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as subclinical_units_can_infect_others,",
+															"CASE WHEN subclinical_units_can_infect_others  = 0  THEN 'No' ELSE  'Yes' END as subclinical_can_infect,",
+															"distance_pdf,  movement_control_pdf ",
+															"FROM scenariocreator_indirectspread ds",
+															"LEFT JOIN( Select id,  name as distance_pdf from scenariocreator_probabilitydensityfunction ) dd ON ds.distance_distribution_id  = dd.id",
+															"Left JOIN( Select id,  name as movement_control_pdf from scenariocreator_probabilitydensityfunction) mc ON ds.movement_control_id  = mc.id"))
+
+
+#creates the data frame from where list will be done
+IndirSpread<-dbFetch(IndirectSpread)  
+
+IndirSpread_df<-as.data.frame(IndirSpread)
+colnames(IndirSpread_df)<-c("Spread Name","Use Fixed Contact Rate","Use Set Contact Rate","Infection Probability","Subclinical Spread?","Shipment Distance","Movement Control")
+
+kable((IndirSpread_df),  caption = "Indirect Contact Parameters", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+Disease Spread Transmission Parameter blocks - Airborne Spread
+Please note that the Transport Delay parameter is no longer used.  Scenarios that are created from NAADSM legacy scenario import will still show these fields, and therefore this report will show them.
+
+
+```{r, results = "asis", echo = FALSE}
+
+AirborneSpread <- dbSendQuery(MyCurrentDB, statement = paste("SELECT asp.name, spread_1km_probability, max_distance, ",
+															"CASE WHEN Use_airborne_exponential_decay = 0  THEN 'Yes- Used linear decay' ELSE 'No - used exponential decay' END, ",
+															"IfNULL(transportdelay_pdf, 'Not In Use') ",
+															"FROM scenariocreator_airbornespread asp ",
+															"JOIN ScenarioCreator_disease d ON d.id  = asp._disease_id",
+															"LEFT JOIN(SELECT id,  name as transportdelay_pdf from scenariocreator_probabilitydensityfunction) td ON asp.transport_delay_id  = td.id"))
+
+
+#creates the data frame from where list will be done
+AirSpread<-dbFetch(AirborneSpread)  
+
+AirSpread_df<-as.data.frame(AirSpread)
+colnames(AirSpread_df)<-c("Spread Name","Prob Spread 1km", "Max Distance", "Max Used?", "Transport Delay")
+
+kable((AirSpread_df),  caption = "Airborne Spread Parameters", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+# Controls
+
+ADSM provides a number of control measures that users can apply alone or in combination to change the progression of disease spread. For this report, all vaccination parameters will be grouped to provide continuity.
+
+High Level Controls - All controls can be turned off with one parameter.
+
+
+
+```{r, results = "asis", echo = FALSE}
+
+Master <- dbSendQuery(MyCurrentDB, statement = paste("SELECT control_plan as Master_Plan, ",
+                                                     "CASE WHEN disable_all_controls = 0  THEN 'On' ELSE 'Off' END ",
+															                        "FROM ScenarioCreator_vaccinationglobal"))
+
+
+#creates the data frame from where list will be done
+MasterCtrl<-dbFetch(Master)  
+
+MasterCtrl_df<-as.data.frame(MasterCtrl)
+colnames(MasterCtrl_df)<-c("Control Master Plan","Controls On?")
+
+kable((MasterCtrl_df),  caption = "Control Master Plan", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Control measures vary in how they are applied:
+
+Some measures are applied across all production types, and are parameterized under Global tabs.
+Some measures are applied at a production type level, and are parameterized in Control Protocol, and can be assigned to one or more production types.
+Some measures are more specific. Users define Zones, determine the parameters that are specific to each zone and production type in Zone Effects, and then users Assign Effects to associate those parameters to a production type.
+
+Global Destruction - these parameters apply to all production types.
+
+```{r, results = "asis", echo = FALSE}
+
+GD <- dbSendQuery(MyCurrentDB, statement = paste("SELECT Destruction_capacity_pdf, destruction_priority_order, Destruction_program_Delay, destruction_reason_order",
+                                                     "FROM ScenarioCreator_destructionglobal dg",
+															                       "LEFT JOIN (SELECT ID, Name as Destruction_capacity_pdf from scenariocreator_probabilitydensityfunction) pdf ",
+                                                     "ON dg.destruction_capacity_id  = pdf.id"))
+
+
+#creates the data frame from where list will be done
+GlobalDest<-dbFetch(GD)  
+
+GlobalDest_df<-as.data.frame(GlobalDest)
+#colnames(GlobalDest_df)<-c("Control Master Plan","Controls On?")
+
+kable((GlobalDest_df),  caption = "Global Destruction", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+Different Control Protocols can be created to affect different production types. The control protocol is a combination of control measures that are integrated to act together on a specific production type. Each control measure will be detailed separately.
+
+
+list how control protocols are assigned
+
+```{r, results = "asis", echo = FALSE}
+
+CP <- dbSendQuery(MyCurrentDB, statement = paste("SELECT pt.name, IFNULL(cp.name, 'Not Assigned') cp,   ",
+                                                  "CASE WHEN use_detection = 0 THEN 'No' ELSE 'Yes' END, ",
+                                                  "CASE WHEN use_tracing =  0 THEN 'No' ELSE 'Yes' END,  ",
+                                                  "CASE WHEN use_testing = 0 THEN 'No' ELSE 'Yes' END,  ",
+                                                  "CASE WHEN use_exams = 0 THEN 'No' ELSE 'Yes' END,  ",
+                                                  "CASE WHEN use_destruction = 0 THEN 'No' ELSE 'Yes' END,  ", 
+                                                  "CASE WHEN use_vaccination = 0 THEN 'No' ELSE 'Yes' END,  ",
+                                                  "CASE WHEN use_cost_accounting = 0 THEN 'No' ELSE 'Yes' END  ",
+                                                  "FROM ScenarioCreator_protocolassignment PA  ",
+                                                  "LEFT JOIN   ScenarioCreator_productiontype PT ON PA.production_type_id = PT.id ",
+                                                  "LEFT JOIN   ScenarioCreator_controlprotocol CP ON PA.control_protocol_id = CP.id" )) 
+      
+
+#creates the data frame from where list will be done
+ControlProtocol<-dbFetch(CP)  
+
+ControlProtocol_df<-as.data.frame(ControlProtocol)
+colnames(ControlProtocol_df)<-c("ProductionType","Control Protocol","Detection?","Tracing?","Testing?","Exam?","Vaccination?","Cost?")
+
+kable((ControlProtocol_df),  caption = "Control Protocol Assignments", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Specifics of Control Protocols
+
+Detection - has specific parameters and can also trigger the use of a Zone. Zones have more specific parameters which are set in the Zone section.
+
+```{r, results = "asis", echo = FALSE}
+
+Detection <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, CASE WHEN use_detection = 1  THEN 'Yes' ELSE 'No' END as det, ",
+                                                        "CASE WHEN detection_is_a_zone_trigger= 0  THEN 'No' ELSE  'Yes' END as zonetrigger, ",
+                                                        "IfNull(obpdf.name, 'No probability Set'), ",
+                                                        "IfNull(rptpdf.name, 'No probability Set') ",
+                                                        "FROM ScenarioCreator_controlprotocol CP  ",
+                                                        "LEFT JOIN Scenariocreator_probabilitydensityfunction Obpdf ",
+                                                        "ON CP.detection_probability_for_observed_time_in_clinical_id = obpdf.id ",
+                                                        "LEFT JOIN Scenariocreator_probabilitydensityfunction rptpdf ",
+                                                        "ON CP.detection_probability_report_vs_first_detection_id= rptpdf.id"))
+
+
+#creates the data frame from where list will be done
+Det<-dbFetch(Detection)  
+
+Det_df<-as.data.frame(Det)
+colnames(Det_df)<-c("Control Protocol","Detection On?","Det Trigger Zone?","Prob of Observing","Prob of Reporting")
+
+kable((Det_df),  caption = "Control Protocol - Detection", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+Tracing - has specific parameters related to contact tracing
+
+```{r, results = "asis", echo = FALSE}
+
+Tracing <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, CASE WHEN use_tracing = 1  THEN 'Yes' ELSE 'No' END, ",
+                                                      "CASE WHEN Trace_direct_forward = 1  THEN 'Yes' ELSE 'No' END, ",
+                                                      "CASE WHEN Trace_direct_back = 1  THEN 'Yes' ELSE 'No' END,",
+                                                      "IFNull(direct_trace_success_rate, 'Not Used'), ",
+                                                      "IfNull(direct_trace_period, 'Not Used'), ",
+                                                      "CASE WHEN Trace_indirect_forward = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                      "CASE WHEN Trace_indirect_back = 0  THEN 'No' ELSE  'Yes' END,",
+                                                      "IfNUll(indirect_trace_success, 'Not Used'), ",
+                                                      "IfNull(indirect_trace_period, 'Not Used'), ",
+                                                      "IfNull(delpdf.name, 'Not Used'), ",
+                                                      "CASE WHEN direct_trace_is_a_zone_trigger = 1  THEN 'Yes' ELSE 'No' END, ",
+                                                      "CASE WHEN indirect_trace_is_a_zone_trigger = 1  THEN 'Yes' ELSE 'No' END ",
+                                                      "FROM ScenarioCreator_controlprotocol CP  ",
+                                                      "LEFT JOIN Scenariocreator_probabilitydensityfunction delpdf ON CP.trace_result_delay_id = delpdf.id"))
+
+
+#creates the data frame from where list will be done
+Trace<-dbFetch(Tracing)  
+
+Trace_df<-as.data.frame(Trace)
+colnames(Trace_df)<-c("Control Protocol","Tracing On?","Dir Fwd?","Dir Back?","Dir Success","Days","Ind Fwd?","Ind Back?","Ind Success","Days","Delay", "Dir Zone?", "Ind Zone?")
+
+kable((Trace_df),  caption = "Control Protocol - Tracing", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Testing - has specific parameters related to laboratory testing. Must use contact tracing to be able to test undetected units.
+
+```{r, results = "asis", echo = FALSE}
+
+Testing <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, ",
+                                                      "CASE WHEN use_testing = 0  THEN 'No' ELSE 'Yes' END, ",
+                                                      "CASE WHEN Test_direct_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                      "CASE WHEN Test_direct_back_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                      "CASE WHEN Test_indirect_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                      "CASE WHEN Test_indirect_back_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                      "IfNull(testpdf.name, 'Not Used'), ",
+                                                      "IfNull(test_specificity, 'Not Used'), ",
+                                                      "IfNull(test_sensitivity, 'Not Used') ",
+                                                      "FROM ScenarioCreator_controlprotocol CP  ",
+                                                      "LEFT JOIN Scenariocreator_probabilitydensityfunction testpdf ",
+                                                      "ON CP.test_delay_id = testpdf.id "))
+
+
+#creates the data frame from where list will be done
+Test<-dbFetch(Testing)
+
+Test_df<-as.data.frame(Test)
+colnames(Test_df)<-c("Control Protocol","Testing On?","Dir Fwd?","Dir Back?","Ind Fwd?","Ind Back?","Delay","Sensitivity","Specificity")
+
+kable((Test_df),  caption = "Control Protocol - Testing", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Exams - has specific parameters related to clinical exam. Must use contact tracing to be able to examine undetected units.
+
+```{r, results = "asis", echo = FALSE}
+
+Exams <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, ",
+                                                    "CASE WHEN use_exams = 0  THEN 'No' ELSE 'Yes' END, ",
+                                                    "CASE WHEN Examine_direct_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "IfNull(exam_direct_forward_success_multiplier, 'Not Used'),",
+                                                    "CASE WHEN Examine_indirect_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "IfNull(exam_indirect_forward_success_multiplier, 'Not Used'),",
+                                                    "CASE WHEN Examine_direct_back_traces = 0  THEN 'No' ELSE  'Yes' END,",
+                                                    "IfNull(exam_direct_back_success_multiplier, 'Not Used'),",
+                                                    "CASE WHEN Examine_indirect_back_traces = 0  THEN 'No' ELSE  'Yes' END,",
+                                                    "IfNull(examine_indirect_back_success_multiplier, 'Not Used') ",
+                                                    "FROM ScenarioCreator_controlprotocol CP "))
+
+
+#creates the data frame from where list will be done
+Exam<-dbFetch(Exams)
+
+Exam_df<-as.data.frame(Exam)
+colnames(Exam_df)<-c("Control Protocol","Exam On?","Dir Fwd?","Dir Fwd Multiplier", "Dir Back?","Dir Back Multiplier","Ind Fwd?","Ind Fwd Multiplier","Ind Back?","Ind Back Multiplier")
+
+kable((Exam_df),  caption = "Control Protocol - Exam", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+Destruction - has specific parameters related to destruction.
+
+```{r, results = "asis", echo = FALSE}
+
+Destruction <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, ",
+                                                    "CASE WHEN use_destruction = 0  THEN 'No' ELSE 'Yes' END, ",
+                                                    "CASE WHEN destruction_is_a_ring_trigger = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "IfNull(destruction_ring_radius, 'Not Used'), ",
+                                                    "CASE WHEN destruction_is_a_ring_target = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "CASE WHEN destroy_direct_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "CASE WHEN destroy_indirect_forward_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "CASE WHEN destroy_direct_back_traces = 0  THEN 'No' ELSE  'Yes' END, ",
+                                                    "CASE WHEN destroy_indirect_back_traces = 0  THEN 'No' ELSE  'Yes' END ",
+                                                    "FROM ScenarioCreator_controlprotocol CP "))
+
+
+#creates the data frame from where list will be done
+Dest<-dbFetch(Destruction)
+
+Dest_df<-as.data.frame(Dest)
+colnames(Dest_df)<-c("Control Protocol","Dest On?","Ring Trigger?","Radius", "Ring Target?","Dest Dir Fwd?","Dest Dir Back","Dest Ind Fwd?","Dest Ind Back")
+
+kable((Dest_df),  caption = "Control Protocol - Destruction", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+Cost Accounting - does not change outbreak, but allows users to enter costs that might be associated with a government response. Once costs are set, outputs must be toggled on in the Output Settings.
+
+```{r, results = "asis", echo = FALSE}
+
+AllCosts <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CP.name, CASE WHEN use_cost_accounting = 1  THEN 'Yes' ELSE 'No' END, ",
+                                                     "IfNull(cost_of_destruction_appraisal_per_unit,  'Not Used'), ",
+                                                     "IfNull(cost_of_destruction_cleaning_per_unit,  'Not Used'), ",
+                                                     "IfNull(cost_of_euthanasia_per_animal,  'Not Used'), ",
+                                                     "IfNull(cost_of_indemnification_per_animal,  'Not Used'), ",
+                                                     "IfNull(cost_of_carcass_disposal_per_animal,  'Not Used') ",
+                                                     "FROM ScenarioCreator_controlprotocol CP  "))
+
+
+#creates the data frame from where list will be done
+Cost<-dbFetch(AllCosts)
+
+Cost_df<-as.data.frame(Cost)
+colnames(Cost_df)<-c("Control Protocol","Cost On?","Appraisal/Unit","Cleaning/Unit", "Euthanasia/Animal","Indemnity/Animal","Disposal/Animal")
+
+kable((Cost_df),  caption = "Control Protocol - Cost Accounting", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Vaccination
+
+There are multiple parts to a vaccination strategy.
+
+A trigger starts Vaccination. Vaccination Triggers allow users to start and stop a vaccination program that was designed in the Control Protocol. Unused triggers will show with field names and empty lines. Vaccination Rings and Vaccination Priorities further direct the action of the vaccination events.
+
+<!--  ```{r, results = "asis", echo = FALSE} -->
+<!--   -->
+<!--  # I can make these into sentences, SMEs say No, just data -->
+<!--  # I would rather have a list of sentences, I am commenting this out to keep just in case -->
+<!--  # Missy note do both start and restart together, that is when we know which it is -->
+<!--   -->
+<!--  Trigger <- dbSendQuery(MyCurrentDB, statement = paste("SELECT 'Vaccination will be triggered when ',  number_of_units, ", -->
+<!--                                                        " 'units of', name,  ' are detected.', ", -->
+<!--                                                        " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ", -->
+<!--                                                        " FROM Scenariocreator_diseasedetection dd ", -->
+<!--                                                        " JOIN Scenariocreator_diseasedetection_trigger_group tg ON dd.id = ",                                                                        " tg.diseasedetection_id ", -->
+<!--                                                        " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id ", -->
+<!--                                                        " WHERE  restart_only = 0 ")) -->
+<!--   -->
+<!--   -->
+<!--  #creates the data frame from where list will be done -->
+<!--  Trig<-dbFetch(Trigger) -->
+<!--   -->
+<!--  Trig_df<-as.data.frame(Trig) -->
+<!--  #colnames(Trig_df)<-c("Control Protocol","Dest On?","Ring Trigger?","Radius", "Ring Target?","Dest Dir Fwd?","Dest Dir Back","Dest Ind Fwd?","Dest Ind Back") -->
+<!--   -->
+<!--  kable((Trig_df),  caption = "Control Protocol - Vaccination Trigger", booktabs = TRUE) -->
+<!--   -->
+<!--  #dbClearResult(res)#to clear results of your last query -->
+<!--   -->
+<!--  ``` -->
+
+Trigger by Number of Units
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerUnits <- dbSendQuery(MyCurrentDB, statement = paste("SELECT number_of_units, ",
+                                                      "  name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_diseasedetection dd ",
+                                                      " JOIN Scenariocreator_diseasedetection_trigger_group tg ON dd.id =     tg.diseasedetection_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id "))
+
+
+#creates the data frame from where list will be done
+TrigUnit<-dbFetch(TriggerUnits)
+
+TrigUnit_df<-as.data.frame(TrigUnit)
+colnames(TrigUnit_df)<-c("Count of Units","Prod Type","Start/Restart")
+
+kable((TrigUnit_df),  booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Trigger by Number of Days
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerTime <- dbSendQuery(MyCurrentDB, statement = paste("SELECT days, ",
+                                                      "  name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_timefromfirstdetection tfd ",
+                                                      " JOIN Scenariocreator_timefromfirstdetection_trigger_group tg ON tfd.id = tg.timefromfirstdetection_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id "))
+
+
+#creates the data frame from where list will be done
+TrigTime<-dbFetch(TriggerTime)
+
+TrigTime_df<-as.data.frame(TrigTime)
+colnames(TrigTime_df)<-c("Days","Prod Type","Start/Restart")
+
+if (dim(TrigTime_df)[1] > 0){
+  kable((TrigTime_df),  booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Trigger by Rate (number per day)
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerRate <- dbSendQuery(MyCurrentDB, statement = paste("SELECT days, ",
+                                                      "  name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_rateofnewdetections tfd ",
+                                                      " JOIN Scenariocreator_rateofnewdetections_trigger_group tg ON tfd.id = tg.rateofnewdetections_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id "))
+
+
+#creates the data frame from where list will be done
+TrigRate<-dbFetch(TriggerRate)
+
+TrigRate_df<-as.data.frame(TrigRate)
+colnames(TrigRate_df)<-c("Days","Prod Type","Start/Restart")
+
+if (dim(TrigRate_df)[1] > 0){
+  kable((TrigRate_df),  booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Trigger by dissemination rate
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerDR <- dbSendQuery(MyCurrentDB, statement = paste("SELECT days, ",
+                                                      "  name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_disseminationrate tfd ",
+                                                      " JOIN Scenariocreator_disseminationrate_trigger_group tg ON tfd.id = tg.disseminationrate_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id "))
+
+
+#creates the data frame from where list will be done
+TrigDR<-dbFetch(TriggerDR)
+
+TrigDR_df<-as.data.frame(TrigDR)
+colnames(TrigDR_df)<-c("Days","Prod Type","Start/Restart")
+
+if (dim(TrigDR_df)[1] > 0){
+  kable((TrigDR_df),  booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerInd <- dbSendQuery(MyCurrentDB, statement = paste("SELECT number_of_groups, name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_spreadbetweengroups tfd ",
+                                                      " JOIN Scenariocreator_spreadbetweengroups_relevant_groups tg ",
+                                                      " ON tfd.id = tg.spreadbetweengroups_id ",
+                                                      " JOIN Scenariocreator_productiongroup pt ON pt.id = tg.productiongroup_id "))
+
+
+#creates the data frame from where list will be done
+TrigInd<-dbFetch(TriggerInd)
+
+TrigInd_df<-as.data.frame(TrigInd)
+colnames(TrigInd_df)<-c("Days", "Group", "Start/Restart")
+
+if (dim(TrigInd_df)[1] > 0){
+  kable((TrigInd_df),  booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Trigger by days waiting for destruction
+
+```{r, results = "asis", echo = FALSE}
+
+TriggerWait <- dbSendQuery(MyCurrentDB, statement = paste("SELECT days, days, ",
+                                                      "  name,  ",
+                                                      " CASE WHEN restart_only = 0 THEN 'On Start' ELSE 'On Restart' END ",
+                                                      " FROM Scenariocreator_destructionwaittime tfd ",
+                                                      " JOIN Scenariocreator_destructionwaittime_trigger_group tg ON tfd.id =  tg.destructionwaittime_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id "))
+
+
+#creates the data frame from where list will be done
+TrigWait<-dbFetch(TriggerWait)
+
+TrigWait_df<-as.data.frame(TrigWait)
+colnames(TrigWait_df)<-c("Days", "Wait Days", "Prod Type","Start/Restart")
+
+if (dim(TrigWait_df)[1] > 0){
+  kable((TrigWait_df),  booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+A trigger stops Vaccination:
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+StopTrigger <- dbSendQuery(MyCurrentDB, statement = paste("SELECT 'Vaccination will be stopped when ',   ",
+                                                      " IFNULL(number_of_units, 'Stop not used'), 'units of', name,  ' are detected.' ",
+                                                      " FROM Scenariocreator_stopvaccination s ",
+                                                      " JOIN Scenariocreator_stopvaccination_trigger_group tg ON s.id = tg.stopvaccination_id ",
+                                                      " JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id " ))
+                                                      
+
+
+#creates the data frame from where list will be done
+StopTrig<-dbFetch(StopTrigger)
+
+StopTrig_df<-as.data.frame(StopTrig)
+#colnames(StopTrig_df)<-c("Days","Prod Type","Start/Restart")
+
+if (dim(StopTrig_df)[1] > 0){
+  kable((StopTrig_df),  caption = "Control Protocol - Vaccination Stop Trigger", booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+*`r if (dim(StopTrig_df)[1] == 0){ paste0("No vaccination stop triggers.")}`*
+
+A Ring describes the action of Vaccination:
+
+A ring defines which production type starts vaccination and which production type gets vaccinated. Ring has the option to vaccinate animals in a ring. A ring is the action area defined by the vaccination parameter and differs from a zone.
+
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+RingTrigger <- dbSendQuery(MyCurrentDB, statement = paste("SELECT 'When ', pt.name, 'are detected then vaccination is started in ', ",
+                                                          "ptt.name, 'with an inner radius of' , ",
+                                                          "IFNULL(inner_radius, 'not used') as inner, ",
+                                                          " 'and and outer radius of ', outer_radius ",
+                                                          "FROM Scenariocreator_vaccinationringrule rr ",
+                                                          "JOIN Scenariocreator_vaccinationringrule_trigger_group tg ON rr.id = tg.vaccinationringrule_id ",
+                                                          "JOIN Scenariocreator_productiontype pt ON pt.id = tg.productiontype_id ",
+                                                          "JOIN Scenariocreator_vaccinationringrule_target_group ttg ON rr.id = ttg.vaccinationringrule_id ",
+                                                          "JOIN Scenariocreator_productiontype ptt ON ptt.id = ttg.productiontype_id" ))
+                                                      
+
+
+#creates the data frame from where list will be done
+RingTrig<-dbFetch(RingTrigger)
+
+RingTrig_df<-as.data.frame(RingTrig)
+colnames(RingTrig_df)<-c("When","Production Type","Are detected then","Production Type", "with an","inner radius","and an ","outer radius")
+
+if (dim(RingTrig_df)[1] > 0){
+  kable((RingTrig_df),  caption = "Control Protocol - Vaccination Rings", booktabs = TRUE)
+}
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+The global vaccination parameters tell capacity and priority.
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+GlobalVXPlan <- dbSendQuery(MyCurrentDB, statement = paste("SELECT  VG.control_plan, vaccination_priority_order, spdf.name, ",
+                                                            "rpdf.name, vaccinate_retrospective_days  ",
+                                                            "FROM ScenarioCreator_vaccinationglobal VG   ",
+                                                            "LEFT JOIN Scenariocreator_probabilitydensityfunction spdf  ",
+                                                            "ON VG.vaccination_capacity_id = spdf.id  ",
+                                                            "LEFT JOIN Scenariocreator_probabilitydensityfunction rpdf ",                                                                          "ON VG.restart_vaccination_capacity_id= rpdf.id" ))
+                                                      
+
+
+#creates the data frame from where list will be done
+GlobalVX<-dbFetch(GlobalVXPlan)
+
+GlobalVX_df<-as.data.frame(GlobalVX)
+colnames(GlobalVX_df)<-c("Master Plan","VX priority","Start capacity pdf","Restart capacity pdf", "retrospective days to vx")
+
+kable((GlobalVX_df),  caption = "Control Protocol - Vaccination Rings", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+The global vaccination parameters tell Delay in Days to start, priority, capacity and reason order. Note that Reason in Priority refers to Reason Order. Basic in Reason order means Detection.
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+GlobalDestPlan <- dbSendQuery(MyCurrentDB, statement = paste("SELECT destruction_program_delay, ",
+                                                             "destruction_priority_order,  ",
+                                                             "destruction_capacity_id,  ",
+                                                             "destruction_reason_order  ",
+                                                             "FROM ScenarioCreator_destructionglobal DG  " ))
+                                                      
+
+
+#creates the data frame from where list will be done
+GlobalDest<-dbFetch(GlobalDestPlan)
+
+GlobalDest_df<-as.data.frame(GlobalDest)
+colnames(GlobalDest_df)<-c("Dest Days Delay","Priority","Dest capacity pdf","Reason order")
+
+kable((GlobalDest_df),  caption = "Control Protocol - Global Destruction", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+Zones are radial areas that can cause different Effects.  Zones are built first, and then Zone Effects are built. Zone Effects are assigned to both a zone and a production type.
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+Zones <- dbSendQuery(MyCurrentDB, statement = paste("SELECT Name, Radius ",
+                                                    "FROM ScenarioCreator_zone Z   " ))
+                                                      
+#creates the data frame from where list will be done
+Zone<-dbFetch(Zones)
+
+Zone_df<-as.data.frame(Zone)
+colnames(Zone_df)<-c("Zone Name","Radius")
+
+kable((Zone_df),  caption = "Zones", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+ZonesEffects <- dbSendQuery(MyCurrentDB, statement = paste("Select  z.name as zone, PT.name as productiontype, ZoneEffectName, Radius,   ",
+                                                          "zone_detection_multiplier, cost_of_surveillance_per_animal_day, DirMoveName, IndMoveName ",
+                                                          "FROM ScenarioCreator_zoneeffectassignment ZEA ",
+                                                          "JOIN ScenarioCreator_productiontype PT ON ZEA.production_type_id = PT.id ",
+                                                          "JOIN ScenarioCreator_zone z ON ZEA.zone_id = z.id ",
+                                                          "JOIN (Select ZE.name as ZoneEffectName, ZE.id as EffectID, zone_detection_multiplier, ",
+                                                          " cost_of_surveillance_per_animal_day, zedirpdf.name as DirMoveName, ",
+                                                          "zeindirpdf.name as IndMoveName FROM ScenarioCreator_zoneeffect ZE", 
+                                                          "LEFT JOIN Scenariocreator_probabilitydensityfunction zedirpdf  ",
+                                                          "ON ze.zone_direct_movement_id = zedirpdf.id ",
+                                                          "LEFT JOIN Scenariocreator_probabilitydensityfunction zeindirpdf ",
+                                                          "ON ze.zone_indirect_movement_id = zeindirpdf.id) sub ",
+                                                          "ON sub.EffectID = effect_id "))
+
+#creates the data frame from where list will be done
+ZoneE<-dbFetch(ZonesEffects )
+
+ZoneE_df<-as.data.frame(ZoneE)
+colnames(ZoneE_df)<-c("Zone", "Prod Type", "Zone Effect","Radius","Det","Cost Surv/Animal/Day","Dir Move pdf", "Ind Move pdf")
+
+kable((ZoneE_df),  caption = "Zone Effects", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+```{r, results = "asis", echo = FALSE}
+
+## Need Matt help here also because a null doesn't return anything to manipulate into words
+
+
+Outputs1 <- dbSendQuery(MyCurrentDB, statement = paste("SELECT iterations, stop_criteria, days, ",                        
+                                                       "cost_track_destruction,        ",
+                                                       "cost_track_vaccination,  ",
+                                                       "cost_track_zone_surveillance",
+                                                       "FROM ScenarioCreator_outputsettings" ))
+                                                      
+#creates the data frame from where list will be done
+Out1<-dbFetch(Outputs1 )
+
+Out1_df<-as.data.frame(Out1)
+colnames(Out1_df)<-c("Iterations To Run","Stop Criteria","Days if used","Track Cost Dest","Track Cost Vacc","Track Cost Zone Surv")
+
+kable((Out1_df), caption = "Output Settings are used to control runs", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+
+```{r, results = "asis", echo = FALSE}
+
+Outputs2 <- dbSendQuery(MyCurrentDB, statement = paste("SELECT CASE WHEN save_daily_unit_states = 0 THEN 'No' ELSE 'Yes' END, ",
+                                                       "CASE WHEN save_daily_events = 0 THEN 'No' ELSE 'Yes' END,  ",        
+                                                       "CASE WHEN save_daily_exposures = 0 THEN 'No' ELSE 'Yes' END, ",         
+                                                       "CASE WHEN save_iteration_outputs_for_units = 0 THEN 'No' ELSE 'Yes' END, ",
+                                                       "CASE WHEN save_map_output = 0 THEN 'No' ELSE 'Yes' END ",
+                                                       "FROM ScenarioCreator_outputsettings" ))
+                                                      
+#creates the data frame from where list will be done
+Out2<-dbFetch(Outputs2 )
+
+Out2_df<-as.data.frame(Out2)
+colnames(Out2_df)<-c("Create States","Create Events","Create Exposures","Create Map")
+
+kable((Out2_df), caption = "Output Settings are used to make Supplemental Files", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+These units are starting the scenario in a non-susceptible state. This is at the end of the report since this list may be long.
+
+
+```{r, results = "asis", echo = FALSE}
+
+InfUnits <- dbSendQuery(MyCurrentDB, statement = paste("SELECT u.unit_ID, name, initial_state, initial_size, ",
+                                                    "Latitude, Longitude ",
+                                                    "FROM ScenarioCreator_unit u ",
+                                                    "JOIN ScenarioCreator_productiontype PT ",
+                                                    "ON u.production_type_id = PT.id ",
+                                                    "WHERE initial_state != 'S'  " ))
+                                                      
+#creates the data frame from where list will be done
+InfUnit<-dbFetch(InfUnits)
+
+InfUnits_df<-as.data.frame(InfUnit)
+colnames(InfUnits_df)<-c("ID","Name","Initial_state","Initial_size","Lat","Lon")
+
+kable((InfUnits_df),  caption = "Units in a Non-susceptible state", booktabs = TRUE)
+
+#dbClearResult(res)#to clear results of your last query
+
+```
+
+#References
+
+JJ Allaire, Joe Cheng, Yihui Xie, Jonathan McPherson, Winston Chang, Jeff Allen, Hadley Wickham, Aron Atkins, Rob Hyndman and Ruben Arslan   (2017). rmarkdown: Dynamic Documents for R. R package version 1.6. https://CRAN.R-project.org/package=rmarkdown
+
+Kirill Müller, Hadley Wickham, David A. James and Seth Falcon (2017). RSQLite: 'SQLite' Interface for R. R package version 2.0.  https://CRAN.R-project.org/package=RSQLite
+
+R Core Team (2017). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL   https://www.R-project.org/.
+
+RStudio Team (2016). RStudio: Integrated Development for R. RStudio, Inc., Boston, MA URL http://www.rstudio.com/.
+
+R Special Interest Group on Databases (R-SIG-DB), Hadley Wickham and Kirill Müller (2017). DBI: R Database Interface. R package version 0.7.  https://CRAN.R-project.org/package=DBI
+
+Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2017). shiny: Web Application Framework for R. R package version 1.0.5. https://CRAN.R-project.org/package=shiny
+
+Yihui Xie (2017). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.17.
+
+Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN 978-1498716963
+
+Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595
