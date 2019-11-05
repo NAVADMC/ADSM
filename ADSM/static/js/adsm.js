@@ -19,6 +19,7 @@ $(function(){
         if(typeof attachment !== 'undefined')
             form = $('#' + attachment)
         var $container = form.closest('div');
+        $("#unsaved-form-header").addClass("hidden");
         if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
