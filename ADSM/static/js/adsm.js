@@ -224,6 +224,7 @@ $(function(){
         $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
         $(this).closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
         document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
+        document.getElementById("population-formset-body").classList.add('scrollbar-danger');
     });
     
     $('[data-visibility-controller]').livequery(function(){
