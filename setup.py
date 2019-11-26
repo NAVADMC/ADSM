@@ -52,6 +52,7 @@ build_exe_options = {
         (os.path.join('Viewer', settings.OS_DIR), os.path.join('Viewer', settings.OS_DIR)),  # Newline's View application for Django Desktop Core
         ('npu.exe' if sys.platform == 'win32' else 'npu', 'npu.exe' if sys.platform == 'win32' else 'npu'),  # Newline's Updater application for Django Desktop Core
         ('README.md', 'README.md'),
+        ('favicon.ico', 'favicon.ico'),
 
         # CHANGE ME for any files/folders you want included with your project
         ('Sample Scenarios', 'Sample Scenarios'),
