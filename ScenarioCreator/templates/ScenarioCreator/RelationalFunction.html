@@ -7,7 +7,7 @@
     <form id="{{ action|action_id }}" class="ajax relational-form"  method="post" action="{{ action }}" enctype="multipart/form-data">
 
         <a href="{{ action }}graph.png" download class="download-overlay-container">
-            <img id="function-graph" src="{{action}}graph.png" class="download-overlay-image">
+            <img id="function-graph" src="{{action}}graph.png?{% now 'U' %}" class="download-overlay-image">
             <div class="download-overlay-base">
                 <div class="download-overlay-text">Click to Download</div>
             </div>
