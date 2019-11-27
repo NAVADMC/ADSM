@@ -11,7 +11,7 @@
     {% for label, prefix, image_links in headers %}
         <h1>{{ label }}</h1>
         {% for image in image_links%}
-            <img src="{{ image }}/Graph.png" alt=""/>
+            <img src="{{ image }}/Graph.png?{%  now 'U' %}" alt=""/>
         {% endfor %}
         <table class="result-table">
             <thead>
