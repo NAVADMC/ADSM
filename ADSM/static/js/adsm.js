@@ -1021,16 +1021,18 @@ function rebuild_protocols_list() {
 
 function hideCenterPanel() {
     center_panel = document.getElementById("center-panel");
-    center_panel.classList.remove("reveal");
+    if (center_panel != null) {
+        center_panel.classList.remove("reveal");
 
-    // Next two loops is for un-focusing user disease spreads when the center panel is closed.
-    var active_list_elements = document.getElementsByClassName("defined_name");
-    for (var i = 0; i < active_list_elements.length; i++){
-        $(active_list_elements[i]).removeClass("active");
-    }
-    var active_list_div = document.getElementsByClassName("defined");
-    for (var i = 0; i < active_list_div.length; i++){
-        $(active_list_div[i]).removeClass("focused");
+        // Next two loops is for un-focusing user disease spreads when the center panel is closed.
+        var active_list_elements = document.getElementsByClassName("defined_name");
+        for (var i = 0; i < active_list_elements.length; i++) {
+            $(active_list_elements[i]).removeClass("active");
+        }
+        var active_list_div = document.getElementsByClassName("defined");
+        for (var i = 0; i < active_list_div.length; i++) {
+            $(active_list_div[i]).removeClass("focused");
+        }
     }
 }
 
