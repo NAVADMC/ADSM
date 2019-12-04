@@ -40,9 +40,9 @@ if os.path.isfile(INSTALL_SETTINGS_FILE):
     install_settings = machinery.SourceFileLoader('install_settings', INSTALL_SETTINGS_FILE).load_module()
     WORKSPACE_PATH = install_settings.WORKSPACE_PATH
     if str(WORKSPACE_PATH).strip() == ".":
-        WORKSPACE_PATH = os.path.join(BASE_DIR, "workspace")
+        WORKSPACE_PATH = os.path.join(BASE_DIR, "ADSM Workspace")
 else:
-    WORKSPACE_PATH = os.path.join(BASE_DIR, "workspace")
+    WORKSPACE_PATH = os.path.join(BASE_DIR, "ADSM Workspace")
     print("Defaulting to Portable Workspace in this Installation.")  # NOTE: Don't do prompts or dialogs in the settings as it will end up getting executed multiple times
 if not WORKSPACE_PATH:
     raise ValueError('Could not import "WORKSPACE_PATH" from "workspace.ini"! Please re-launch ADSM.')
@@ -55,7 +55,7 @@ if not os.path.exists(WORKSPACE_PATH):
         os.makedirs(WORKSPACE_PATH, exist_ok=True)
     except:
         os.remove(INSTALL_SETTINGS_FILE)
-        raise ValueError("Could not create selected Workspace path! Please re-launch ADSM and select a new Workspace directory.")
+        raise ValueError("Could not create selected Workspace path! Please re-launch ADSM and select a new ADSM Workspace directory.")
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
 

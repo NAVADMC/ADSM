@@ -107,12 +107,16 @@ for proc in psutil.process_iter():
         sys.exit(1)
 
 print("\nPreparing Workspace...")
+if os.path.exists(os.path.join(BASE_DIR, 'workspace')):
+    # Rename any old 'workspace' folders to 'ADSM Workspace'
+    os.rename(os.path.join(BASE_DIR, 'workspace'), os.path.join(BASE_DIR, 'ADSM Workspace'))
 user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
 if not os.path.isfile(user_settings_file):
     Tk().withdraw()
-    pick_custom_workspace = askyesno("Pick a Custom Workspace Directory?", 'Do you want to pick a custom Workspace directory?\nIf not, your installation will be considered "Portable" and a Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your Workspace with other users, then you should select a custom directory.')
+    pick_custom_workspace = askyesno("Pick a custom location for your ADSM Workspace Directory?", 'Do you want to pick a custom location for your ADSM Workspace directory?\nIf not, your installation will be considered "Portable" and am ADSM Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your ADSM Workspace with other users, then you should select a custom directory.')
     if pick_custom_workspace:
-        custom_directory = askdirectory(initialdir=BASE_DIR, title="Select Workspace Directory", mustexist=True)
+        custom_directory = askdirectory(initialdir=BASE_DIR, title="Select location for ADSM Workspace Directory", mustexist=True)
+        custom_directory = os.path.join(custom_directory, 'ADSM Workspace')
         if not str(custom_directory).strip():
             custom_directory = "."
             Message(title="Notice!", message="You did not select a directory!\nDefaulting to a Portable installation in the root folder of this installation.").show()
