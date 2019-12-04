@@ -113,7 +113,7 @@ if os.path.exists(os.path.join(BASE_DIR, 'workspace')):
 user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
 if not os.path.isfile(user_settings_file):
     Tk().withdraw()
-    pick_custom_workspace = askyesno("Pick a custom location for your ADSM Workspace Directory?", 'Do you want to pick a custom location for your ADSM Workspace directory?\nIf not, your installation will be considered "Portable" and am ADSM Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your ADSM Workspace with other users, then you should select a custom directory.')
+    pick_custom_workspace = askyesno("Pick a custom location for your ADSM Workspace Directory?", 'Do you want to pick a custom location for your ADSM Workspace directory?\nIf not, your installation will be considered "Portable" and an ADSM Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your ADSM Workspace with other users, then you should select a custom directory.')
     if pick_custom_workspace:
         custom_directory = askdirectory(initialdir=BASE_DIR, title="Select location for ADSM Workspace Directory", mustexist=True)
         custom_directory = os.path.join(custom_directory, 'ADSM Workspace')
