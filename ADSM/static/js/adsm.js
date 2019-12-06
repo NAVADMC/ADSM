@@ -1045,7 +1045,7 @@ function hideFunctionsPanel() {
 }
 
 function show_crash_text(error_text) {
-    const dialog = new BootstrapDialog.show({
+    var dialog = new BootstrapDialog.show({
         title: 'Simulation Error Details',
         type: BootstrapDialog.TYPE_WARNING,
         message: error_text,
