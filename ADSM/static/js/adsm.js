@@ -1037,10 +1037,13 @@ function hideCenterPanel() {
 }
 
 function hideFunctionsPanel() {
-    functions_panel = document.getElementById('functions_panel');
+    // Click the back button on the functions panel.
+    document.getElementsByName("functions_back")[0].click();
+
+    let functions_panel = document.getElementById('functions_panel');
     functions_panel.classList.add("TB_panel_closed");
 
-    toolbar_btn = document.getElementById("TB_functions");
+    let toolbar_btn = document.getElementById("TB_functions");
     toolbar_btn.classList.remove('active');
 }
 
