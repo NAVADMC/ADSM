@@ -13,15 +13,15 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script>
         <div class="mapwrapper">
             <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
-                <div style="background: url(/results/population_thumbnail.png) no-repeat center;height: 800px; width: 923px;">
+                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;">
                     <!--top level map content goes here-->
                 </div>
                 <div style="height: 2080px; width: 2400px;">
-                    <img src="/results/population_zoom.png" alt="" />
+                    <img src="/results/population_zoom.png?{%  now 'U' %}" alt="" />
                     <div class="mapcontent"></div>
                 </div> 
                 <div style="height: 4160px; width: 4800px;"> 
-                    <img src="/results/population_zoom.png" alt="" />
+                    <img src="/results/population_zoom.png?{%  now 'U' %}" alt="" />
                     <div class="mapcontent"></div>
                 </div>
             </div>  

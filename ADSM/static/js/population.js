@@ -246,10 +246,11 @@ $(document).on('click', '#farm_list .sortControls a', function(event){
 });
 
 $(document).on('click', '#refresh_map', function(){
-    $('#population_map_container').html('')  //clear previous contents
+    $('#population_map_container').html('');  //clear previous contents
     //TODO: set background of container to working.gif
-    //TODO: request 
-    var new_url = '?' + population_filter_string()
+    //TODO: request
+    var today = new Date();
+    var new_url = '?' + today.getTime() + '&' + population_filter_string();
     //$('#population_map_container img').attr('src', '/results/Population.png' + new_url)
 
     var img = new Image();
