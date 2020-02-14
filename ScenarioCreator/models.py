@@ -864,6 +864,7 @@ class OutputSettings(InputSingleton):
         help_text='Create map outputs for units in supplemental directory.', )
 
     def clean_fields(self, exclude=None):
+        super().clean_fields(exclude=exclude)
         if self.stop_criteria != 'stop-days':
             self.days = 1825  # 5 year maximum simulation time
 
