@@ -14,7 +14,7 @@ import sys
 
 
 PRODUCTION_SETTINGS = True  # When you want to enable the production settings, copy the template file and modify
-OVERRIDE_DEBUG = False
+OVERRIDE_DEBUG = True
 if PRODUCTION_SETTINGS:
     PRODUCTION_SETTINGS = True
     from ADSM.production_settings import *
