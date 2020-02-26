@@ -896,6 +896,11 @@ def population(request):
 
 
 def validate_scenario(request):
+
+    # ensure that the destruction_reason_order includes all elements. See #990 for more details
+    DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order = match_data(DestructionGlobal.objects.all()[0].destruction_reason_order,
+                                                                             "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
+
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
                                   shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
