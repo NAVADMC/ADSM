@@ -1089,7 +1089,7 @@ function show_crash_text(error_text) {
         buttons: [
             {
                 label: 'Close',
-                cssClass: 'btn',
+                cssClass: 'btn-primary',
                 action: function (dialog) {
                     dialog.close();
                 }
