@@ -156,7 +156,7 @@ $(function(){
             };  //updates Navigation bar context
         }
         ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
-    })
+    });
 
     $(document).on('click', '#update_adsm', function(event){
         event.preventDefault();
@@ -165,7 +165,7 @@ $(function(){
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
-    })
+    });
 
     $(document).on('click', '.open_scenario', function(event){ // #new_scenario is handled by [data-copy-link]
         var dialog = check_file_saved();
@@ -175,17 +175,18 @@ $(function(){
             dialog.$modal.on('hidden.bs.modal', function(){
                 window.location = link})
         }
-    })
+    });
 
     $(document).on('click', '[data-discard-changes-link]', function(event){ // #new_scenario is handled by [data-copy-link]
-        var dialog = check_file_saved();
+        var dialog = confirm_discard();
         if(dialog){
             event.preventDefault();
             var link = $(this).attr('data-discard-changes-link');
-            dialog.$modal.on('hidden.bs.modal', function(){
-                window.location = link})
+            dialog.$modal.on('hidden.bs.modal', function() {
+                window.location = link
+            })
         }
-    })
+    });
 
     $('.filename input').on('change', function(){
         $(this).closest('form').trigger('submit');
@@ -625,13 +626,13 @@ var attach_visibility_controller = function (self){
     }
     
     $(hide_target).css('margin-left', '26px');
-}
+};
 
 
 var check_file_saved = function(){
     if( $('.scenario-status.unsaved').length)
     {
-        var filename = $('.filename').text().trim()
+        var filename = $('.filename').text().trim();
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,
@@ -663,7 +664,40 @@ var check_file_saved = function(){
         });
         return dialog;
     }
-}
+};
+
+
+var confirm_discard = function(){
+    if( $('.scenario-status.unsaved').length)
+    {
+        var filename = $('.filename').text().trim();
+        var dialog = new BootstrapDialog.show({
+            title: 'Discard Changes Confirmation',
+            closable: false,
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'Are you sure you would like to discard your changes to <strong>' + filename + '</strong>?',
+            buttons: [
+                {
+                    label: 'Discard Changes',
+                    cssClass: 'btn btn-dont-save',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn-primary btn-save',
+                    action: function(dialog){
+                        dialog.$modal.hide();
+                        $('.modal-backdrop').hide();
+                        return false;
+                    }
+                }
+            ]
+        });
+        return dialog;
+    }
+};
 
 
 two_state_button = function(){
