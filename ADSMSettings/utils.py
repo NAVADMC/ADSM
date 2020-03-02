@@ -49,10 +49,12 @@ def db_list():
                 dir_files = os.listdir(os.path.join(workspace_path(), dir))
                 for file in dir_files:
                     if file.endswith('.db') and file.replace('.db', '') != scenario_filename():
-                        dbs.append(file)
+                        dbs.append((file, os.path.getmtime(os.path.join(workspace_path(), dir, file))))  # Append tuple (filename, datemodified)
                         break  # Don't add a directory more than once
         break  # only look at the top level for folders that may contain DBs
-    return sorted(dbs)
+    dbs = sorted(dbs, key=lambda x: x[1], reverse=True)  # Sort by provided date
+    dbs = [x[0] for x in dbs]  # Remove dates and leave just names
+    return dbs
 
 
 def file_list(extensions=[]):
