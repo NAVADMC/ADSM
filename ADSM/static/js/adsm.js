@@ -27,6 +27,10 @@ $(function(){
         }
     })
 
+    $(document).on("click", '.btn-save', function () {
+        $("#unsaved-form-header").addClass("hidden");
+    })
+
     $(document).on('click', '#assign-function', function(){
         var $form = $(this).closest('.layout-panel').find('form')
         if($form.length){
