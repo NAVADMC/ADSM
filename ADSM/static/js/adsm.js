@@ -1092,10 +1092,10 @@ function show_crash_text(error_text) {
         message: error_text,
         buttons: [
             {
-                label: 'Close',
+                label: 'Return to Scenario Creator',
                 cssClass: 'btn-primary',
                 action: function (dialog) {
-                    dialog.close();
+                       location.replace("/results/Inputs/");
                 }
             }
         ]
