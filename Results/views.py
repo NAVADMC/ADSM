@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, Http
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
+from django.utils import timezone as djtimezone
 from django.utils.html import mark_safe
 
 from ADSMSettings.models import SmSession
@@ -92,6 +93,7 @@ def create_blank_unit_stats():
 
 
 def run_simulation(request):
+    print("Starting Simulation run at %s" % djtimezone.now())
     delete_all_outputs()
     delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
