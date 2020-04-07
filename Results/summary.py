@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from statistics import median
+
 from Results.models import DailyControls, DailyByProductionType, DailyByZone
 from ScenarioCreator.models import Zone
 from ScenarioCreator.models import Zone, OutputSettings
@@ -10,9 +12,8 @@ def list_of_iterations():
 
 
 def median_value(queryset, term):
-    count = queryset.count()
     try:
-        med = queryset.values_list(term, flat=True).order_by(term)[int(round(count / 2))]
+        med = median(queryset.values_list(term, flat=True).order_by(term))  # NOTE: We are doing our own order_by even though the median function will do it so that we only get "term" in the values_list
         return med if med != -1 else "N/A"
     except:
         return "N/A"

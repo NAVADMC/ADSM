@@ -1,0 +1,285 @@
+---
+title: "Functions Global Report"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+output:
+  word_document: default
+fontsize: 10pt
+params:
+   dat: "~/ADSM Beta Workspace/AlmostANewSample/AlmostANewSample.db"
+---
+
+<!---
+#
+# Title:   Functions Global Report
+#  Author:  Missy Schoenbaum
+#  Date:    11/9/2018
+#  NOTES: Enter your database above in the dat: line
+#
+# Parameter Global Report returns a report in Word format
+# The word document details the parametes entered into the database using R Markdown
+# SOME SUGGESTIONS THAT COULD NOT BE BUILT INTO THIS REPORT
+# ONCE THE DOCUMENT HAS KNIT INTO A WORD DOCUMENT
+# FORMATTING CANNOT BE CONTROLLED WITH THE R CODE
+# DO FILE SAVE AS TO MAKE EDITS AND IMPROVE FILE FORMAT
+# ADD A PAGE NUMBER IN THE HEADER OR FOOTER
+# PASTE THE DATABASE NAME INTO THE FOOTER ALSO WILL HELP WITH DOCUMENTATION
+# CHANGE THE PAGE LAYOUT FROM PORTRAIT TO LANDSCAPE
+# SELECT ALL THE TEXT AND REDUCE THE FONT SIZE
+# ADD SPACES BETWEEN REL FUNCTIONS
+# COMMON TROUBLSHOOTING PROBLEM - DO NOT CUT AND PASTE YOUR DIRECTORY, SLASHES WILL BE BACKWARDS
+#
+# WHERE READING RELATIONAL FUCTIONS, YOU WILL BE SHOWN EVERY POINT IN THE FUNCTION GROUPED BY THE FUNCTION NAME
+## 
+--->
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+options(knitr.kable.NA = '-')
+```
+
+```{r setup, include=FALSE}
+
+#install.packages("RSQLite")
+#install.packages("DBI")
+#install.packages("knitr")
+
+
+library("RSQLite") #to connect to SQLite from R 
+library("DBI")     #(this is what I am using)
+library("knitr")   #to do rmarkdown documents
+
+
+rm(list=ls())      # to clean the environment
+
+list.of.packages <- c("ggplot2", "shiny","plotly","xlsx", "jpeg","leaflet","RSQLite","DBI","knitr","gridExtra",
+                      "igraph","reshape","maps","rmarkdown","dplyr", "readxl", "tcltk2", "tidyverse", "doBy", "stringr",
+                      "gtools", "DBI")
+
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+
+if(length(new.packages)) install.packages(new.packages)
+
+lapply(list.of.packages, require, character.only = TRUE)
+
+adsmr_getdirpath = function(inCaption){
+  
+  #### Helper function that browses for an output directory
+  browseInput = function(){
+    
+    # Convert the tcl variable to an R variable
+    # nComparisons = as.numeric(tclvalue(nComparisons))
+    nameComparisons = "chosenScenario"
+    
+    # Intialize the list or directories
+    dirpath = list()
+    
+    # # Destroy the GUI window
+    # tbtkdestroy()
+    
+    # for(i in 1:nComparisons){
+      ## Name the directory
+      dirpath = (tcltk::tk_choose.dir(caption = inCaption))
+      
+      ## Error checking for a selected directory
+      if (dirpath == ""){
+        tkmessageBox("No directory was selected")
+        stop("No directory was selected")
+      }
+      
+    # }
+    
+    splitNames = str_trim(str_split(nameComparisons, ",")[[1]])
+    if (length(splitNames) != 1){
+      tkmessageBox(message = "Number of scenario names does not equal the number of scenarios chosen, default names used instead")
+      splitNames = str_trim(unlist(lapply(current_wd, function(x){
+        xSplit = str_split(x, "/")
+        xSplitLast = xSplit[[1]][length(xSplit[[1]])]
+        return(xSplitLast)
+      })))
+    }
+    names(dirpath) = splitNames
+    
+    splitdirpath = str_split(dirpath, "/")
+    dirpath = paste0(dirpath, "/", splitdirpath[[1]][length(splitdirpath[[1]])], ".db")
+    
+    assign("dirpath", dirpath, envir = .GlobalEnv)
+    
+  }
+  
+  browseInput()
+  
+  # tbtkdestroy = function(){
+  #   tkdestroy(tb_tkwin)
+  # }
+  # 
+  # #========================================================================================#
+  # #### TclTk interface
+  # 
+  # ## Open a generic window
+  # tb_tkwin = tktoplevel()
+  # tkraise(tb_tkwin)
+  # 
+  # ## Set a default number of comparisons
+  # # nComparisons = tclVar("2")
+  # # nameComparisons = tclVar("Scenario1, Scenario2")
+  # 
+  # ## Create a user input form for the number of scenarios for comparison
+  # # tb_tkwin$env$in_nComparisons = tk2entry(tb_tkwin, width = "25", textvariable = nComparisons)
+  # 
+  # ## Create text inputs for naming scenarios
+  # # tb_tkwin$env$in_nameComparisons = tk2entry(tb_tkwin, width = 60, textvariable = nameComparisons)
+  # 
+  # ## Create a button to run the model
+  # tb_tkwin$env$butRunModel = tk2button(tb_tkwin,
+  #                                      text = "Enter",
+  #                                      command = browseInput)
+  # 
+  # ## Create a cancel button
+  # tb_tkwin$env$butCancel = tk2button(tb_tkwin,
+  #                                    text = "Cancel",
+  #                                    command = tbtkdestroy)
+  # 
+  # ## Set the interactive window title and lay out components
+  # tktitle(tb_tkwin) = "ADSM Parameter Document"
+  # # tkgrid(tk2label(tb_tkwin, text = "Enter the number of scenarios \n you want to compare:"),
+  # #        tb_tkwin$env$in_nComparisons,
+  # #        columnspan = 2,
+  # #        padx = 5,
+  # #        pady = c(5, 15))
+  # # tkgrid(tk2label(tb_tkwin, text = "Enter the name of each scenario, \n separated by commas (\",\"):"),
+  # #        tb_tkwin$env$in_nameComparisons,
+  # #        columnspan = 2,
+  # #        padx = 5,
+  # #        pady = c(5, 15))
+  # tkgrid(tk2label(tb_tkwin, text = "    "))
+  # tkgrid(tb_tkwin$env$butRunModel,
+  #        tb_tkwin$env$butCancel,
+  #        columnspan = 2,
+  #        padx = 5,
+  #        pady = c(5, 15))
+  # 
+  # tkbind(tb_tkwin$env$entVersion, "<Return>", browseInput)
+  # tkwait.window(tb_tkwin)
+}
+
+adsmr_getdirpath("Select the ADSM output folder (that contains the .db files) you wish to use as input")
+
+
+```
+
+```{r, include=F}
+# connect to the sqlite file of the scenario, customize this line to point to the scenario file
+# the default is set to the Sample Scenario with Outputs which is included with all ADSM implementations
+
+MyCurrentDB <- dbConnect(RSQLite::SQLite(), path.expand(dirpath))
+
+splitpath = strsplit(dirpath, "/")
+scenarioname = strsplit(splitpath[[1]][length(splitpath[[1]])], ".db")[[1]]
+
+```
+
+# Running notes
+
+  - Database file: ``r path.expand(dirpath)``
+  - Scenario name: ``r scenarioname``
+  - Report run date: ``r format(Sys.time(), '%m/%d/%Y %I:%M%p')``
+
+# Overview 
+
+>This document provides a printable version of the relational functions and the probability density functions that are available in ADSM. The probability density functions will only present the values that support a given equation type, which will leave gaps in the table. 
+
+>Please Note: This document is a report of the data entered into ADSM Version 3.5.  In order to change a parameter value, the user must change the value in ADSM interface, apply and save the changes to update. Changing this document does NOT change ADSM.   Every ADSM database has exactly the same structure, but users may or may not use given parameters, resulting in Null values or blanks in this report. The Word document output can be formatted after it has been created.
+
+> Use this document as a cross reference to the Parameter Global Report
+
+```{r, include=F}
+
+PDFs <- dbSendQuery(MyCurrentDB, statement = paste("SELECT Name, equation_type, mean, std_dev, min, mode, ",
+                                                   "max, alpha, alpha2, beta, location, scale, shape, ",
+                                                   "n, p, m, d, theta, a, s, graph_id, x_axis_units  ",
+                                                   "FROM ScenarioCreator_probabilitydensityfunction ",
+                                                   "ORDER BY 1"))
+
+#creates the data frame from where analyses will be done
+pdf<-dbFetch(PDFs) 
+
+pdf_df<-as.data.frame(pdf)
+colnames(pdf_df)<-c("Name","type","mean","stddv","min","mode","max","alpha","alpha2","beta","location","scale","shape",                            "n","p","m","d","theta","a","s","graph","xaxis")
+
+```
+
+```{r, results = "asis", echo = FALSE}
+kable((pdf_df),  caption = "Probability Density Functions", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+
+
+```{r, results = "asis", echo = FALSE}
+
+RelFunctions <- dbSendQuery(MyCurrentDB, statement = paste("SELECT name, notes, x, x_axis_units, y,  y_axis_units ",
+                                                  "FROM ScenarioCreator_relationalfunction f ",
+                                                  "JOIN ScenarioCreator_relationalpoint p ",
+                                                  "ON f.id = p.relational_function_id ",
+                                                  "ORDER BY p.id"))
+
+#creates the data frame with list
+Rels<-dbFetch(RelFunctions)  
+
+Rels_df<-as.data.frame(Rels)
+#colnames(Rels_df)<-c("Description","Random Seed")
+
+kable((Rels_df),  caption = "Relational Functions - values that can change over time", booktabs = TRUE) 
+
+#dbClearResult(res)#to clear results of your last query
+```
+
+
+<!-- Can I plot one of these? -->
+
+
+<!-- ```{r, results = "asis", echo = FALSE} -->
+
+<!-- RelFunctionsPlot <- dbSendQuery(MyCurrentDB, statement = paste("SELECT name, x, x_axis_units, y,  y_axis_units ", -->
+<!--                                                   "FROM ScenarioCreator_relationalfunction f ", -->
+<!--                                                   "JOIN ScenarioCreator_relationalpoint p ", -->
+<!--                                                   "ON f.id = p.relational_function_id ", -->
+<!--                                                   " WHERE name = 'Latent period' ", -->
+<!--                                                   "ORDER BY p.id")) -->
+
+<!-- #creates the data frame with list -->
+<!-- RelsPlot<-dbFetch(RelFunctionsPlot)   -->
+
+<!-- RelsPlot_df<-as.data.frame(RelsPlot) -->
+
+<!-- plot(RelsPlot_df) -->
+<!-- #geom_curve(aes_(x, y), data = Rels_df, main = "Latent Period")  -->
+
+<!-- #dbClearResult(res)#to clear results of your last query -->
+<!-- ``` -->
+
+
+#References
+
+
+JJ Allaire, Joe Cheng, Yihui Xie, Jonathan McPherson, Winston Chang, Jeff Allen, Hadley Wickham, Aron Atkins, Rob Hyndman and Ruben Arslan   (2017). rmarkdown: Dynamic Documents for R. R package version 1.6. https://CRAN.R-project.org/package=rmarkdown
+
+Kirill Müller, Hadley Wickham, David A. James and Seth Falcon (2017). RSQLite: 'SQLite' Interface for R. R package version 2.0.  https://CRAN.R-project.org/package=RSQLite
+
+R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL   https://www.R-project.org/.
+
+RStudio Team (2016). RStudio: Integrated Development for R. RStudio, Inc., Boston, MA URL http://www.rstudio.com/.
+
+R Special Interest Group on Databases (R-SIG-DB), Hadley Wickham and Kirill Müller (2017). DBI: R Database Interface. R package version 0.7.  https://CRAN.R-project.org/package=DBI
+
+Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2017). shiny: Web Application Framework for R. R package version 1.0.5. https://CRAN.R-project.org/package=shiny
+
+Yihui Xie (2017). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.17.
+
+Yihui Xie (2015) Dynamic Documents with R and knitr. 2nd edition. Chapman and Hall/CRC. ISBN 978-1498716963
+
+Yihui Xie (2014) knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595

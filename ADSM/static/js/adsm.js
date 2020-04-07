@@ -19,11 +19,16 @@ $(function(){
         if(typeof attachment !== 'undefined')
             form = $('#' + attachment)
         var $container = form.closest('div');
+        $("#unsaved-form-header").addClass("hidden");
         if($container.closest('.layout-panel').attr('id') == 'main-panel'){
             window.location.reload()
         }else{
             clear_form_populate_panel($container);
         }
+    })
+
+    $(document).on("click", '.btn-save', function () {
+        $("#unsaved-form-header").addClass("hidden");
     })
 
     $(document).on('click', '#assign-function', function(){
@@ -39,7 +44,9 @@ $(function(){
                 if(parent_select.attr('data-new-item-url').indexOf(model) != -1){ //correct model
                     if(pk != 'new'){
                         parent_select.val(pk)
-                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+                        parent_select.closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+                        parent_select.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+                        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
                     }
                 }else{
                     $(this).popover({'content': "Cannot assign a probability function to a relational field, or vice versa",
@@ -67,6 +74,8 @@ $(function(){
             $('#functions_panel select').prop('disabled', true);
             $('#functions_panel textarea').prop('disabled', true);
         };
+        // activate the corresponding toolbar button
+        document.getElementById('TB_functions').classList.add('active');
     })
 
     $('form[action^="/setup/ProbabilityDensityFunction"]').livequery(function(){
@@ -82,6 +91,8 @@ $(function(){
             $('#functions_panel select').prop('disabled', true);
             $('#functions_panel textarea').prop('disabled', true);
         };
+        // activate the corresponding toolbar button
+        document.getElementById('TB_functions').classList.add('active');
     })
 
 
@@ -149,7 +160,7 @@ $(function(){
             };  //updates Navigation bar context
         }
         ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
-    })
+    });
 
     $(document).on('click', '#update_adsm', function(event){
         event.preventDefault();
@@ -158,7 +169,7 @@ $(function(){
 
     $(document).on('saved', 'form:has(.unsaved)', function(){ //fixes 'Save' button with wrong color state
         $(this).find('.unsaved').removeClass('unsaved');
-    })
+    });
 
     $(document).on('click', '.open_scenario', function(event){ // #new_scenario is handled by [data-copy-link]
         var dialog = check_file_saved();
@@ -168,7 +179,18 @@ $(function(){
             dialog.$modal.on('hidden.bs.modal', function(){
                 window.location = link})
         }
-    })
+    });
+
+    $(document).on('click', '[data-discard-changes-link]', function(event){ // #new_scenario is handled by [data-copy-link]
+        var dialog = confirm_discard();
+        if(dialog){
+            event.preventDefault();
+            var link = $(this).attr('data-discard-changes-link');
+            dialog.$modal.on('hidden.bs.modal', function() {
+                window.location = link
+            })
+        }
+    });
 
     $('.filename input').on('change', function(){
         $(this).closest('form').trigger('submit');
@@ -196,15 +218,19 @@ $(function(){
         populate_pdf_panel(select);
 
     })
-    
+
     $(document).on('change', ':input, select', function(){
-        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        $(this).closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     });
     
     $(document).on('input', 'input, textarea', function(){
-        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        $(this).closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        $(this).closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
+        document.getElementById("population-formset-body").classList.add('scrollbar-danger');
     });
-    
     
     $('[data-visibility-controller]').livequery(function(){
         attach_visibility_controller(this)
@@ -232,7 +258,7 @@ $(function(){
         $(this).parent('form').submit();
     })
 
-    $(document).on('click', '[data-delete-link]', function(){
+    $(document).on('click', '[data-delete-link], [additional-warning], [custom-deletable]', function(){
         var link = $(this).attr('data-delete-link')
         var deleting_outputs = typeof outputs_exist !== 'undefined' && outputs_exist;
         var do_reload = $(this).hasClass('ajax-post') || deleting_outputs
@@ -244,13 +270,21 @@ $(function(){
             object_type = 'object';
         }
         var additional_msg = ''
+        var additional_warning = ''
+        var custom_deletable = ''
         if(deleting_outputs){
             additional_msg = ' and <strong><u>All Results</u></strong>' 
+        }
+        if ($(this).attr('additional-warning') != undefined) {
+            additional_warning = $(this).attr('additional-warning')
+        }
+        if ($(this).attr('custom-deletable') != undefined) {
+            custom_deletable = $(this).attr('custom-deletable')
         }
         var dialog = new BootstrapDialog.show({
             title: 'Delete Confirmation',
             type: BootstrapDialog.TYPE_WARNING,
-            message: 'Are you sure you want to delete the selected ' + object_type + additional_msg + '?',
+            message: 'Are you sure you want to delete the selected ' + ((custom_deletable == '') ? object_type : custom_deletable) + additional_msg + '?\n' + additional_warning,
             buttons: [
                 {
                     label: 'Cancel',
@@ -289,7 +323,8 @@ $(function(){
                                     dialog.close();
                                 });
                             }
-                        } 
+                        }
+                        hideCenterPanel();
                     }
                 }
             ]
@@ -327,7 +362,7 @@ $(function(){
             var label = $('nav').find('a.active').first().text()
             $.each(['Vaccination', 'Protocol', 'Zone'], function(index, value){
                 if(label.indexOf(value) != -1){
-                    new_link = '/setup/ControlMasterPlan/1/'
+                    new_link = '/setup/VaccinationGlobal/1/'
                 }
             })
         }
@@ -474,14 +509,33 @@ function load_target_link(callback){
                 callback(element);
             }
         });
-        $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
-        
+        if(selector == "#center-panel") {
+            $('#center-panel').addClass('reveal'); //allows toggle of box shadow on :before pseudo element
+        }
     }
 
+/*
+Desc:       This function is called when the population panel (right-panel) is opened from inside the page instead of
+            from the right-toolbar. It performs two actions, the first of which is to open the population panel itself,
+            the second of which is to active the right-toolbar so it is clear to the user where the panel is comming
+            from (and the right-toolbar button does not have to be pushed twice to clear the panel).
+
+Params:     None
+
+Returns:    None
+
+Tickets:    #922 Added right-toolbar activation.
+ */
 function open_population_panel() {
+    // get the population panel
     var pop = $('#population_panel');
-    pop.removeClass('TB_panel_closed')
-    pop.addClass('add-pt')
+    // open the population panel
+    pop.removeClass('TB_panel_closed');
+    pop.addClass('add-pt');
+    // get the right-toolbar population button
+    control = document.getElementById('TB_population');
+    // activate it
+    control.classList.add('active');
 }
 
 function open_panel_if_needed() {
@@ -576,13 +630,13 @@ var attach_visibility_controller = function (self){
     }
     
     $(hide_target).css('margin-left', '26px');
-}
+};
 
 
 var check_file_saved = function(){
     if( $('.scenario-status.unsaved').length)
     {
-        var filename = $('.filename').text().trim()
+        var filename = $('.filename').text().trim();
         var dialog = new BootstrapDialog.show({
             title: 'Unsaved Scenario Confirmation',
             closable: false,
@@ -614,7 +668,40 @@ var check_file_saved = function(){
         });
         return dialog;
     }
-}
+};
+
+
+var confirm_discard = function(){
+    if( $('.scenario-status.unsaved').length)
+    {
+        var filename = $('.filename').text().trim();
+        var dialog = new BootstrapDialog.show({
+            title: 'Discard Changes Confirmation',
+            closable: false,
+            type: BootstrapDialog.TYPE_WARNING,
+            message: 'Are you sure you would like to discard your changes to <strong>' + filename + '</strong>?',
+            buttons: [
+                {
+                    label: 'Discard Changes',
+                    cssClass: 'btn btn-dont-save',
+                    action: function(dialog){
+                        dialog.close();
+                    }
+                },
+                {
+                    label: 'Cancel',
+                    cssClass: 'btn-primary btn-save',
+                    action: function(dialog){
+                        dialog.$modal.hide();
+                        $('.modal-backdrop').hide();
+                        return false;
+                    }
+                }
+            ]
+        });
+        return dialog;
+    }
+};
 
 
 two_state_button = function(){
@@ -646,7 +733,10 @@ function add_model_option_to_selects(html, selectInput) {
         .before($('<option value="' + pk + '">' + title + '</option>')); // Add option to all similar selects
     if(selectInput != null){
         selectInput.val(pk); // select option for select that was originally clicked
-        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled')
+        selectInput.closest('.layout-panel').find('.btn-save').removeAttr('disabled'); //unsaved changes
+        parent_select.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        selectInput.closest('.layout-panel').find('.fragment').addClass('scrollbar-danger'); //unsaved changes
+        document.getElementById("unsaved-form-header").classList.remove('hidden'); //unsaved changes
     }
     //add functions to their panel lists
     var $new_link = $('.function_dropdown [href="' + model_link + '"]')
@@ -965,4 +1055,49 @@ function statusChecker(){
 function rebuild_protocols_list() {
     $('#protocol_list #accordion').remove();
     build_protocols_list(); // build from js rather than reload HTML
+}
+
+function hideCenterPanel() {
+    center_panel = document.getElementById("center-panel");
+    if (center_panel != null) {
+        center_panel.classList.remove("reveal");
+
+        // Next two loops is for un-focusing user disease spreads when the center panel is closed.
+        var active_list_elements = document.getElementsByClassName("defined_name");
+        for (var i = 0; i < active_list_elements.length; i++) {
+            $(active_list_elements[i]).removeClass("active");
+        }
+        var active_list_div = document.getElementsByClassName("defined");
+        for (var i = 0; i < active_list_div.length; i++) {
+            $(active_list_div[i]).removeClass("focused");
+        }
+    }
+}
+
+function hideFunctionsPanel() {
+    // Click the back button on the functions panel.
+    document.getElementsByName("functions_back")[0].click();
+
+    let functions_panel = document.getElementById('functions_panel');
+    functions_panel.classList.add("TB_panel_closed");
+
+    let toolbar_btn = document.getElementById("TB_functions");
+    toolbar_btn.classList.remove('active');
+}
+
+function show_crash_text(error_text) {
+    var dialog = new BootstrapDialog.show({
+        title: 'Simulation Error Details',
+        type: BootstrapDialog.TYPE_WARNING,
+        message: error_text,
+        buttons: [
+            {
+                label: 'Return to Scenario Creator',
+                cssClass: 'btn-primary',
+                action: function (dialog) {
+                       location.replace("/results/Inputs/");
+                }
+            }
+        ]
+    });
 }

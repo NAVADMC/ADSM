@@ -13,10 +13,8 @@ from ADSMSettings.views import save_scenario
 from ADSMSettings.utils import adsm_executable_command
 from ADSMSettings.models import SimulationProcessRecord, SmSession
 from Results.models import DailyControls, DailyByZoneAndProductionType, DailyByProductionType, DailyByZone, ResultsVersion
-from Results.utils import zip_map_directory_if_it_exists
+from Results.utils import zip_map_directory_if_it_exists, abort_simulation
 from ScenarioCreator.models import ProductionType, Zone
-
-
 
 
 def non_empty_lines(line):
@@ -54,6 +52,9 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
                                       bufsize=1)
+        # Popen is non-blocking, and all the readlines below read the process output in real time as it buffers
+        # Calling communicate IS blocking, so we don't want to do that until this process is done
+        # Ideally we would run communicate first so we can get any errors, but this would prevent us from updating progress of this simulation in real time.
         headers = simulation.stdout.readline().decode()
         log_file.write("LOG: HEADERS:\n")
         log_file.write("%s\n" % headers)
@@ -91,6 +92,13 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
             log_file.write("LOG: FINAL ERRORS:\n")
             log_file.write("%s\n" % errors)
             print(errors)
+            if not SmSession.objects.get().simulation_crashed:
+                error_text = errors.decode()
+                if "MEMORY-ERROR" in error_text:
+                    error_text += "This scenario has exceeded the limits of ADSM. It will be necessary to modify " \
+								  "your parameters to reducde disease spread to execute this scenario."
+                SmSession.objects.all().update(simulation_crashed=True, crash_text=error_text)
+            abort_simulation()
     # End logging
     
     sorted_results = defaultdict(lambda: [] )

@@ -3,13 +3,13 @@
         <div id="sim_progress_and_button">
             <div class="progress progress-done">
                 <span class="simulation-status status-text">Simulation complete.  {{ iterations_completed }} iterations.</span>
-                <div class="simulation-progress progress-bar done" style="width: 100%;"></div>
+                <div id="progress-bar" class="simulation-progress progress-bar done" style="width: 100%;"></div>
             </div>
         </div>
     {% else %}
         <div id="sim_progress_and_button">
             <div id="running_message">Running Simulation</div>
-            <a href="/results/abort_simulation" class="btn">Abort</a>
+            <a class="btn hidden" href="/LoadingScreen/?loading_url=/results/abort_simulation" id="sim_abort_btn">Abort</a>
             <div class="progress">
                 <span class="simulation-status status-text"></span>
                 <div class="simulation-progress progress-bar" style="width:{{ results_progress|floatformat:"0" }}%"></div>

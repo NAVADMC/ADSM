@@ -49,10 +49,12 @@ def db_list():
                 dir_files = os.listdir(os.path.join(workspace_path(), dir))
                 for file in dir_files:
                     if file.endswith('.db') and file.replace('.db', '') != scenario_filename():
-                        dbs.append(file)
+                        dbs.append((file, os.path.getmtime(os.path.join(workspace_path(), dir, file))))  # Append tuple (filename, datemodified)
                         break  # Don't add a directory more than once
         break  # only look at the top level for folders that may contain DBs
-    return sorted(dbs)
+    dbs = sorted(dbs, key=lambda x: x[1], reverse=True)  # Sort by provided date
+    dbs = [x[0] for x in dbs]  # Remove dates and leave just names
+    return dbs
 
 
 def file_list(extensions=[]):
@@ -157,8 +159,10 @@ def graceful_startup():
 
     print("Copying Sample Scenarios and Example Queries and Code...")
     samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
+    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
+    blacklisted_files = ["population_map.png", "population_thumbnail.png"]
     for dirpath, dirnames, files in os.walk(samples_dir):
-        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames]
+        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
         subdir = str(dirpath).replace(samples_dir, '')
         if subdir.startswith(os.path.sep):
             subdir = subdir.replace(os.path.sep, '', 1)
@@ -166,10 +170,11 @@ def graceful_startup():
             if not os.path.exists(os.path.join(workspace_path(), subdir)):
                 os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
         for file in files:
-            try:
-                shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
-            except Exception as e:
-                print(e)
+            if file not in blacklisted_files:
+                try:
+                    shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+                except Exception as e:
+                    print(e)
 
     print("Migrating all .sqlite3 files to .db...")
     connections.close_all()
@@ -211,6 +216,7 @@ def graceful_startup():
         reset_db('scenario_db')
 
     update_db_version()
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
 
     if getattr(sys, 'frozen', False):
         check_for_updates()

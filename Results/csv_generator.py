@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import connections, OperationalError
 from django.db.models import Avg, Min, Max
 from math import sqrt
+from numpy import percentile
 from statistics import pstdev
 
 from ADSMSettings.utils import workspace_path, scenario_filename
@@ -25,10 +26,11 @@ def create_csv_file(location, headers, data):
             writer.writerow(x)
 
 
-def django_percentile(field_name, query_set, cutoff_percentile, count):
-    index = int((count - 1) * (cutoff_percentile / 100))
-    model_instance = query_set.order_by(field_name)[index]
-    return getattr(model_instance, field_name)
+def django_percentile(field_name, query_set, cutoff_percentile):
+    try:
+        return percentile(query_set.values_list(field_name).order_by(field_name), cutoff_percentile)
+    except:
+        return "N/A"
 
 
 class SummaryCSVGenerator(multiprocessing.Process):
@@ -61,25 +63,22 @@ class SummaryCSVGenerator(multiprocessing.Process):
         data = []  # 2D
 
         fields_of_interest = [field for field, val in DailyByProductionType() if 'Cumulative' in explain(field)]  # only cumulative, last day fields in DailyByProductionType for all production types
-        grab_pt = 'infcUIni infcAIni infcUAir infcAAir infcUDir infcADir infcUInd infcAInd expcUDir expcADir expcUInd expcAInd detcUClin detcAClin detcUTest detcATest descUIni descAIni descUDet descADet descUDirFwd descADirFwd descUIndFwd descAIndFwd descUDirBack descADirBack descUIndBack descAIndBack descURing descARing vaccUIni vaccAIni vaccURing vaccARing vacwUMax vacwAMax vacwUMaxDay vacwAMaxDay vacwUTimeMax vacwUTimeAvg exmcUDirFwd exmcADirFwd exmcUIndFwd exmcAIndFwd exmcUDirBack exmcADirBack exmcUIndBack exmcAIndBack tstcUDirFwd tstcADirFwd tstcUIndFwd tstcAIndFwd tstcUDirBack tstcADirBack tstcUIndBack tstcAIndBack tstcUTruePos tstcUTrueNeg tstcUFalsePos tstcUFalseNeg firstDetection lastDetection firstVaccination firstDestruction tsdUSusc tsdASusc tsdULat tsdALat tsdUSubc tsdASubc tsdUClin tsdAClin tsdUNImm tsdANImm tsdUVImm tsdAVImm tsdUDest tsdADest'.split()
+        grab_pt = 'infcUIni infcAIni infcUAir infcAAir infcUDir infcADir infcUInd infcAInd expcUDir expcADir expcUInd expcAInd detcUClin detcAClin detcUTest detcATest descUIni descAIni descUDet descADet descUDirFwd descADirFwd descUIndFwd descAIndFwd descUDirBack descADirBack descUIndBack descAIndBack descURing descARing vaccUIni vaccAIni vaccURing vaccARing vacwUMax vacwAMax vacwUMaxDay vacwAMaxDay vacwUTimeMax vacwUTimeAvg exmcUDirFwd exmcADirFwd exmcUIndFwd exmcAIndFwd exmcUDirBack exmcADirBack exmcUIndBack exmcAIndBack tstcUDirFwd tstcADirFwd tstcUIndFwd tstcAIndFwd tstcUDirBack tstcADirBack tstcUIndBack tstcAIndBack tstcUTruePos tstcUTrueNeg tstcUFalsePos tstcUFalseNeg firstDetection lastDetection firstVaccination firstDestruction'.split()
         query_set = DailyByProductionType.objects.filter(last_day=True, production_type__isnull=True, )
-        count = query_set.count()  # only needs to be evaluated once per model
         for field_name in set().union(grab_pt, fields_of_interest):
-            data.append(self.summary_row(field_name, query_set, headers, count))
+            data.append(self.summary_row(field_name, query_set, headers))
 
         grab_controls = 'deswUMax deswAMax deswUMaxDay deswAMaxDay deswUTimeMax deswUTimeAvg deswUDaysInQueue deswADaysInQueue detOccurred firstDetUInf firstDetAInf vaccOccurred destrOccurred diseaseDuration outbreakDuration'.split()
         query_set = DailyControls.objects.filter(last_day=True)
-        count = query_set.count()  # only needs to be evaluated once per model
         for field_name in grab_controls:
-            data.append(self.summary_row(field_name, query_set, headers, count))
+            data.append(self.summary_row(field_name, query_set, headers))
 
         # TODO: These are field names mentioned in the original NAADSM file that I have not yet accounted for
         unaccounted_for = 'infcUAll infcAAll expcUAll expcAAll trcUDirFwd trcADirFwd trcUIndFwd trcAIndFwd trcUDirpFwd trcADirpFwd trcUIndpFwd trcAIndpFwd trcUDirBack trcADirBack trcUIndBack trcAIndBack trcUDirpBack trcADirpBack trcUIndpBack trcAIndpBack trcUDirAll trcADirAll trcUIndAll trcAIndAll trcUAll trcAAll tocUDirFwd tocUIndFwd tocUDirBack tocUIndBack tocUDirAll tocUIndAll tocUAll detcUAll detcAAll descUAll descAAll vaccUAll vaccAAll exmcUDirAll exmcADirAll exmcUIndAll exmcAIndAll exmcUAll exmcAAll tstcUDirAll tstcADirAll tstcUIndAll tstcAIndAll tstcUAll tstcAAll tstcATruePos tstcATrueNeg tstcAFalsePos tstcAFalseNeg zoncFoci diseaseEnded outbreakEnded'.split()
 
         return headers, data
 
-
-    def summary_row(self, field_name, query_set, headers, count):
+    def summary_row(self, field_name, query_set, headers):
 
         resolvers = {'Field Name': lambda field, query: field_name,
                      'Explanation': lambda field, query: explain(field_name),
@@ -87,11 +86,11 @@ class SummaryCSVGenerator(multiprocessing.Process):
                      'StdDev': std_dev,
                      'Low': lambda field, query: query.aggregate(Min(field)).popitem()[1],  # grabs value
                      'High': lambda field, query: query.aggregate(Max(field)).popitem()[1],  # grabs value
-                     'p5': lambda field, query:  django_percentile(field, query, 5, count),
-                     'p25': lambda field, query: django_percentile(field, query, 25, count),
-                     'p50': lambda field, query: django_percentile(field, query, 50, count),
-                     'p75': lambda field, query: django_percentile(field, query, 75, count),
-                     'p95': lambda field, query: django_percentile(field, query, 95, count),
+                     'p5': lambda field, query:  django_percentile(field, query, 5),
+                     'p25': lambda field, query: django_percentile(field, query, 25),
+                     'p50': lambda field, query: django_percentile(field, query, 50),
+                     'p75': lambda field, query: django_percentile(field, query, 75),
+                     'p95': lambda field, query: django_percentile(field, query, 95),
         }
         row = {}
         for column in headers:

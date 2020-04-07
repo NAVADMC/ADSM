@@ -343,23 +343,29 @@ class ProbabilityDensityFunction(Function):
     graph = models.ForeignKey('RelationalFunction', blank=True, null=True,
         help_text='A series of points used in: Histogram, Piecewise.')
 
+    export_fields = ["name", "x_axis_units", "notes", "equation_type", "mean", "std_dev", "min", "mode", "max", "alpha", "alpha2", "beta", "location", "scale", "shape", "n", "p", "m", "d", "theta", "a", "s", "graph"]
+
 
 class RelationalFunction(Function):
     wiki_link = "https://github.com/NAVADMC/ADSM/wiki/Relational-functions"
     y_axis_units = models.CharField(max_length=255, blank=True,
         help_text='Specifies the descriptive units for the x axis in relational functions.', )
 
+    export_fields = ["name", "x_axis_units", "notes", "y_axis_units"]
+
 
 class RelationalPoint(BaseModel):
     relational_function = models.ForeignKey(RelationalFunction)
     x = FloatField(validators=[MinValueValidator(0.0)], )
     y = FloatField(validators=[MinValueValidator(0.0)], )
+
+    export_fields = ["x", "y"]
+
     def __str__(self):
         return '%i Point(%s, %s)' % (self.relational_function.id, self.x, self.y)
 
 
-class ControlMasterPlan(InputSingleton):
-    name = models.CharField(default="Control Master Plan", max_length=255)
+class VaccinationGlobal(InputSingleton):
     disable_all_controls = models.BooleanField(default=False,
         help_text='Disable all ' + wiki("Control activities", "control-measures") +
                   ' for this simulation run.  Normally used temporarily to test uncontrolled disease spread.')
@@ -371,6 +377,7 @@ class ControlMasterPlan(InputSingleton):
         help_text='The priority criteria for order of vaccinations.',)
     vaccinate_retrospective_days = models.PositiveIntegerField(blank=True, null=True, default=0,
         help_text='Once a trigger has been activated, detected units prior to the trigger day can be retrospectively included in the vaccination strategy. This number defines how many days before the trigger to step back, and incorporate detected units.', )
+    control_plan = models.TextField(blank=True)
 
     def update_production_type_listing(self):
         data = json.loads(self.vaccination_priority_order, object_pairs_hook=OrderedDict)  # preserve priority ordering is important
@@ -386,7 +393,11 @@ class ControlMasterPlan(InputSingleton):
     def save(self, *args, **kwargs):
         if self.vaccination_priority_order.startswith('{'):  # after the data migration
             self.update_production_type_listing()
-        super(ControlMasterPlan, self).save(*args, **kwargs)
+        super(VaccinationGlobal, self).save(*args, **kwargs)
+
+
+class ControlMasterPlan(InputSingleton):
+    name = models.CharField(default="Control Master Plan", max_length=255)
 
     def __str__(self):
         return str(self.name)
@@ -563,7 +574,7 @@ class ControlProtocol(BaseModel):
     use_vaccination = models.BooleanField(default=False,
         help_text='Indicates if units of this ' + wiki("production type") + ' will be subject to vaccination.', )
     vaccinate_detected_units = models.BooleanField(default=False,
-        help_text='Indicates if detection in units of this ' + wiki("production type") + ' will trigger vaccination.', )
+        help_text='Indicates if detection in units of this ' + wiki("production type") + ' will be included in vaccination.', )
     days_to_immunity = models.PositiveIntegerField(blank=True, null=True,
         help_text='The number of days required for the onset of ' + wiki("vaccine immunity", "vaccine-immune") + ' in a newly vaccinated unit of this type.', )
     minimum_time_between_vaccinations = models.PositiveIntegerField(blank=False, null=False, default=99999,
@@ -664,10 +675,10 @@ class ControlProtocol(BaseModel):
 
 class ProtocolAssignment(BaseModel):
     def save(self, *args, **kwargs):
-        self._master_plan = ControlMasterPlan.objects.get()
+        self._master_plan = VaccinationGlobal.objects.get()
         super(ProtocolAssignment, self).save(*args, **kwargs)
 
-    _master_plan = models.ForeignKey('ControlMasterPlan',
+    _master_plan = models.ForeignKey('VaccinationGlobal',
                                      help_text='Points back to a master plan for grouping purposes.')
     production_type = models.OneToOneField('ProductionType',
         help_text='The production type that these outputs apply to.', )
@@ -690,9 +701,9 @@ class Disease(InputSingleton):
     include_airborne_spread = models.BooleanField(default=True,
         help_text='Indicates if airborne spread is used in the model', )
     use_airborne_exponential_decay = models.BooleanField(default=False,
-        help_text = "Indicates if the decrease in probability by "
+        help_text = "Indicates if the decrease in probability of disease spread by "
                     + wiki("airborne transmission", "/Model-Specification#airborne-spread")
-                    + " is simulated by the exponential or linear algorithm.",)
+                    + " is simulated by the exponential decay algorithm. Linear decay is the default setting algorithm for disease spread.",)
     use_within_unit_prevalence = models.BooleanField(default=False,
         help_text='Indicates if ' + wiki("within unit prevalence", "/Model-Specification#prevalence") + ' should be used in the model.', )
     def __str__(self):
@@ -800,8 +811,8 @@ class DirectSpread(AbstractSpread):
 class AirborneSpread(DiseaseSpread):
     spread_1km_probability = PercentField(validators=[MinValueValidator(0.0), MaxValueValidator(.999)],
         help_text='The probability that disease will be spread to unit 1 km away from the source unit.', )
-    max_distance = FloatField(validators=[MinValueValidator(1.1)], blank=True, null=True,
-        help_text='The maximum distance in KM of ' + wiki("airborne spread", "airborne-transmission") + '.  Only used in Linear Airborne Decay.', )
+    max_distance = FloatField(validators=[MinValueValidator(1.1)], default=1.1,
+        help_text='The maximum distance in KM of ' + wiki("airborne spread", "airborne-transmission") + '.')
     exposure_direction_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=0,
         help_text='The start angle in degrees of the area at risk of ' + wiki("airborne spread", "airborne-transmission") + '.  0 is North.', )
     exposure_direction_end = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(360)], default=360,
@@ -842,7 +853,7 @@ class OutputSettings(InputSingleton):
 
     ## Outputs requested:
     save_daily_unit_states = models.BooleanField(default=False,
-        help_text='Create a plain text file with the state of each unit on each day of each iteration.', )
+        help_text='Save all daily non-susceptible states for each unit in a supplemental file.', )
     save_daily_events = models.BooleanField(default=False,
         help_text='Save all daily events in a supplemental file.', )
     save_daily_exposures = models.BooleanField(default=False,
@@ -853,6 +864,7 @@ class OutputSettings(InputSingleton):
         help_text='Create map outputs for units in supplemental directory.', )
 
     def clean_fields(self, exclude=None):
+        super().clean_fields(exclude=exclude)
         if self.stop_criteria != 'stop-days':
             self.days = 1825  # 5 year maximum simulation time
 
@@ -880,11 +892,11 @@ class ProductionType(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super(ProductionType, self).save(force_insert, force_update, using, update_fields)
-        ControlMasterPlan.objects.get().save()  # updates production list
+        VaccinationGlobal.objects.get().save()  # updates production list
 
     def delete(self, using=None):
         super(ProductionType, self).delete(using)
-        ControlMasterPlan.objects.get().save()  # updates production list
+        VaccinationGlobal.objects.get().save()  # updates production list
 
     def __str__(self):
         return self.name
@@ -924,9 +936,9 @@ class Zone(BaseModel):
 class ZoneEffect(BaseModel):
     name = models.CharField(max_length=255, blank=True, null=True)
     zone_direct_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes direct movement rate.', )
+        help_text='Function that describes direct movement rate.', )
     zone_indirect_movement = models.ForeignKey(RelationalFunction, related_name='+', blank=True, null=True,
-        help_text='Function the describes indirect movement rate.', )
+        help_text='Function that describes indirect movement rate.', )
     zone_detection_multiplier = FloatField(validators=[MinValueValidator(0.0)], default=1.0,
         help_text='Multiplier for the probability of observing '+wiki("clinical signs", "clinically-infectious")+' in units of this ' +
                   wiki("production type") + ' in this '+wiki("Zone")+'.', )
@@ -1063,5 +1075,5 @@ class VaccinationRingRule(BaseModel):
         else:
             return format_html('{0} detection triggers {1} vaccination within {2} km', *bold_values)
 
-
-
+    def title(self):
+        return self.__str__().replace('<strong>', '').replace('</strong>', '')

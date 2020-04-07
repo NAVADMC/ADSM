@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="function-header">
-                <a id="assign-function" href="#" class="action_link"><i class="glyphicon glyphicon-arrow-left"></i> Assign</a>
+                <!-- <a id="assign-function" href="#" class="action_link"><i class="glyphicon glyphicon-arrow-left"></i> Assign</a> -->
                 <span class="pull-right list-button" data-toggle="collapse" data-target="#probability-options">Probability <i class="glyphicon glyphicon-triangle-bottom"></i></span>
                 <span class="pull-right list-button" data-toggle="collapse" data-target="#relational-options">Relational <i class="glyphicon glyphicon-triangle-bottom"></i></span>
             </div>
@@ -30,5 +30,18 @@
         {% else %}
             {% include 'ScenarioCreator/ModelList.html' %}
         {% endif %}
+
+        <p class="help-text">Exported functions will be saved in a folder titled "Exports" in your workspace folder with either "REL_" or "PDF_" prepended to their names.</p>
+        <div style="bottom:40px;width:40%;left:20px;margin-bottom:20px;">
+                <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/rel" class="btn btn-info">Export Relational Functions</a>
+                <a href="/LoadingScreen/?loading_url=/setup/ExportFunctions/pdf" class="btn btn-info">Export Probability Density Functions</a>
+        </div>
+
+        <p class="help-text">Imported functions are read from csv files in the current scenario's workspace "Imports" folder that have either "REL_" or "PDF_" <strong>prepended</strong> to their names.<br>If the "Imports" folder does not exist save the current scenario to create it.</p>
+        <div style="bottom:20px;width:40%;left:20px;">
+                <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/rel" class="btn btn-info">Import Relational Functions</a>
+                <a href="/LoadingScreen/?loading_url=/setup/ImportFunctions/pdf" class="btn btn-info">Import Probability Density Functions</a>
+        </div>
+
     </div>
 </div>

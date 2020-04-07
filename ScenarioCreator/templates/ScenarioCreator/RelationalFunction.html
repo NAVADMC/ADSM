@@ -4,29 +4,36 @@
 {% load db_status_tags %}
 
 {% block content %}
-<form id="{{ action|action_id }}" class="ajax relational-form"  method="post" action="{{ action }}" enctype="multipart/form-data">
+    <form id="{{ action|action_id }}" class="ajax relational-form"  method="post" action="{{ action }}" enctype="multipart/form-data">
 
-    <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
+        <a href="{{ action }}graph.png" download class="download-overlay-container">
+            <img id="function-graph" src="{{action}}graph.png?{% now 'U' %}" class="download-overlay-image">
+            <div class="download-overlay-base">
+                <div class="download-overlay-text">Click to Download</div>
+            </div>
+        </a>
 
-    {% crispy form %}
-    <label for="file">Or Import Points from File... &nbsp</label>    
-    <input type="file" id="file" name="file" accept=".csv">
+        <p style="margin-bottom:15px;">Click on the graph to download the highest possible resolution.</p>
 
-    {% include "ScenarioCreator/RelationalEmbeddedFormset.html" %}
-    <script>
-        $(document).on('submit', '.relational-form', function(){
-            $('#formset tbody tr').each(function(){
-                var x = $(this).find('td:first-child input:nth-child(3)').first().val()
-                var y = $(this).find('td:nth-child(2) input:first-child').first().val()
-                if(x === '' && y === ''){
-                    $(this).find('td:nth-child(3) input:first-child').first().attr('checked','checked')
-                }
-            })
-        });
-    </script>
-    {% include "ScenarioCreator/ViewEditButtons.html" %}
+        {% crispy form %}
+        <label for="file">Or Import Points from File... &nbsp</label>
+        <input type="file" id="file" name="file" accept=".csv">
 
-</form>
-{#    {% crispy formset helper %}#}
+        {% include "ScenarioCreator/RelationalEmbeddedFormset.html" %}
+        <script>
+            $(document).on('submit', '.relational-form', function(){
+                $('#formset tbody tr').each(function(){
+                    var x = $(this).find('td:first-child input:nth-child(3)').first().val()
+                    var y = $(this).find('td:nth-child(2) input:first-child').first().val()
+                    if(x === '' && y === ''){
+                        $(this).find('td:nth-child(3) input:first-child').first().attr('checked','checked')
+                    }
+                })
+            });
+        </script>
+        {% include "ScenarioCreator/ViewEditButtons.html" %}
+
+    </form>
+    {#    {% crispy formset helper %}#}
 {% endblock %}
 

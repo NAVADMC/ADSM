@@ -8,19 +8,20 @@
     {% if is_simulation_stopped %}
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mapbox.css" />
         <script type="text/javascript" src="{{ STATIC_URL }}js/summary_csv.js"></script>
+        <script src="{{ STATIC_URL }}js/combine_outputs.js" type="text/javascript"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/mousewheel.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script>
         <div class="mapwrapper">
             <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
-                <div style="background: url(/results/population_thumbnail.png) no-repeat center;height: 800px; width: 923px;">
+                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;">
                     <!--top level map content goes here-->
                 </div>
                 <div style="height: 2080px; width: 2400px;">
-                    <img src="/results/population_zoom.png" alt="" />
+                    <img src="/results/population_zoom.png?{%  now 'U' %}" alt="" />
                     <div class="mapcontent"></div>
                 </div> 
                 <div style="height: 4160px; width: 4800px;"> 
-                    <img src="/results/population_zoom.png" alt="" />
+                    <img src="/results/population_zoom.png?{%  now 'U' %}" alt="" />
                     <div class="mapcontent"></div>
                 </div>
             </div>  
@@ -66,8 +67,18 @@
     {% if not is_simulation_stopped %}
         <a href="/results/">Recalculate Summary Statistics</a>
     {% endif %}
-    
+
         <div id="summaryData">
+
+            {% if simulation_crashed %}
+                <div class="simulation_error" onclick="show_crash_text('{{ crash_text|escape|escapejs }}');" style="cursor: pointer;">
+                    <p class="simulation_error_text">*** A Simulation Crash has been detected! ***</p>
+                    <p class="simulation_error_text">The CEngine program exited in an unexpected way...</p>
+                    <p class="simulation_error_text">Produced results WILL NOT be accurate, and a full program restart is recommended before making any changes to the scenario.</p>
+                    <div><p class="simulation_error_text">Click on this banner for more information...</p></div>
+                </div>
+            {% endif %}
+
             <p>Simulation Version: {{ version_number }}</p>
             {% include "Results/Summary.html" %}
         </div>
@@ -79,15 +90,32 @@
             </div>
             <div class="panel-body">
                 <ul class="file_list">
-                    <li id="summary_csv">
-                        <button class="btn btn-mini btn-default has-spinner">
-                            <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
-                            Calculate Summary CSV
-                        </button>
-                    </li>
+                       <table>
+                        <tr>
+                            <td>
+                                <li id="summary_csv">
+                                    <button class="btn btn-mini btn-default has-spinner">
+                                        <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
+                                        Calculate Summary CSV
+                                    </button>
+                                </li>
+                            </td>
+                            <td>
+                                <li id="combine_outputs">
+                                    <button class="btn btn-mini btn-default has-spinner">
+                                        <span class="spinner"><i class="icon-spin glyphicon glyphicon-refresh"></i></span>
+                                        Combine Output Files
+                                    </button>
+                                </li>
+                            </td>
+                            <td>
+                                <b>Warning:</b> These operations may take very long for large scenarios.
+                            </td>
+                        </tr>
+                    </table>
 
                     {% for file in supplemental_files %}
-                        <li><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
+                        <li class="file_list_item"><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
                             <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
                             <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>

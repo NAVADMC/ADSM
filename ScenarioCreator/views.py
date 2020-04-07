@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from django.forms.models import modelformset_factory
 from django.db.models import Q, ObjectDoesNotExist
 from django.db import OperationalError, transaction
+from django.contrib.contenttypes.models import ContentType
 
 from Results.models import *  # This is absolutely necessary for dynamic form loading
 from ScenarioCreator.models import *  # This is absolutely necessary for dynamic form loading
@@ -18,12 +19,17 @@ from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
+from ScenarioCreator.models import VaccinationRingRule, RelationalFunction
+from ScenarioCreator.exporter import *
+from ScenarioCreator.importer import *
+from ScenarioCreator import function_graphs
+from matplotlib import pyplot as plt
 
 
 # Useful descriptions of some of the model relations that affect how they are displayed in the views
 from ScenarioCreator.utils import whole_scenario_validation
 
-singletons = ['Scenario', 'Population', 'Disease', 'ControlMasterPlan', 'OutputSettings', "DestructionGlobal"]
+singletons = ['Scenario', 'Population', 'Disease', 'VaccinationGlobal', 'OutputSettings', "DestructionGlobal", "ControlMasterPlan"]
 abstract_models = {
     'Function':
         [('RelationalFunction', RelationalFunction),
@@ -182,12 +188,12 @@ def disable_all_controls_json(request):
     if 'POST' in request.method:
         new_value = request.POST['use_controls']
         set_to = new_value == 'false'  # logical inversion because of use_controls vs disable_controls
-        controls = ControlMasterPlan.objects.get()
+        controls = VaccinationGlobal.objects.get()
         controls.disable_all_controls = set_to
         controls.save()
         return JsonResponse({'status': 'success'})
     else:
-        return JsonResponse({'disable_all_controls': ControlMasterPlan.objects.get().disable_all_controls})
+        return JsonResponse({'disable_all_controls': VaccinationGlobal.objects.get().disable_all_controls})
     
 
 def initialize_spread_assignments():
@@ -343,6 +349,63 @@ def initialize_relational_form(context, primary_key, request):
     context['model'] = model
     return context
 
+def export_functions(request, block):
+    '''
+    "Functions" as in relational functions and probability density functions.
+
+    Exports to a single file, delimited by "REL_" for relational functions and "PDF_" for probability density functions.
+    Files are saved in the same folder as the .db for each scenario. Exporting the same scenario multiple times overwrites
+    the existing file.
+    :param block: "rel" or "pdf" to determine which export to run.
+    :return: Redirect to the scenario description.
+    '''
+    if block == "rel":
+        # get the relational function model
+        relfunction_model = globals()["RelationalFunction"]
+        # get all of the relational functions
+        relfunction_objects = relfunction_model.objects.all()
+        # get the relational function points model
+        relpoints_model = globals()["RelationalPoint"]
+        # get all of the relational points
+        relpoints_objects = relpoints_model.objects.all()
+        # export the relational functions, export_relational_functions() is located in exporter.py
+        export_relational_functions(relfunction_objects, relpoints_objects)
+        pass
+    elif block == "pdf":
+        # get the pdf model
+        pdf_model = globals()["ProbabilityDensityFunction"]
+        # get all of the pdfs
+        pdf_objects = pdf_model.objects.all()
+        # export the pdfs, export_pdfs() is located in exporter.py
+        export_pdfs(pdf_objects)
+    return redirect("/setup/Scenario/1/")
+
+def import_functions(request, block):
+    '''
+    "Functions" as in relational functions and probability density functions.
+
+    Imports from all files located in the same location as the .db for each scenario that are delimited by "PDF_" for
+    Probability Density Functions or "REL_" for relational functions. Will not import functions from files that include
+    the current scenarios name.
+
+    :param block: "rel" or "pdf" to determine which export to run.
+    :return: Redirect to the scenario description.
+    '''
+    if block == "rel":
+        # get the relational function model
+        relfunction_model = globals()["RelationalFunction"]
+        # get all the existing relational functions
+        relfunction_objects = relfunction_model.objects.all()
+        # import new relational functions, import_relational_functions() is located in importer.py
+        import_relational_functions(relfunction_objects)
+    elif block == "pdf":
+        # get the pdf model
+        pdf_model = globals()["ProbabilityDensityFunction"]
+        # get all of the existing pdfs
+        pdf_objects = pdf_model.objects.all()
+        # import new pdfs, import_pdfs() is located in importer.py
+        import_pdfs(pdf_objects)
+    return redirect("/setup/Scenario/1/")
 
 def deepcopy_points(request, primary_key, created_instance):
     queryset = RelationalPoint.objects.filter(relational_function_id=primary_key)
@@ -513,7 +576,8 @@ def new_entry(request, second_try=False):
         initialized_form = form(request.POST or None)
         context = {'form': initialized_form,
                    'title': "Create a new " + spaces_for_camel_case(model_name),
-                   'action': request.path}
+                   'action': request.path,
+                   'new_form': True}
         add_breadcrumb_context(context, model_name)
         return new_form(request, initialized_form, context)
     except OperationalError:
@@ -575,6 +639,38 @@ def delete_entry(request, primary_key):
     if model_name not in singletons:
         return redirect('/setup/%s/' % model_name)  # model list
     else:
+        if model_name == "Population":
+            print("Deleting Population Dependant Models.")
+
+            try:
+                VaccinationRingRuleModel = globals()["VaccinationRingRule"]
+                VaccinationRingRuleModel.objects.get(pk=1).delete()
+            except VaccinationRingRule.DoesNotExist:
+                pass
+
+            try:
+                VaccinationGlobalModel = globals()["VaccinationGlobal"]
+                VaccinationGlobalModel.objects.get(pk=1).delete()
+            except VaccinationGlobal.DoesNotExist:
+                pass
+
+            try:
+                DiseaseDetectionModel = globals()["DiseaseDetection"]
+                DiseaseDetectionObjects = DiseaseDetectionModel.objects.all()
+                for DiseaseDetectionObject in DiseaseDetectionObjects:
+                    DiseaseDetectionObject.delete()
+            except DiseaseDetection.DoesNotExist:
+                pass
+
+            try:
+                StopVaccinationModel = globals()["StopVaccination"]
+                StopVaccinationObjects = StopVaccinationModel.objects.all()
+                for StopVaccinationObject in StopVaccinationObjects:
+                    StopVaccination.delete()
+            except StopVaccination.DoesNotExist:
+                pass
+
+            print("Population Deletion Complete. Redirecting...")
         return redirect('/setup/%s/new/' % model_name)  # Population can be deleted, maybe others
 
 
@@ -736,6 +832,11 @@ def parse_population(file_path, session):
     convert_user_notes_to_unit_id()
     return JsonResponse({"status": "complete", "redirect": "/setup/Populations/"})
 
+def export_population(request, format):
+    parser = ScenarioCreator.population_parser.ExportPopulation(format)
+    parser.export()
+    return redirect("/setup/Populations/")
+
 
 def filtering_params(request):
     """Collects the list of parameters to filter by.  Because of the way this is setup:
@@ -795,6 +896,11 @@ def population(request):
 
 
 def validate_scenario(request):
+
+    # ensure that the destruction_reason_order includes all elements. See #990 for more details
+    DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order = match_data(DestructionGlobal.objects.all()[0].destruction_reason_order,
+                                                                             "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
+
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
                                   shell=(platform.system() != 'Darwin'),
                                   stdout=subprocess.PIPE,
@@ -811,19 +917,18 @@ def validate_scenario(request):
 
 
 def vaccination_global(request):
-    instance = ControlMasterPlan.objects.get()
+    instance = VaccinationGlobal.objects.get()
     initialized_form = VaccinationMasterForm(request.POST or None, instance=instance)
     if request.method == "POST":
         if initialized_form.is_valid():
             instance = initialized_form.save(commit=True)
     context = {
-        'base_page': 'ScenarioCreator/VaccinationGlobal.html',
         'title': 'Vaccination Global',
         'ordering': json.loads(instance.vaccination_priority_order, object_pairs_hook=OrderedDict),
         'form': initialized_form
     }
 
-    return render(request, 'ScenarioCreator/navigationPane.html', context)
+    return render(request, 'ScenarioCreator/VaccinationGlobal.html', context)
 
 
 def destruction_global(request):
@@ -835,7 +940,6 @@ def destruction_global(request):
             instance = initialized_form.save(commit=True)
 
     context = {
-        'base_page': 'ScenarioCreator/DestructionGlobal.html',
         'title': 'Destruction Global',
         'reasons': match_data(instance.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring").split(","),
         'priorities': instance.destruction_priority_order.split(","),
@@ -846,7 +950,7 @@ def destruction_global(request):
     'priorities': json.loads(json.dumps(match_data(str(instance.destruction_priority_order), '{"Days Holding":["Oldest", "Newest"], "Production Type":[], "Size":["Largest", "Smallest"]}')), object_pairs_hook=OrderedDict),
     '''
 
-    return render(request, 'ScenarioCreator/navigationPane.html', context)
+    return render(request, 'ScenarioCreator/DestructionGlobal.html', context)
 
 
 def match_data(current, all_data):

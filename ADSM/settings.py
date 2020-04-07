@@ -34,27 +34,28 @@ if OVERRIDE_DEBUG:
 
 # Look for any settings to import from the installer.
 # Installer settings are to be used globally across all users.
-if os.path.isfile(os.path.join(BASE_DIR, 'settings.ini')):
+INSTALL_SETTINGS_FILE = os.path.join(BASE_DIR, 'workspace.ini')
+if os.path.isfile(INSTALL_SETTINGS_FILE):
     from importlib import machinery
-    install_settings = machinery.SourceFileLoader('install_settings', os.path.join(BASE_DIR, 'settings.ini')).load_module()
+    install_settings = machinery.SourceFileLoader('install_settings', INSTALL_SETTINGS_FILE).load_module()
     WORKSPACE_PATH = install_settings.WORKSPACE_PATH
+    if str(WORKSPACE_PATH).strip() == ".":
+        WORKSPACE_PATH = os.path.join(BASE_DIR, "ADSM Workspace")
+else:
+    WORKSPACE_PATH = os.path.join(BASE_DIR, "ADSM Workspace")
+    print("Defaulting to Portable Workspace in this Installation.")  # NOTE: Don't do prompts or dialogs in the settings as it will end up getting executed multiple times
 if not WORKSPACE_PATH:
-    if os.name == "nt":  # Windows users could be on a domain with a documents folder not in their home directory.
-        try:
-            import ctypes.wintypes
-            CSIDL_PERSONAL = 5
-            SHGFP_TYPE_CURRENT = 0
-            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-            ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
-            WORKSPACE_PATH = os.path.join(buf.value, "ADSM Workspace")
-        except:
-            WORKSPACE_PATH = None
-    if not WORKSPACE_PATH:
-        WORKSPACE_PATH = os.path.join(os.path.expanduser("~"), "Documents", "ADSM Workspace")
+    raise ValueError('Could not import "WORKSPACE_PATH" from "workspace.ini"! Please re-launch ADSM.')
+
 if not DB_BASE_DIR:
     DB_BASE_DIR = os.path.join(WORKSPACE_PATH, "settings")
+
 if not os.path.exists(WORKSPACE_PATH):
-    os.makedirs(WORKSPACE_PATH, exist_ok=True)
+    try:
+        os.makedirs(WORKSPACE_PATH, exist_ok=True)
+    except:
+        os.remove(INSTALL_SETTINGS_FILE)
+        raise ValueError("Could not create selected Workspace path! Please re-launch ADSM and select a new ADSM Workspace directory.")
 if not os.path.exists(DB_BASE_DIR):
     os.makedirs(DB_BASE_DIR, exist_ok=True)
 

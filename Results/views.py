@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, Http
 from django.forms.models import modelformset_factory
 from django.shortcuts import render, redirect
 from django.db.models import Max
+from django.utils import timezone as djtimezone
 from django.utils.html import mark_safe
 
 from ADSMSettings.models import SmSession
@@ -19,9 +20,11 @@ from Results.utils import delete_supplemental_folder, map_zip_file, delete_all_o
 import Results.output_parser
 from Results.summary import list_of_iterations, iterations_complete
 from Results.csv_generator import SummaryCSVGenerator, SUMMARY_FILE_NAME
+from Results.combine_outputs import CombineOutputsGenerator
 
 
 def back_to_inputs(request):
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
     return redirect('/setup/OutputSettings/1')
 
 
@@ -40,14 +43,21 @@ def simulation_status(request):
 
 def results_home(request):
     from Results.csv_generator import SUMMARY_FILE_NAME
-    path_ex = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + "/*.csv")
+    path_ex = workspace_path(scenario_filename() + "/" + "Supplemental Output Files")
     start = workspace_path()
-    context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex)]}
+    context = {'supplemental_files': [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/*.csv")]}
+
+    for combined_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Combined Outputs/*.txt")]:
+        context['supplemental_files'].append(combined_file)
+    for combined_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Combined Outputs/*.csv")]:
+        context['supplemental_files'].append(combined_file)
+
     summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
     try:
         context['supplemental_files'].remove(summary_path)
     #             context['supplemental_files'] = [file for file in context['supplemental_files'] if not file.endswith(SUMMARY_FILE_NAME)] # filter out summary.csv
-    except ValueError: pass
+    except ValueError:
+        pass
     context['summary_file_name'] = summary_path
 
     if os.path.exists(map_zip_file()):
@@ -62,6 +72,12 @@ def results_home(request):
             context['version_number'] = '.'.join([v.versionMajor, v.versionMinor, v.versionRelease])
         except:  # more specific exceptions kept leaking through
             pass
+
+    # get the had_memory_error boolean, this is used to display the error banner.
+    sm_session = SmSession.objects.get()
+    context['simulation_crashed'] = sm_session.simulation_crashed
+    context['crash_text'] = sm_session.crash_text
+
     return render(request, 'Results/SimulationProgress.html', context)
 
 
@@ -77,6 +93,7 @@ def create_blank_unit_stats():
 
 
 def run_simulation(request):
+    print("Starting Simulation run at %s" % djtimezone.now())
     delete_all_outputs()
     delete_supplemental_folder()
     create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
@@ -188,6 +205,9 @@ def result_table(request, model_name, model_class, model_form, graph_links=False
         context['iterations'] = iterations[:5]  # It's pointless to display links to more than the first 10 iterations, there can be thousands
         context['model_name'] = model_name
         context['excluded_fields'] = ['zone', 'production_type', 'day', 'iteration', 'id', 'pk', 'last_day']
+        context['excluded_fields'] += ['vacwU', 'vacwUMax', 'vacwUMaxDay', 'vacwUTimeMax', 'vacwUTimeAvg',
+                                       'vacwUDaysInQueue', 'vacwA', 'vacwAMax', 'vacwAMaxDay', 'vacATimeMax',
+                                       'vacATimeAvg', 'vacwADaysInQueue', 'vacwATimeMax', 'vacwATimeAvg']
         context['excluded_fields'] += [field for field in model_class._meta.get_all_field_names() if not field.startswith(prefix)]
         context['empty_fields'] = all_empty_fields(model_class, context['excluded_fields'])
         context['headers'] = class_specific_headers(model_name, prefix)
@@ -232,6 +252,28 @@ def summary_csv(request):
     if request.method == "POST":
         csv_generator = SummaryCSVGenerator()
         csv_generator.start()  # starts a new thread
+        return HttpResponseAccepted()
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])
+
+
+def combine_outputs(request):
+
+    class HttpResponseAccepted(HttpResponse):
+        status_code = 202
+
+    if request.method == "GET":
+        if SmSession.objects.get().combining_outputs:
+            return HttpResponseAccepted()
+        elif not DailyControls.objects.all().count() or is_simulation_running():
+            return HttpResponseBadRequest()
+        elif len([file_name for file_name in os.listdir(workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Combined Outputs/"))]) != 4:
+            return HttpResponseNotFound()
+        else:
+            return HttpResponse()
+    if request.method == "POST":
+        outputs_generator = CombineOutputsGenerator()
+        outputs_generator.start()  # starts a new thread
         return HttpResponseAccepted()
     else:
         return HttpResponseNotAllowed(permitted_methods=['GET', 'POST'])

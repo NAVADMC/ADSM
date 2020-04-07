@@ -144,6 +144,7 @@ def open_scenario(request, target, wrap_target=True):
     convert_user_notes_to_unit_id()
     unsaved_changes(False)  # File is now in sync
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=outputs_exist())  # This is also reset from delete_all_outputs
+    SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
     # else:
     #     print('File does not exist')
     return redirect('/setup/Scenario/1/')
@@ -190,6 +191,11 @@ def save_scenario(request=None):
             print('Encountered an error while copying file', full_path)
             return render(request, 'ScenarioName.html', {"failure_message": save_error})
 
+    try:
+        os.makedirs(workspace_path(scenario_filename() + "\\Imports\\"))
+    except FileExistsError:
+        pass
+
     if request is not None and request.is_ajax():
         return render(request, 'ScenarioName.html', {"success_message": "File saved to " + target,
                                                      "filename": scenario_filename(),
@@ -221,6 +227,9 @@ def copy_file(request, target, destination):
         os.makedirs(os.path.dirname(destination), exist_ok=True)
     shutil.copy(target, destination)
     print("Done copying", target)
+    if target.endswith(".db"):
+        # We just copied a scenario, so we should open it
+        return redirect("/LoadingScreen/?loading_url=/app/OpenScenario/%s/" % os.path.basename(destination))
     return redirect('/')
 
 
@@ -273,3 +282,8 @@ def show_help_overlay_json(request):
         return JsonResponse({'status':'success'})
     else:  # GET
         return JsonResponse({'show_help_overlay': SmSession.objects.get().show_help_overlay})
+
+
+def delete_workspace_setting(request):
+    os.remove(settings.INSTALL_SETTINGS_FILE)
+    return HttpResponse("Please close ADSM and restart to select a new Workspace directory.")

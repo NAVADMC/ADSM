@@ -32,7 +32,7 @@ def create_db_connection(db_name, db_path):
 
 # def db_save(file_path):
 #     create_db_connection('save_file', file_path)
-#     top_level_models = [Scenario, Population, Disease, ControlMasterPlan]
+#     top_level_models = [Scenario, Population, Disease, VaccinationGlobal]
 #     for parent_object in top_level_models:
 #         try:
 #             node = parent_object.objects.using('default').get()

@@ -10,16 +10,43 @@
             {% if form_errors %}
                 <div id='form-errors'>{{ form_errors }}</div>
             {% endif %}
-            {% include "ScenarioCreator/EditButtons.html" %}
         </form>
 
         {# Code that is only relevant to Disease Spread but it here because of generic form use #}
-        {% if 'DirectSpread' in request.get_full_path or 'IndirectSpread' in request.get_full_path or 'AirborneSpread' in request.get_full_path%}
-            <div id="spread-widget">
-                {#React is waiting to put an element under this ID#}
+        {% if 'DirectSpread' in request.get_full_path or 'IndirectSpread' in request.get_full_path or 'AirborneSpread' in request.get_full_path %}
+
+            {# Custom formatted buttonHolder for this form that puts the buttons in the center of the form instead of the bottom #}
+            <div class="buttonHolder">
+                {% if outputs_exist %}
+                    <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit">Delete Results and Apply changes</button>
+                {% else %}
+                    <button type="button" class="btn btn-default btn-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} id="id-cancel" onclick="hideCenterPanel()">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="window.location.reload();" disabled>Apply</button>
+                {% endif %}
+                {% if backlinks %}
+                    <button type="submit" disabled class="btn btn-danger" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} >Remove References before Deleting</button>
+                {% elif deletable %}
+                    <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
+                {% endif %}
             </div>
 
+            {% if not new_form %}
+                <div id="spread-widget">
+                    {#React is waiting to put an element under this ID#}
+                </div>
+            {% else %}
+                <div className="spread-widget-contents">
+                    <hr/>
+                    <h1>Production Type Combinations</h1>
+                    <p>Production Types Combinations represent how disease spreads between the different production types. The list will become available when the disease spread parameters above have been filled out and saved.</p>
+                </div>
+            {% endif %}
+
+        {% else %}
+            {# use the default edit buttons #}
+            {% include "ScenarioCreator/EditButtons.html" %}
         {% endif %}
+
     {% else %}
         <form class="ajax" {% if loading_message %}data-loading-message="{{ loading_message }}"{% endif %}>
             {% crispy form %}

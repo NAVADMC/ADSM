@@ -53,7 +53,9 @@ def convert_user_notes_to_unit_id():
     units = Unit.objects.filter(Q(user_notes__isnull=False) | ~Q(user_notes=''), Q(unit_id__isnull=True) | Q(unit_id=''))
     updated_units = []
     for unit in units:
-        unit_id_search = re.search(".*?unit_id=([0-9]+)", str(unit.user_notes))  # Note that on None user_notes, we are actually regexing "None" which is fine for now.
+        # NOTE: If you want to filter specifically unitid or unit_id, use this regex: .*?unit??_*?id=([0-9]+)
+        # NOTE: If you want ot filter specifically unit_id, use this regex: .*?unit_id=([0-9]+)
+        unit_id_search = re.search(".*?id=([0-9]+)", str(unit.user_notes))  # Note that on None user_notes, we are actually regexing "None" which is fine for now.
         if unit_id_search is not None and unit.unit_id in (None, ''):  # The unit_id being none check isn't needed with the new filter above, but we'll keep it for future safety
             unit.unit_id = unit_id_search.group(1)
             updated_units.append(unit)

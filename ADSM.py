@@ -25,10 +25,16 @@ multiprocessing.freeze_support()
 # ----------BEGIN MAIN PROGRAM----------
 import subprocess
 import argparse
+import json
 import threading
 import _thread
 import psutil
 import socket
+
+from tkinter import Tk
+from tkinter.filedialog import askdirectory
+from tkinter.messagebox import askyesno, Message
+
 from django.utils.timezone import now
 
 
@@ -37,9 +43,10 @@ def launch_viewer(server_port):
     if not os.path.exists(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR)):
         os.makedirs(os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR), exist_ok=True)
     log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'debug.log')
-    console_log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'console.log')
+    # console_log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'console.log')  # The new viewer created 11/26/2019 doesn't create separate browser and javascript logs. Everything goes into log_path above.
     try:
-        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
+        # viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Beta_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
+        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" "%s" "%s" "%s" "%s"' % (settings.EXTENSION, "http://127.0.0.1:%s" % server_port, "ADSM Beta Viewer", log_path, os.path.join(settings.BASE_DIR, 'bin', 'env', 'favicon.ico'))), shell=True)
         if viewer_status != 0 and viewer_status != 9:  # The 9 is to ignore X Window System error BadDrawable when closing. TODO: Debug viewer
             raise RuntimeError("Error launching Viewer!")
     except:
@@ -98,6 +105,26 @@ for proc in psutil.process_iter():
         print("\nPress any key to exit...")
         input()
         sys.exit(1)
+
+print("\nPreparing Workspace...")
+if os.path.exists(os.path.join(BASE_DIR, 'workspace')):
+    # Rename any old 'workspace' folders to 'ADSM Workspace'
+    os.rename(os.path.join(BASE_DIR, 'workspace'), os.path.join(BASE_DIR, 'ADSM Workspace'))
+user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
+if not os.path.isfile(user_settings_file):
+    Tk().withdraw()
+    pick_custom_workspace = askyesno("Pick a custom location for your ADSM Workspace Directory?", 'Do you want to pick a custom location for your ADSM Workspace directory?\nIf not, your installation will be considered "Portable" and an ADSM Workspace folder will be created in the root of your installation.\n\nIf you are on a shared or networked computer and wish to share your ADSM Workspace with other users, then you should select a custom directory.')
+    if pick_custom_workspace:
+        custom_directory = askdirectory(initialdir=BASE_DIR, title="Select location for ADSM Workspace Directory", mustexist=True)
+        custom_directory = os.path.join(custom_directory, 'ADSM Workspace')
+        if not str(custom_directory).strip():
+            custom_directory = "."
+            Message(title="Notice!", message="You did not select a directory!\nDefaulting to a Portable installation in the root folder of this installation.").show()
+    else:
+        custom_directory = "."
+
+    with open(user_settings_file, 'w') as user_settings:
+        user_settings.write('WORKSPACE_PATH = %s' % json.dumps(custom_directory))
 
 print("\nPreparing Django environment...")
 

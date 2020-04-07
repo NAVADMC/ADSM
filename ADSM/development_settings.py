@@ -7,8 +7,6 @@ if getattr(sys, 'frozen', False):
 else:
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-WORKSPACE_PATH = None  # To detect automatically, leave set to None
-
 DB_BASE_DIR = None  # To have as 'settings' folder in WORKSPACE_PATH leave set to None
 
 # SECURITY WARNING: keep the secret key used in production secret!

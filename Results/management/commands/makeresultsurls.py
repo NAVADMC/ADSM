@@ -45,6 +45,7 @@ class Command(BaseCommand):
                                                       "url('^simulation_status.json$', 'Results.views.simulation_status')",
                                                       "url('^abort_simulation$', 'Results.utils.abort_simulation')",
                                                       "url('^SummaryCSV/$', 'Results.views.summary_csv')",
+                                                      "url('^CombineOutputs/$', 'Results.views.combine_outputs')",
                                                       ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \

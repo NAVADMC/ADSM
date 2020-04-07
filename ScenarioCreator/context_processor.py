@@ -1,7 +1,7 @@
 from django.db.models import F, Count
 
 from ScenarioCreator.models import ProductionType, Scenario, OutputSettings, Unit, Disease, DiseaseProgression, \
-    DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, ControlMasterPlan, ControlProtocol, \
+    DiseaseProgressionAssignment, DirectSpread, DiseaseSpreadAssignment, VaccinationGlobal, ControlProtocol, \
     ProtocolAssignment, Zone, ZoneEffect, ProbabilityDensityFunction, RelationalFunction, ZoneEffectAssignment, SpreadBetweenGroups, \
     DestructionWaitTime, TimeFromFirstDetection, DisseminationRate, RateOfNewDetections, DiseaseDetection, ProductionGroup, VaccinationRingRule, \
     DestructionGlobal
@@ -46,7 +46,7 @@ def basic_context(request):
                                     indirect_contact_spread__isnull=True,
                                     airborne_spread__isnull=True
                                 ).count() < pt_count ** 2,  # all possible assignments == pt_count^2
-               'ControlMasterPlan': ControlMasterPlan.objects.count(),
+               'VaccinationGlobal': VaccinationGlobal.objects.count(),
                'VaccinationTrigger': any([m.objects.count() for m in 
                                           [DiseaseDetection,RateOfNewDetections,DisseminationRate,TimeFromFirstDetection,DestructionWaitTime,SpreadBetweenGroups]]),
                'VaccinationRingRule': VaccinationRingRule.objects.count(),
@@ -58,7 +58,7 @@ def basic_context(request):
                'ZoneEffectAssignments': ZoneEffectAssignment.objects.filter(effect__isnull=False).count() >= Zone.objects.count() and Zone.objects.count(),
                'ProbabilityDensityFunctions': ProbabilityDensityFunction.objects.count(),
                'RelationalFunctions': RelationalFunction.objects.count(),
-               'controls_enabled': ControlMasterPlan.objects.filter(disable_all_controls=True).count() == 0,
+               'controls_enabled': VaccinationGlobal.objects.filter(disable_all_controls=True).count() == 0,
                })
 
         validation_models = {'Scenario': 'Scenario/1/', 
@@ -70,7 +70,7 @@ def basic_context(request):
                              'Progressions': 'AssignProgressions/',
                              'DirectSpreads': 'DirectSpreads/', 
                              'AssignSpreads': 'AssignSpreads/', 
-                             'ControlMasterPlan': 'ControlMasterPlan/1/', 
+                             'VaccinationGlobal': 'VaccinationGlobal/1/',
                              'Protocols': 'ControlProtocol/', 
                              'ProtocolAssignments': 'AssignProtocols/', 
                              'Zones': 'Zone/', 

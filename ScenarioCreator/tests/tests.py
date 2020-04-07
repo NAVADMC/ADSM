@@ -6,7 +6,7 @@ from ADSMSettings.utils import workspace_path
 from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_name,
                                     Unit, Population, ProductionType, IndirectSpread,
                                     ProbabilityDensityFunction, RelationalFunction, Disease,
-                                    ControlMasterPlan, OutputSettings)
+                                    VaccinationGlobal, OutputSettings)
 from ScenarioCreator.population_parser import PopulationParser
 from ScenarioCreator.forms import IndirectSpreadForm
 from ADSMSettings.models import SingletonManager
@@ -191,19 +191,19 @@ class PopulationTestCase(TestCase):
         self.assertEqual(result.pk, 1)
 
 
-class ControlMasterPlanTestCase(TestCase):
+class VaccinationGlobalTestCase(TestCase):
     multi_db = True
 
     def test_model_is_singleton(self):
-        self.assertIsInstance(ControlMasterPlan.objects, SingletonManager)
+        self.assertIsInstance(VaccinationGlobal.objects, SingletonManager)
 
     def test_save(self):
-        result = ControlMasterPlan()
+        result = VaccinationGlobal()
         result.id = 2
         result.save()
 
-        result = ControlMasterPlan.objects.get()
-        self.assertEqual(ControlMasterPlan.objects.count(), 1)
+        result = VaccinationGlobal.objects.get()
+        self.assertEqual(VaccinationGlobal.objects.count(), 1)
         self.assertEqual(result.pk, 1)
 
 

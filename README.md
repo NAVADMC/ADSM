@@ -1,11 +1,14 @@
 # ADSM (Animal Disease Spread Model)
-A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  
+A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  ADSM is an upgrade of the NAADSM application.
+
+Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@usda.gov
+
 This repo is the primary repo for the ADSM project and houses the main Frontend that users will be interacting with.  
 It creates scenarios by storing their parameters in a SQLite file and displays results after running a simulation.  
 A more detailed breakdown of this application will follow.
 
 ## Installing ADSM As An End User
-ADSM can be installed on either x86-64 Windows 7 - 10 or x86-64 Debian based Linux Systems (Ubuntu preferred).  
+ADSM can be installed on either x86-64 Windows 7 - 10 or x86-64 Debian based Linux Systems (Ubuntu preferred) running under the English Locale (language). Other Locales may work, but have not been tested and are not supported at this time.  
 There is a Beta and Release channel available for installation.
 
 ### Windows Release Channel
@@ -46,7 +49,7 @@ If ADSM is selecting the Workspace directory automatically both the Release and 
 1. On the latest pre-release page, download either "ADSM_vx.x.x.x-beta_windows.zip" or "ADSM_vx.x.x.x-beta_linux.tar.gz"
 1. Extract the package into the folder in which you want ADSM Beta to be installed. It is best to do this somewhere in your User space (a directory your user owns).
 1. If you need to specify a different Workspace Folder to avoid a conflict with a Production Release, follow these steps.
-   1. In your ADSM Beta folder, create a file called "settings.ini".
+   1. In your ADSM Beta folder, create a file called "workspace.ini".
    1. Using your favorite text editor, add one of the following lines:
       1. Windows: `WORKSPACE_PATH = 'DRIVE:\\desired\\path\\to\ADSM Beta Workspace'`
       1. Linux: `WORKSPACE_PATH = '/desired/path/to/ADSM Beta Workspace'`  
@@ -138,7 +141,7 @@ The base app which holds the settings and site wide static files.
 There are a few things to note about the settings of this project.
 
 1. The 'settings' file will attempt to detect where to create the workspace directory.
-   1. It first looks to see if there is a user defined workspace in a 'settings.ini' file.
+   1. It first looks to see if there is a user defined workspace in a 'workspace.ini' file.
    1. If not, it will take the path as defined in either 'development_settings' or 'production_settings' (depending on which is used).
    1. If still not defined, it will find the User's Home directory and place the workspace there.
 1. There are 'development_settings' and a reference 'production_settings'.
@@ -365,7 +368,7 @@ The ADSM releases are:
 ## Credits
 Project Members:
 
-* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@aphis.usda.gov
+* Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@usda.gov
 * ADSM Technical Lead - Josiah Seaman
 * Simulation Creator / Maintainer - Neil Harvey
 * Dev Ops - Bryan Hurst

@@ -20,6 +20,7 @@ import threading
 from django.http import HttpResponse
 from django.db.models import Max
 
+from ADSMSettings.models import SmSession
 from Results.models import Unit
 from Results.utils import is_simulation_stopped
 from Results.summary import list_of_iterations
@@ -63,17 +64,47 @@ def define_color_mappings():
     return [ListedColormap(x) for x in [zone_blues, red_infected, green_vaccinated]]
 
 
+'''
+Desc:       gragh_zones actually places down the blue infection zones shown on the results map, darker circles are 
+            placed down when more simulations had infections over a population. The size of each zone is determined by 
+            the largest zone size created by the user (larger user zones = larger map zones).
+        
+Params:     in:ax matplotlib dependant variable
+            in:latitude height of the map
+            in:longitude width of the map
+            in:total_iterations integer value for total iterations run by the simulation
+            in:zone_blues list of tuples holding color values for the zones
+            in:zone_focus list of zone locations
+        
+Returns:    None
+
+Tickets:    #896 Zones were being drawn much larger than expected. draw_radius was added to replace
+            largest_zone_radius / kilometers_in_one_latitude_degree as the radius size with a scalar of 50
+            so regularly sized populations still display as expected. This change means the largest user zone
+            radius is no longer relivent for zone display on the results graph and "zones" displayed are a more
+            generalized reference of how the disease spread.
+'''
 def graph_zones(ax, latitude, longitude, total_iterations, zone_blues, zone_focus):
+    # get the largest_zone radius from the Zones in the database
     largest_zone_radius = Zone.objects.aggregate(Max('radius'))['radius__max']
+
+    if max(latitude) - min(latitude) > max(longitude) - min(longitude):
+        draw_radius = (max(latitude) - min(latitude)) / 50
+    else:
+        draw_radius = (max(longitude) - min(longitude)) / 50
+
+    # if this is false, no zones exist
     if largest_zone_radius:
+        # for each zone location, enumerated so the number of zones in tha location is stored in freq
         for i, freq in [(index, n_times) for index, n_times in enumerate(zone_focus) if n_times > 0]:
+            # add the circle to the map
             ax.add_patch(Circle(xy=(longitude[i], latitude[i]),
                                 color=zone_blues(freq / total_iterations),
-                                radius= largest_zone_radius / kilometers_in_one_latitude_degree,
+                                radius=draw_radius,  # old radius largest_zone_radius / kilometers_in_one_latitude_degree,
                                 linewidth=0,
                                 zorder=freq,
             ))
-
+    return
 
 def graph_states(ax, latitude, longitude, total_iterations, infected, vaccinated, destroyed):
     #size = min(100, 3000 / sqrt(Unit.objects.count()))  # TODO: reconcile with ScenarioCreator Population Map marker size
@@ -127,7 +158,9 @@ def population_results_map():
                 u.unitstats.cumulative_destroyed,
                 u.unitstats.cumulative_zone_focus, 
                 u.initial_size,
-                ) for u in queryset]
+                ) if hasattr(u, "unitstats") else
+               (u.latitude, u.longitude, -1, -1, -1, -1, u.initial_size)
+                for u in queryset]
     total_iterations = float(len(list_of_iterations()))
     latitude, longitude, infected, vaccinated, destroyed, zone_focus, herd_size = zip(*latlong)
     zone_blues, red_infected, green_vaccinated = define_color_mappings()
@@ -179,41 +212,46 @@ class PopulationWorker(threading.Thread):
     def run(self):
         self.make_population_map_file()
         
-        
 
 def population_zoom_png(request=None):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
-    try:
-        with open(path, "rb") as img_file:
-            return HttpResponse(img_file.read(), content_type='image/png')
-    except IOError:
-        save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
-        if not save_image:  # in order to avoid database locked Issue #150
-            return population_png(request, 58.5, 52)
-        else:
-
-            if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
-                print("Waiting on a Population Map")
-                sleep(5)
+    if not SmSession.objects.get().simulation_crashed:
+        path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+        thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
+        try:
+            with open(path, "rb") as img_file:
+                return HttpResponse(img_file.read(), content_type='image/png')
+        except IOError:
+            save_image = is_simulation_stopped()  # we want to check this before reading the stats, this is in motion
+            if not save_image:  # in order to avoid database locked Issue #150
+                return population_png(request, 58.5, 52)
             else:
-                PopulationWorker(path, thumb_path).start()
-                sleep(.5)
-            return population_zoom_png(request)
+
+                if any(thread.name == 'population_map_thread' for thread in threading.enumerate()):
+                    print("Waiting on a Population Map")
+                    sleep(5)
+                else:
+                    PopulationWorker(path, thumb_path).start()
+                    sleep(.5)
+                return population_zoom_png(request)
+    else:
+        return HttpResponse()
 
 
 def population_thumbnail_png(request, second_try=False):
-    path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_map.png')
-    thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files" + '/population_thumbnail.png')
-    try:
-        with open(thumb_path, "rb") as f:
-            return HttpResponse(f.read(), content_type="image/png")
-    except IOError:
-        if os.path.exists(path):
-            if second_try:
-               sleep(1) 
-            thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
-            return population_thumbnail_png(request, second_try=True)
-        else:
-            sleep(5)
-            return population_thumbnail_png(request, second_try=False)
+    if not SmSession.objects.get().simulation_crashed:
+        path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_map.png')
+        thumb_path = workspace_path(scenario_filename() + "/" + "Supplemental Output Files/Map" + '/population_thumbnail.png')
+        try:
+            with open(thumb_path, "rb") as f:
+                return HttpResponse(f.read(), content_type="image/png")
+        except IOError:
+            if os.path.exists(path):
+                if second_try:
+                   sleep(1)
+                thumbnail(path, thumb_path, scale=0.1923)  # create the thumbnail
+                return population_thumbnail_png(request, second_try=True)
+            else:
+                sleep(5)
+                return population_thumbnail_png(request, second_try=False)
+    else:
+        return HttpResponse()

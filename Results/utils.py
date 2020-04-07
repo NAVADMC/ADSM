@@ -12,7 +12,7 @@ from ADSMSettings.utils import workspace_path, supplemental_folder_has_contents,
 def is_simulation_running():
     """Returns True if the simulation is currently active.  Also sets the simulation_has_started for historical context."""
     if len(get_simulation_controllers()) > 0:
-        SmSession.objects.all().update(simulation_has_started = True)
+        SmSession.objects.all().update(simulation_has_started=True)
         return True
     return False
 
@@ -68,9 +68,16 @@ def zip_map_directory_if_it_exists():
 
 
 def abort_simulation(request=None):
+    # Import these things locally since several other modules import this utils
+    from django.db import close_old_connections
+    from ADSMSettings.views import save_scenario
+    from Results.interactive_graphing import population_zoom_png
+
+    # Kill each of the open processes
     for process in get_simulation_controllers():
         print("Aborting Simulation Thread")
         process.kill()
+
     if request is not None:
         return redirect('/results/')
 

@@ -33,6 +33,10 @@ var results_status  = (function(pollTime){
                 status_text = "Starting Simulation..."
             }
             $('.simulation-status').text(status_text);
+            if(context.iterations_completed >= 1) {
+                var abort_btn = document.getElementById("sim_abort_btn");
+                abort_btn.classList.remove('hidden');
+            }
 
             last_progress = simulation_progress;
         });

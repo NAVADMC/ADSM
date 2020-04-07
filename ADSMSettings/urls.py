@@ -22,4 +22,6 @@ urlpatterns = patterns('',
     url(r'^Download/$', 'ADSMSettings.views.download_file'),
     url(r'^Copy/(?P<target>.+)/(?P<destination>.+)/$', 'ADSMSettings.views.copy_file'),
     url(r'^Upload/$', 'ADSMSettings.views.upload_scenario'),
+
+    url(r'^DeleteWorkspaceSetting/$', 'ADSMSettings.views.delete_workspace_setting')
 )

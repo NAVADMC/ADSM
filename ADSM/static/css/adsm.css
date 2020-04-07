@@ -208,6 +208,7 @@ form.editable input{
     display: block;
     height: auto;
     overflow: hidden; /* check boxes are bold from mixins.less and I think it looks better with definitions*/
+    padding-bottom: 2px;
 }
 
 .hide-help-text .help-block {
@@ -345,6 +346,14 @@ header .filename {
     z-index: 102;/*necessary for #unsaved-header*/
 }
 #unsaved-header {
+    color: white;
+    position: fixed;
+    top: 0;
+    right: 3%;
+    z-index: 130;
+    /* font-size: 18px !important; */
+}
+#unsaved-form-header {
     color: white;
     position: fixed;
     top: 25px;
@@ -723,7 +732,7 @@ ul {
 .current .buttonHolder {
   position: absolute;
   right: 24px;
-  top: 40px;
+  top: 60px;
 }
 
 #file_panel h2,
@@ -1320,6 +1329,7 @@ section .btn-primary:focus,
 .btn-danger {
     background-color: #d0343a;
     transition: all .2s ease;
+    margin-top: 0px;
 }
 
 .btn-danger:hover{
@@ -1440,7 +1450,6 @@ select {
 .file_list {
     list-style: none;
     margin-bottom: 15px;
-    max-width: 600px;
     position: relative;
 }
 
@@ -1453,6 +1462,11 @@ select {
     position: absolute;
     right: 5px;
     top: 0;
+}
+
+.file_list_item {
+    background: #f5f5f5;
+    margin-bottom: 3px;
 }
 
 .file_list .icon {
@@ -1739,7 +1753,7 @@ section#population_main_panel h1:first-of-type {
 /*************** Farm_list **********/
 #farm_list_container{
     float: right;
-    width: 49.98vw;
+    width: 55.00vw;
     overflow-x: auto;
     padding-left: 0px;
 }
@@ -1781,10 +1795,10 @@ section#population_main_panel h1:first-of-type {
     position: relative;
 }
 #farm_list td {
-    width: 17%;
+    width: 12.5%;
 }
 #farm_list th { /**--- this accounts for the 6px scroll bar taking up width in the table body---**/
-    width: calc(17% - 1px);
+    width: calc(12.5% - 1px);
 }
 
 #farm_list tbody{
@@ -1955,7 +1969,7 @@ section#population_main_panel h1:first-of-type {
     #population_grid_wraper form:first-of-type{
         float: left !important;
         padding-right: 0;
-        margin-top: 303px;
+        margin-top: 383px;
     }
     #population_filters {
         position: absolute;
@@ -2055,6 +2069,7 @@ section#population_main_panel h1:first-of-type {
     }
     #edit_population {
         right: 10px;
+        margin-top: 65px;
         top: calc(100vh + 131px);
     }
 }
@@ -2579,6 +2594,18 @@ span.IndirectSpread {
         padding-bottom: 3px;
     }
 }
+.simulation_error {
+    background-color: #d0343a;
+    margin-bottom: 15px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 15px;
+    padding: 10px 10px 10px 10px;
+}
+.simulation_error_text {
+    color: white;
+    display: block;
+}
 
 /*----------------------------------------------------*/
 /*----- global overrides -----*/
@@ -2843,4 +2870,40 @@ span.IndirectSpread {
     .btn .icon-spin {
         height: auto
     }
+}
+
+.react-select-box-container {
+    background-color: white;
+}
+
+.download-overlay-image {
+    opacity: 1;
+    transition: .5s ease;
+    backface-visibility: hidden;
+}
+
+.download-overlay-base {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 115px;
+  left: 190px;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.download-overlay-text {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 18px;
+  padding: 16px 32px;
+}
+
+.download-overlay-container:hover .download-overlay-image {
+    opacity: 0.3;
+}
+
+.download-overlay-container:hover .download-overlay-base {
+    opacity: 1;
 }

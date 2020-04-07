@@ -89,6 +89,8 @@ build_protocols_list = function(){
                     if (!tab['valid']) {
                         first_submodel_with_error = "#sub-model" + index;
                         first_tab_with_error = "#id_" + tab['field'];
+                    } else {
+                        document.getElementById('control-protocol-tab').className = "pull-right completed";
                     }
                 });
                 $container.append($sub_headings);
@@ -102,6 +104,8 @@ build_protocols_list = function(){
                 $(first_submodel_with_error).collapse('show');
                 // first_tab_with_error = $('input[data-proxy="'+first_tab_with_error+'"]').parents('.defined_wrapper').find('.defined_name').first();
                 first_tab_with_error = $('input[data-proxy="'+first_tab_with_error+'"]').siblings('.defined_name').first();
+                console.log(document.getElementById('control-protocol-tab'));
+                document.getElementById('control-protocol-tab').className = "pull-right incomplete";
                 switch_tabs(first_tab_with_error);
             }
         }

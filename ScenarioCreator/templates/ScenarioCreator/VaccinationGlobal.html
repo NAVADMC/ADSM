@@ -1,91 +1,99 @@
-{% extends 'ScenarioCreator/Fragment.html' %}
+{% extends 'ScenarioCreator/MainPanel.html' %}
 {% load floppyforms %}
 {% load crispy_forms_tags  %}
 {% load db_status_tags  %}
 
-{% block content %}
+{% block main_layout %}
+    <section id="main_panel" class="layout-panel col-xs-8" style="margin-left: 210px;">
+        <div class="fragment">
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
-    <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.min.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery-ui.structure.min.css" />
+            <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
-    <h1 id="title">{{ title }}</h1>
+            <h1 id="title" style="margin-top: 0px;">{{ title }}</h1>
 
-    <label>Vaccination Priorities</label>
-    <ul id="priorities" class="ui-sortable">
-        {% for key, value in ordering.items %}
-            <li class="ui-state-default ui-sortable-handle tab-list top-level-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{key}}
-                <ul class="sub-priorities ui-sortable">
-                {% for sub_priority in value %}
-                    <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
+            <label>Vaccination Priorities</label>
+            <ul id="priorities" class="ui-sortable">
+                {% for key, value in ordering.items %}
+                    <li class="ui-state-default ui-sortable-handle tab-list top-level-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{key}}
+                        <ul class="sub-priorities ui-sortable">
+                        {% for sub_priority in value %}
+                            <li class="ui-state-default ui-sortable-handle tab-list sub-priority" title="Drag to change Vaccination Priority"><span class="pull-right completed"></span>{{sub_priority}}</li>
+                        {% endfor %}
+                        </ul>
+                    </li>
                 {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+            </ul>
 
-    <form class="ajax" method="post" action="" id="vaccination-global-form">
-        {% crispy form %}
-        {% if form_errors %}
-            <div id='form-errors'>{{ form_errors }}</div>
-        {% endif %}
-    </form>
+            <form class="ajax" method="post" action="" id="vaccination-global-form">
+                {% crispy form %}
+                {% if form_errors %}
+                    <div id='form-errors'>{{ form_errors }}</div>
+                {% endif %}
+            </form>
 
-    <script>
-        function submitVaccinationGlobalForm() {
-            var priorityString = "{";
-            var priorityList = document.getElementById("priorities");
-            var topLevelItems = priorityList.getElementsByClassName("top-level-priority");
+            <script>
+                function submitVaccinationGlobalForm() {
+                    var priorityString = "{";
+                    var priorityList = document.getElementById("priorities");
+                    var topLevelItems = priorityList.getElementsByClassName("top-level-priority");
 
-            for (var i = 0; i < topLevelItems.length; ++i) {
-                var priority = topLevelItems[i].textContent.split('\n');
+                    for (var i = 0; i < topLevelItems.length; ++i) {
+                        var priority = topLevelItems[i].textContent.split('\n');
 
-                priorityString += "\"" + priority[0].trim() + "\": [";
+                        priorityString += "\"" + priority[0].trim() + "\": [";
 
-                var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
+                        var subLevelItems = topLevelItems[i].getElementsByClassName("sub-priority");
 
-                for (var k = 0; k < subLevelItems.length; ++k) {
-                    var temp = subLevelItems[k].textContent.trim();
-                    if (temp) {
-                        priorityString += "\"" + temp + "\", ";
+                        if(parseInt(subLevelItems.length) > 0) {
+                            for (var k = 0; k < subLevelItems.length; ++k) {
+                                var temp = subLevelItems[k].textContent.trim();
+                                if (temp) {
+                                    priorityString += "\"" + temp + "\", ";
+                                }
+                            }
+                        } else {
+                            priorityString += "\"\"";
+                        }
+                        if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
+                            priorityString = priorityString.slice(0, priorityString.length - 2);
+                        }
+                        priorityString += "], "
                     }
-                }
-                if (priority.length > 1) {  // This is checking that there are actually sub elements that were added. Skip if there is only a dict key.
                     priorityString = priorityString.slice(0, priorityString.length - 2);
+                    priorityString += "}";
+                    document.getElementById("id_vaccination_priority_order").value = priorityString;
+
+                    document.getElementById("vaccination-global-form").submit();
                 }
-                priorityString += "], "
-            }
-            priorityString = priorityString.slice(0, priorityString.length - 2);
-            priorityString += "}";
-            document.getElementById("id_vaccination_priority_order").value = priorityString;
 
-            document.getElementById("vaccination-global-form").submit();
-        }
+                $(function() {
+                    $( ".ui-sortable" ).sortable({
+                        update: function(event, ui) {
+                            $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
+                        }
+                    });
+                    $( ".ui-sortable" ).disableSelection();
 
-        $(function() {
-            $( ".ui-sortable" ).sortable({
-                update: function(event, ui) {
-                    $('#submit-id-submit').removeAttr('disabled').addClass('unsaved');
-                }
-            });
-            $( ".ui-sortable" ).disableSelection();
+                    $('#priorities>.ui-sortable-handle').mouseenter(function(){
+                        $('#priorities>.ui-sortable-handle').removeClass('active')
+                        $(this).addClass('active')
+                    });
+                    $(':input').hover(function(){
+                        $('#priorities *').removeClass('active')
+                    })
+                });
+            </script>
 
-            $('#priorities>.ui-sortable-handle').mouseenter(function(){
-                $('#priorities>.ui-sortable-handle').removeClass('active')
-                $(this).addClass('active')
-            });
-            $(':input').hover(function(){
-                $('#priorities *').removeClass('active')
-            })
-        });
-	</script>
-
-    <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
-        {% if outputs_exist %}
-            <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="submitVaccinationGlobalForm();">Delete Results and Apply changes</button>
-        {% else %}
-            <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitVaccinationGlobalForm();">Apply</button>
-        {% endif %}
-    </div>
+            <div class="buttonHolder" style="position:absolute; right:25px; bottom:72px;">
+                {% if outputs_exist %}
+                    <button type="submit" class="btn btn-danger btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" onclick="submitVaccinationGlobalForm();">Delete Results and Apply changes</button>
+                {% else %}
+                    <button type="button" class="btn btn-default btn-cancel" id="id-cancel" onclick="window.location.reload();">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-save" id="submit-id-submit" disabled onclick="submitVaccinationGlobalForm();">Apply</button>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 {% endblock %}

@@ -11,7 +11,6 @@ from crispy_forms.layout import Layout, ButtonHolder, HTML
 from ScenarioCreator.models import *
 from floppyforms import Select, NumberInput, HiddenInput, SelectMultiple, CheckboxInput, TextInput
 from crispy_forms.helper import FormHelper
-import os
 
 
 class FloatInput(NumberInput):
@@ -26,6 +25,14 @@ class AddOrSelect(Select):
     # def get_context(self, name, value, attrs=None, choices=()):
     #     context = super(AddOrSelect, self).get_context(name, value, attrs=None, choices=())
     #     context['attrs']['data-new-item-url'] = '/%s/new/' %
+
+
+class SelectExisting(Select):
+    template_name = 'floppyforms/function_select.html'
+
+
+class PiecewiseSelect(Select):
+    template_name = 'floppyforms/piecewise_select.html'
 
 
 class FixedSelect(Select):
@@ -102,7 +109,8 @@ class UnitForm(BaseForm):
 class UnitFormAbbreviated(BaseForm):
     class Meta(object):
         model = Unit
-        exclude = ['_population', 'days_in_initial_state', 'days_left_in_initial_state', 'user_notes']
+        exclude = ['_population', 'user_notes']
+        # fields included: production type, latitude, longitude, initial state, initial size, unit id, 'days_in_initial_state', 'days_left_in_initial_state'
         widgets = {}
         #'production_type': AddOrSelect(attrs={'data-new-item-url': '/setup/ProductionType/new/'})
 
@@ -111,7 +119,7 @@ class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityDensityFunction
         exclude = []
-        widgets = {'graph': AddOrSelect(attrs={'data-new-item-url': '/setup/RelationalFunction/new/'})}
+        widgets = {'graph': PiecewiseSelect()}
 
     def clean(self):
         cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
@@ -158,21 +166,6 @@ class ControlMasterPlanForm(BaseForm):
         )
         super(ControlMasterPlanForm, self).__init__(*args, **kwargs)
 
-        '''
-        HTML(r"<h2>Global Vaccination settings</h2>"),
-        HTML(r"<p>Parameters are not used if Vaccination is turned off in the control protocol</p>"),
-        'vaccination_capacity',
-        'restart_vaccination_capacity',
-        'vaccination_priority_order',
-        'vaccinate_retrospective_days',
-        HTML(r"<h2>Global Destruction settings</h2>"),
-        HTML(r"<p>Parameters are not used if Destruction is turned off in the control protocol</p>"),
-        'destruction_program_delay',
-        'destruction_capacity',
-        'destruction_priority_order',
-        'destruction_reason_order',
-        '''
-
 
     class Meta(object):
         model = ControlMasterPlan
@@ -182,7 +175,7 @@ class ControlMasterPlanForm(BaseForm):
 
 class VaccinationMasterForm(BaseForm):
     class Meta(object):
-        model = ControlMasterPlan
+        model = VaccinationGlobal
         fields = 'vaccination_capacity restart_vaccination_capacity vaccination_priority_order vaccinate_retrospective_days'.split()
         widgets = {
             # 'vaccination_priority_order': TextInput(attrs={'hidden':'hidden'}),
@@ -356,6 +349,18 @@ class DiseaseForm(BaseForm):
 
 
 class DiseaseProgressionForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout (
+            "name",
+            "disease_latent_period",
+            "disease_subclinical_period",
+            "disease_clinical_period",
+            "disease_immune_period",
+            "disease_prevalence" if Disease.objects.get().use_within_unit_prevalence else HTML('<p class="help-block">Within unit prevalence is not being used.<br/></p>')
+        )
+        super(DiseaseProgressionForm, self).__init__(*args, **kwargs)
+
     class Meta(object):
         model = DiseaseProgression
         exclude = ['_disease']
@@ -408,7 +413,7 @@ class DirectSpreadForm(BaseForm):
             'use_fixed_contact_rate',
             'contact_rate',
             AppendedText('infection_probability', 'example: 0.37 = 37%'),
-            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>'),
+            HTML('<p class="help-block">Probability of infection transfer is determined by within unit prevalence.</p>') if Disease.objects.get().use_within_unit_prevalence else HTML('<p class="help-block">Probability of infection is NOT determined by within unit prevalence.</p>'),
             'distance_distribution',
             'transport_delay',
             'movement_control',
@@ -439,6 +444,7 @@ class AirborneSpreadForm(BaseForm):
             'name',
             AppendedText('spread_1km_probability', 'example: 0.37 = 37%'),
             'max_distance',
+            HTML('<p class="help-block">"Max distance" is used only if Linear Airborne Decay is selected (in the Disease tab). If using Exponential Airborne Decay "Max Distance" will not be an available option.</p>'),
             'exposure_direction_start',
             'exposure_direction_end',
             'transport_delay',
