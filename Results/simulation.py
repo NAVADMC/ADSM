@@ -96,7 +96,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
                 error_text = errors.decode()
                 if "MEMORY-ERROR" in error_text:
                     error_text += "This scenario has exceeded the limits of ADSM. It will be necessary to modify " \
-								  "your parameters to reducde disease spread to execute this scenario."
+								  "your parameters to reduce disease spread to execute this scenario."
                 SmSession.objects.all().update(simulation_crashed=True, crash_text=error_text)
             abort_simulation()
     # End logging
