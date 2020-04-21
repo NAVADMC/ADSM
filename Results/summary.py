@@ -66,7 +66,7 @@ def summarize_results():
     for zone in Zone.objects.all():
         queryset = DailyByZone.objects.filter(last_day_query(), zone=zone)
         zones_summary.append(
-            ("Median Total Area of %s in km^2" % zone.name, median_value(queryset, "zoneArea")))
+            ("Median Total Area of %s in km^2" % zone.name, round(median_value(queryset, "zoneArea"), 3)))
         zones_summary.append(
             ("Median Number of Distinct %s Zones" % zone.name, median_value(queryset, "numSeparateAreas")))
     summary["Zone Summary"] = zones_summary
