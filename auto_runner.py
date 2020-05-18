@@ -1,4 +1,5 @@
 from ADSM import settings
+from CSUtils import args2dict
 
 
 def setup(args):
@@ -8,57 +9,56 @@ def setup(args):
     :return: None
     """
 
-    # string to hold the name of the exclude file
-    exclude_file_name = ""
-    # string to hold the location of the scenarios to auto-run
-    scenarios_path = ""
-    # file var to hold to exclude file object
-    exclude_file = None
-    # variable denoting if additional print statements should be used or not
-    verbose = False
+    # dictionary of the arguments
+    parsed_args = {}
+    # file object for the exclude file
+    exclude_file = ""
 
-    print("Auto-run mode detected, setting up...")
+    # parse the given arguments into that dictionary
+    parsed_args = args2dict(args)
 
-    # for every index and argument in the given arguments
-    for index, arg in enumerate(args):
-        # if the current argument denotes that the next will be the scenarios path
-        if arg == "--scenarios-path":
-            # set the scenarios_path variable
-            scenarios_path = args[index+1]
-        # if the current argument denotes that the next will be an exclude file
-        if arg == "--exclude-file":
-            # set the exclude file name
-            exclude_file_name = args[index+1]
-        if arg == "-v":
-            verbose = True
+    # if the arguments could not be parsed
+    if parsed_args is None:
+        # exit program
+        print("\nInvalid command line arguments given.")
+        return None
 
-    if verbose:
-        print(("[setup] Given exclude-file name is: " + exclude_file_name) if exclude_file_name != "" else
+    # if the verbose flag was not given
+    if "v" not in parsed_args.keys():
+        # set it to false
+        parsed_args["v"] = False
+
+    print("\nAuto-run mode detected, setting up...")
+
+    if parsed_args["v"]:
+        print(("[setup] Given exclude-file name is: " + parsed_args["exclude_file"])
+              if "exclude_file" in parsed_args.keys() else
               "[setup] No exclude-file name detected.")
-        print(("[setup] Given scenarios-path is: " + scenarios_path) if scenarios_path != "" else
+        print(("[setup] Given scenarios-path is: " + parsed_args["scenarios_path"])
+              if "scenarios_path" in parsed_args.keys() else
               "[setup] No scenarios-path given, defaulting to the ADSM working directory.")
 
     # if no scenario_path was given
-    if scenarios_path == "":
+    if "scenarios_path" not in parsed_args.keys():
         # get the default path from settings
-        scenarios_path = settings.WORKSPACE_PATH
+        parsed_args["scenarios_path"] = settings.WORKSPACE_PATH
 
-        if verbose:
-            print("[setup] Detected ADSM working directory is: ", scenarios_path)
+        if parsed_args["v"]:
+            print("[setup] Detected ADSM working directory is: ", parsed_args["scenarios_path"])
 
     # test if an exclude file was given before trying to open it
-    if exclude_file_name != "":
+    if "exclude_file" in parsed_args.keys():
         # we're going to try to catch if the file could not be opened
         try:
-            if verbose:
+            if parsed_args["v"]:
                 print("[setup] Opening exclude file...")
-            exclude_file = open(exclude_file_name, "r")
-            if verbose:
+            exclude_file = open(parsed_args["exclude_file"], "r")
+            if parsed_args["v"]:
                 print("[setup] File opened.")
         except FileNotFoundError:
             # print an error message
             print("\n\nGIVEN EXCLUDE FILE COULD NOT BE OPENED")
-            if verbose:
+            if parsed_args["v"]:
                 print("[setup] aborting ADSM")
             # exit ADSM
             return None
@@ -66,47 +66,46 @@ def setup(args):
     else:
         # let the user know one was not detected. This is printed so if the user intended to have an exclude file
         # but their arguments had a typo they know that their exclude file was not used.
-        print("No exclude file given, running all scenarios in current working directory.")
+        print("No exclude file given, running all scenarios.")
 
-    if verbose:
-        print("[setup] Setup complete, starting ADSM auto-runner.")
+    print("Setup complete, starting ADSM auto-runner.")
+
     # call the run function (with the opened exclude file, or None), this will actually start the auto-run process.
-    run(exclude_file if exclude_file is not None else None, verbose)
+    run(parsed_args, exclude_file)
 
-    if verbose:
+    if parsed_args["v"]:
         print("[setup] ADSM auto-runner complete, cleaning up...")
 
     # if an exclude file was opened
-    if exclude_file is not None:
-        if verbose:
+    if "exclude_file" in parsed_args.keys():
+        if parsed_args["v"]:
             print("[setup] Closing the exclude file.")
         # close it
         exclude_file.close()
 
-    if verbose:
+    if parsed_args["v"]:
         print("[setup] Clean up complete. Closing ADSM.")
     # exit ADSM
     return None
 
 
-def run(scenarios_path, exclude_file=None, verbose=False):
+def run(options, exclude_file):
     """ auto-run main function. Loops through file in the current working directory and hands them to execute_next to
     actually run them through the simulator.
 
-    :param scenarios_path: file path to a folder containing the scenarios the user wishes to run.
-    :param exclude_file: file object with list of scenarios to skip
-    :param verbose: boolean denoting if additional print statements should be output
+    :param options: dictionary of formatted parameters
+    :param exclude_file: file object with a list of scenarios to skip (one scenario per line)
     :return: None
     """
     return None
 
 
-def execute_next(next_scenario_name, verbose=False):
+def execute_next(options, exclude_file):
     """ This function takes a single scenario name from the current ADSM working directory and runs that scenario
     through the simulator.
 
-    :param next_scenario_name: scenario name to run
-    :param verbose: boolean denoting if additional print statements should be output
-    :return: 0 if scenario executed as expected, 1 if an error occured.
+    :param options: dictionary of formatted parameters
+    :param exclude_file: file object with a list of scenarios to skip (one scenario per line)
+    :return: 0 if scenario executed as expected, 1 if an error occurred.
     """
     return

@@ -16,7 +16,7 @@ def main(*args):
     # if at least one user-command line argument is given (first args is always this file's location)
     if(len(args[0]) > 1):
         # if the first given argument is --auto
-        if(args[0][1] == "--auto"):
+        if(args[0][1] == "-auto"):
             # start the ADSM auto-runner
             auto_runner.setup(*args)
             # return, so ADSM does not also start normally
