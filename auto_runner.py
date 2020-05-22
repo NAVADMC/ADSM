@@ -1,4 +1,3 @@
-from CSUtils import args2dict
 from itertools import chain
 from ADSM import settings
 from glob import glob
@@ -9,76 +8,81 @@ import os
 def setup(args):
     """ Setup the auto-runner. This function mainly is in place to handle the exclude-file, if one is given.
 
-    :param args: list of command line arguments
+    :param args: argsparse arguments object
     :return: None
     """
 
-    # dictionary of the arguments
-    parsed_args = {}
-    # file object for the exclude file
-    exclude_file = ""
-    # list of all scenarios to process
+    # list of all scenarios to process, not filled if args.run_scenarios has any values
     scenarios = []
-    # list of scenarios to exclude (if applicable)
+    # list of scenarios to exclude
     excluded_scenarios = []
+    # file containing names of scenarios to exclude, one per line
+    exclude_file = None
+    # list of scenarios to include
+    included_scenarios = []
+    # file containing names of scenarios to include, one per line
+    include_file = None
     file_text = ""  # raw file data
 
-    # parse the given arguments into that dictionary
-    parsed_args = args2dict(args)
-
-    # if the arguments could not be parsed
-    if parsed_args is None:
-        # exit program
-        print("\nInvalid command line arguments given.")
-        return None
-
-    # if the verbose flag was not given
-    if "v" not in parsed_args.keys():
-        # set it to false
-        parsed_args["v"] = False
-
     print("\nAuto-run mode detected, setting up...")
+    print(args)
+    print(args["run_all_scenarios"])
 
-    if parsed_args["v"]:
-        print(("[setup] Given exclude-file name is: " + parsed_args["exclude_file"])
-              if "exclude_file" in parsed_args.keys() else
-              "[setup] No exclude-file name detected.")
-        print(("[setup] Given scenarios-path is: " + parsed_args["scenarios_path"])
-              if "scenarios_path" in parsed_args.keys() else
-              "[setup] No scenarios-path given, defaulting to the ADSM working directory.")
+    # check and make sure that a command line arguments conflict was not given by the user
+    if args["run_all_scenarios"] and \
+            (args["run_scenarios"] is not None or args["run_scenarios_list"] is not None):
+        raise InvalidArgumentsGiven('"run-all-scenarios" cannot be used with either '
+                                    '"run-scenarios" or "run-scenarios-list".')
+
+    if args["verbose"]:
+        print("[setup] Argument Summary: ")
+        print("\t[setup] Running all scenarios (unless manually excluded)"
+              if args["run_all_scenarios"] else
+              "\t[setup] Only running specified scenarios.")
+        print(("\t[setup] Excluded scenarios: " + str(args["exclude_scenarios"]))
+              if args["exclude_scenarios"] is not None else
+              "\t[setup] No specific scenarios excluded.")
+        print(("\t[setup] Given exclude-file name is: " + args["exclude_scenarios_list"])
+              if args["exclude_scenarios_list"] is not None else
+              "\t[setup] No exclude-file name detected.")
+        print(("\t[setup] Scenarios included to be run: " + str(args["run_scenarios"]))
+              if args["run_scenarios"] is not None else
+              "\t[setup] No specific scenario included.")
+        print(("\t[setup] Given include-file name is: " + args["run_scenarios_list"])
+              if args["run_scenarios_list"] is not None else
+              "\t[setup] No include-file name detected.")
 
     # if no scenario_path was given
-    if "scenarios_path" not in parsed_args.keys():
+    if args["workspace_path"] is None:
         # get the default path from settings
-        parsed_args["scenarios_path"] = settings.WORKSPACE_PATH
+        args["workspace_path"] = settings.WORKSPACE_PATH
 
-        if parsed_args["v"]:
-            print("[setup] Detected ADSM working directory is: ", parsed_args["scenarios_path"])
+        if args["verbose"]:
+            # tab here because this will actually line up with the argument summary above
+            print("\t[setup] Scenarios will be pulled from this directory: ", args["workspace_path"])
+    else:
+        # tab here because this will actually line up with the argument summary above
+        print("\t[setup] Scenarios will be pulled from this directory: ", args["workspace_path"])
+
+    if args["verbose"]:
+        print("\n[setup] Building complete scenario exclusion list...")
 
     # test if an exclude file was given before trying to open it
-    if "exclude_file" in parsed_args.keys():
+    if args["exclude_scenarios_list"] is not None:
         # we're going to try to catch if the file could not be opened
         try:
-            if parsed_args["v"]:
-                print("[setup] Opening exclude file...")
-            exclude_file = open(parsed_args["exclude_file"], "r")
-            if parsed_args["v"]:
-                print("[setup] File opened.")
+            if args["verbose"]:
+                print("\t[setup] Opening exclude file...")
+            exclude_file = open(args["exclude_scenarios_list"], "r")
+            if args["verbose"]:
+                print("\t[setup] File opened.")
         except FileNotFoundError:
             # print an error message
-            print("\n\nGIVEN EXCLUDE FILE COULD NOT BE OPENED")
-            if parsed_args["v"]:
+            print("\n\nGIVEN EXCLUDE-SCENARIOS-LIST FILE COULD NOT BE OPENED")
+            if args["verbose"]:
                 print("[setup] aborting ADSM")
             # exit ADSM
             return None
-    # if no exclude file name was given
-    else:
-        # let the user know one was not detected. This is printed so if the user intended to have an exclude file
-        # but their arguments had a typo they know that their exclude file was not used.
-        print("No exclude file given, running all scenarios.")
-
-    if parsed_args["v"]:
-        print("[setup] Building list of scenarios to run...")
 
     # first we need to create a list of excluded scenarios
     # if an exclude_file was even given
@@ -88,65 +92,140 @@ def setup(args):
         # build the exclusion list be removing newlines
         excluded_scenarios = [file_name.replace("\n", "") for file_name in file_text]
 
-    # for every folder in the given workspace
-    for potential in os.listdir(parsed_args["scenarios_path"]):
-        if parsed_args["v"]:
-            print("\n[setup] Checking next potential scenario: " + potential)
+    if args["verbose"] and args["exclude_scenarios_list"] is not None:
+        print("\t[setup] " + str(len(excluded_scenarios)) + " scenario(s) were collected from the given file.")
 
-        # make sure the potential is not excluded, no sense verifying it if we can't use it anyways
-        if potential in excluded_scenarios:
-            if parsed_args["v"]:
-                print("[setup] Potential scenario excluded by user. Skipping.")
-            continue
+    # if additional specific scenario names were given to exclude
+    if args["exclude_scenarios"] is not None:
+        # append those scenarios to the excluded_scenarios list
+        excluded_scenarios += args["exclude_scenarios"]
+        if args["verbose"]:
+            print("\t[setup] " + str(len(args["exclude_scenarios"])) +
+                  " scenario(s) were collected from the command line.")
 
-        # try catch block will prevent anything not a directory in the workspace from stopping ADSM
-        try:
-            # get all of the files within the potential scenario
-            potential_files = os.listdir(parsed_args["scenarios_path"] + "/" + potential)
+    if args["verbose"]:
+        print("[setup] Excluded scenarios compiled: " + str(excluded_scenarios) +
+              "\t(Duplicate scenarios names will not cause any errors.)")
+        print("\n[setup] Building complete scenario inclusion list...")
 
-            # hard-check to make sure we're not in the settings folder
-            if 'activeSession.db' in potential_files and 'settings.db' in potential_files:
-                if parsed_args["v"]:
-                    print("[setup] Settings folder detected. Skipping.")
+    # we don't need to collect any of the included scenarios if the --run-all-scenarios option was given
+    if not args["run_all_scenarios"]:
+
+        # test if an include file was given before trying to open it
+        if args["run_scenarios_list"] is not None:
+            # we're going to try to catch if the file could not be opened
+            try:
+                if args["verbose"]:
+                    print("\t[setup] Opening include file...")
+                include_file = open(args["run_scenarios_list"], "r")
+                if args["verbose"]:
+                    print("\t[setup] File opened.")
+            except FileNotFoundError:
+                # print an error message
+                print("\n\nGIVEN RUN-SCENARIOS-LIST FILE COULD NOT BE OPENED")
+                if args["verbose"]:
+                    print("[setup] aborting ADSM")
+                # exit ADSM
+                return None
+
+        # first we need to create a list of included scenarios
+        # if an include_file was even given
+        if include_file is not None:
+            # get the file data
+            file_text = include_file.readlines()
+            # for each file name
+            for file in file_text:
+                # get rid of that pesky newline
+                file.replace("\n", "")
+                # check and make sure that name is not also in the exluded list
+                if file in excluded_scenarios:
+                    raise ScenarioConflict("A given scenario was both included and excluded.")
+                else:
+                    included_scenarios.append(file)
+
+        if args["verbose"] and args["run_scenarios_list"] is not None:
+            print("\t[setup] " + str(len(included_scenarios)) + " scenario(s) were collected from the given file.")
+
+        # if additional specific scenario names were given to exclude
+        if args["run_scenarios"] is not None:
+            # we need to check and make sure each included file is also not excluded
+            # for each file name
+            for file in args["run_scenarios"]:
+                # get rid of that pesky newline
+                file.replace("\n", "")
+                # check and make sure that name is not also in the excluded list
+                if file in excluded_scenarios:
+                    raise ScenarioConflict("A given scenario was both included and excluded.")
+                else:
+                    included_scenarios.append(file)
+
+            if args["verbose"]:
+                print("\t[setup] " + str(len(args["run_scenarios"])) +
+                      " scenario(s) were collected from the command line.")
+    else:
+        if args["verbose"]:
+            print("\t[setup] Collecting scenarios from the workspace...")
+
+        # for every folder in the given workspace
+        for potential in os.listdir(args["workspace_path"]):
+            if args["verbose"]:
+                print("\n\t[setup] Checking next potential scenario: " + potential)
+
+            # make sure the potential is not excluded, no sense verifying it if we can't use it anyways
+            if potential in excluded_scenarios:
+                if args["verbose"]:
+                    print("\t[setup] Potential scenario excluded by user. Skipping.")
                 continue
 
-            # for each file within the potential scenarios
-            for file in potential_files:
-                # if that file name has the .db extension
-                if ".db" in file:
-                    if parsed_args["v"]:
-                        print("[setup] Scenario confirmed, adding to list of known scenarios")
-                    scenarios.append(potential)
-                    break
-            else:
-                if parsed_args["v"]:
-                    print("[setup] Scenario denied.")
-        except NotADirectoryError:
-            if parsed_args["v"]:
-                print("[setup] Potential is not a directory. Skipping.")
-            continue
+            # try catch block will prevent anything not a directory in the workspace from stopping ADSM
+            try:
+                # get all of the files within the potential scenario
+                potential_files = os.listdir(args["workspace_path"] + "/" + potential)
 
-    if parsed_args["v"]:
-        print("\n[setup] Collected scenarios:", scenarios, "\n")
+                # hard-check to make sure we're not in the settings folder
+                if 'activeSession.db' in potential_files and 'settings.db' in potential_files:
+                    if args["verbose"]:
+                        print("\t[setup] Settings folder detected. Skipping.")
+                    continue
 
-    parsed_args["scenarios"] = scenarios
+                # for each file within the potential scenarios
+                for file in potential_files:
+                    # if that file name has the .db extension
+                    if ".db" in file:
+                        if args["verbose"]:
+                            print("\t[setup] Scenario confirmed, adding to list of known scenarios")
+                        scenarios.append(potential)
+                        break
+                else:
+                    if args["verbose"]:
+                        print("\t[setup] Scenario denied.")
+            except NotADirectoryError:
+                if args["verbose"]:
+                    print("\t[setup] Potential is not a directory. Skipping.")
+                continue
+
+    if args["verbose"]:
+        print("\n[setup] Included scenarios compiled:", scenarios,
+              "\t(Excluded scenarios have already been removed from this list.)\n")
+
+    args["scenarios"] = scenarios
 
     print("Setup complete, starting ADSM auto-runner.")
 
     # call the run function (with the opened exclude file, or None), this will actually start the auto-run process.
-    run(parsed_args)
+    run(args)
 
-    if parsed_args["v"]:
+    if args["verbose"]:
         print("\n[setup] ADSM auto-runner complete, cleaning up...")
 
     # if an exclude file was opened
-    if "exclude_file" in parsed_args.keys():
-        if parsed_args["v"]:
+    if "exclude_file" in args.keys():
+        if args["verbose"]:
             print("[setup] Closing the exclude file.")
         # close it
         exclude_file.close()
 
-    if parsed_args["v"]:
+    if args["verbose"]:
         print("[setup] Clean up complete. Closing ADSM.")
     # exit ADSM
     return None
@@ -180,3 +259,11 @@ def execute_next(options, exclude_file):
     :return: 0 if scenario executed as expected, 1 if an error occurred.
     """
     return
+
+
+class InvalidArgumentsGiven(Exception):
+    pass
+
+
+class ScenarioConflict(Exception):
+    pass
