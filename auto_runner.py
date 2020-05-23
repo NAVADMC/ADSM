@@ -23,6 +23,8 @@ def setup(args):
     # file containing names of scenarios to include, one per line
     include_file = None
     file_text = ""  # raw file data
+    # boolean to mark if a scenario from the workspace should be used or not
+    include = False
 
     print("\nAuto-run mode detected, setting up...")
     print(args)
@@ -188,17 +190,23 @@ def setup(args):
                         print("\t[setup] Settings folder detected. Skipping.")
                     continue
 
-                # for each file within the potential scenarios
-                for file in potential_files:
-                    # if that file name has the .db extension
-                    if ".db" in file:
+                # if a DO.NOT.RUN file is in the scenario
+                if "DO.NOT.RUN" not in potential_files:
+                    # for each file within the potential scenarios
+                    for file in potential_files:
+                        # if that file name has the .db extension
+                        if ".db" in file:
+                            if args["verbose"]:
+                                print("\t[setup] Scenario confirmed, adding to list of known scenarios")
+                            scenarios.append(potential)
+                            break
+                    else:
                         if args["verbose"]:
-                            print("\t[setup] Scenario confirmed, adding to list of known scenarios")
-                        scenarios.append(potential)
-                        break
+                            print("\t[setup] Scenario denied.")
                 else:
                     if args["verbose"]:
                         print("\t[setup] Scenario denied.")
+
             except NotADirectoryError:
                 if args["verbose"]:
                     print("\t[setup] Potential is not a directory. Skipping.")
@@ -211,9 +219,10 @@ def setup(args):
     args["scenarios"] = scenarios
 
     print("Setup complete, starting ADSM auto-runner.")
-
-    # call the run function (with the opened exclude file, or None), this will actually start the auto-run process.
-    run(args)
+    # loop through all of the given scenarios
+    for scenario in args["scenarios"]:
+        print("Running next scenario: \"" + scenario + "\"")
+        execute_next(args, args["workspace_path"] + "\\" + scenario)
 
     if args["verbose"]:
         print("\n[setup] ADSM auto-runner complete, cleaning up...")
@@ -231,33 +240,28 @@ def setup(args):
     return None
 
 
-def run(options):
-    """ auto-run main function. Loops through file in the current working directory and hands them to execute_next to
-    actually run them through the simulator.
+def execute_next(args, scenario):
+    """ This function takes a single scenario path and runs that scenario through the simulator.
 
-    A scenario is defined as a folder within the given scenarios_path that has at least (but not exclusively) at .db
-    file within. The exception to this is the "settings" folder withing the default ADSM workspace, which contains
-    multiple .db files but is not considered a scenario.
-
-    :param options: dictionary of formatted parameters
-    :return: None
-    """
-
-    # loop through all of the given scenarios
-    for scenario in options["scenarios"]:
-        print("Running next scenario: \"" + scenario + "\"")
-
-    return None
-
-
-def execute_next(options, exclude_file):
-    """ This function takes a single scenario name from the current ADSM working directory and runs that scenario
-    through the simulator.
-
-    :param options: dictionary of formatted parameters
-    :param exclude_file: file object with a list of scenarios to skip (one scenario per line)
+    :param args: dictionary of parameters
+    :param scenario: Path to scenario to run through the simulator
     :return: 0 if scenario executed as expected, 1 if an error occurred.
     """
+
+    # string to the path of the .db file within the scenario
+    db_file = ""
+
+    if args["verbose"]:
+        print("\t[execute] Full path of next scenario to be run: " + scenario)
+
+    for file in os.listdir(scenario):
+        if ".db" in file:
+            db_file = file
+            break
+
+    if args["verbose"]:
+        print("\t[execute] Scenario Database File: " + db_file)
+
     return
 
 
