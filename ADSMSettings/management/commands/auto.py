@@ -344,6 +344,9 @@ def execute_next(args, scenario):
     sim = Simulation(args, scenario_path=os.path.abspath(os.path.join(scenario, db_file)))
     # run the simulation
     sim.start()
+    # this line prevents the auto-runner from continuing onto the next scenario until all iterations of the current one
+    # are complete.
+    sim.join()
 
     if args["verbose"]:
         print("\t[execute] Simulation Complete.")
