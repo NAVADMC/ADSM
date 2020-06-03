@@ -423,6 +423,7 @@ class Simulation(multiprocessing.Process):
                 # call run_simulation. apply_async does not require run_simulation to be done in order to return, so
                 # the overhead for loop will immediately continue onto the next iteration
                 res = pool.apply_async(func=run_simulation, args=(iteration, adsm_cmd))  # TODO: Stop storing this operation
+                res.get()
 
             # close the multi-threading
             pool.close()
