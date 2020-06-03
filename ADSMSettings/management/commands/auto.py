@@ -1,3 +1,8 @@
+import multiprocessing
+import subprocess
+import platform
+import sqlite3
+import time
 import os
 
 from django.core.management import BaseCommand
@@ -22,6 +27,8 @@ class Command(BaseCommand):
                             help='Filename that contains scenario names to run, one per line.', action='store')
         parser.add_argument('--workspace-path', dest='workspace_path',
                             help="Give a different workspace path to pull scenarios from.", action='store')
+        parser.add_argument('--max-iterations', dest='max_iterations',
+                            help="Maximum number of iterations any single simulation can run.", action='store')
 
     def handle(self, *args, **options):
         setup(options)
@@ -50,14 +57,21 @@ def setup(args):
     include = False
 
     print("\nAuto-run mode detected, setting up...")
-    print(args)
-    print(args["run_all_scenarios"])
 
     # check and make sure that a command line arguments conflict was not given by the user
     if args["run_all_scenarios"] and \
             (args["run_scenarios"] is not None or args["run_scenarios_list"] is not None):
         raise InvalidArgumentsGiven('"run-all-scenarios" cannot be used with either '
                                     '"run-scenarios" or "run-scenarios-list".')
+
+    # make sure that a valid max_iterations argument was given
+    try:
+        # make sure it exists in the first place before we try and convert it to an integer
+        if args["max_iterations"] is not None:
+            # make the conversion
+            args["max_iterations"] = int(args["max_iterations"])
+    except ValueError:
+        raise InvalidArgumentsGiven("The given iterations max could not be converted to an integer.")
 
     if args["verbose"]:
         print("[setup] Argument Summary: ")
@@ -171,7 +185,7 @@ def setup(args):
         if args["verbose"] and args["run_scenarios_list"] is not None:
             print("\t[setup] " + str(len(included_scenarios)) + " scenario(s) were collected from the given file.")
 
-        # if additional specific scenario names were given to exclude
+        # if additional specific scenario names were given to include
         if args["run_scenarios"] is not None:
             # we need to check and make sure each included file is also not excluded
             # for each file name
@@ -182,6 +196,25 @@ def setup(args):
                 if file in excluded_scenarios:
                     raise ScenarioConflict("A given scenario was both included and excluded.")
                 else:
+                    # next we'll check to make sure that a DO.NOT.RUN file is also not in the scenario directory
+
+                    # get all of the files within the potential scenario
+                    potential_files = os.listdir(args["workspace_path"] + "/" + file)
+
+                    # if a DO.NOT.RUN file is in the scenario
+                    if "DO.NOT.RUN" not in potential_files:
+                        # for each file within the potential scenarios
+                        for db_file in potential_files:
+                            # if that file name has the .db extension
+                            if ".db" in db_file:
+                                if args["verbose"]:
+                                    print("\t[setup] Scenario confirmed, adding to list of known scenarios")
+                                scenarios.append(db_file.replace(".db", ""))
+                                break
+                        else:
+                            raise ScenarioConflict("A given scenario was both included and excluded.")
+                    else:
+                        raise ScenarioConflict("A given scenario was both included and excluded.")
                     included_scenarios.append(file)
 
             if args["verbose"]:
@@ -244,7 +277,7 @@ def setup(args):
     print("Setup complete, starting ADSM auto-runner.")
     # loop through all of the given scenarios
     for scenario in args["scenarios"]:
-        print("Running next scenario: \"" + scenario + "\"")
+        print("\nRunning next scenario: \"" + scenario + "\"")
         execute_next(args, args["workspace_path"] + "\\" + scenario)
 
     if args["verbose"]:
@@ -285,7 +318,92 @@ def execute_next(args, scenario):
     if args["verbose"]:
         print("\t[execute] Scenario Database File: " + db_file)
 
+    # Get the actual number of iterations to run from the scenario itself
+    # open the scenario for reading
+    db_conn = sqlite3.connect(os.path.abspath(os.path.join(scenario, db_file)))
+    db_curr = db_conn.cursor()
+
+    # execute the query
+    db_curr.execute("SELECT iterations from ScenarioCreator_outputsettings")
+
+    # actually save the value (fetchone() returns a tuple)
+    args["next_iterations_count"] = int(db_curr.fetchone()[0])
+
+    db_conn.close()
+
+    # Make sure that said scenarios iterations count is not more than the max (if a user max was specified)
+    if args["max_iterations"] is not None:
+        if args["next_iterations_count"] > args["max_iterations"]:
+            args["next_iterations_count"] = args["max_iterations"]
+
+    if args["verbose"]:
+        print("\t[execute] Running", args["next_iterations_count"], "iteration(s).")
+        print("\t[execute] Starting Simulation...")
+
+    # create the simulation object
+    sim = Simulation(args, scenario_path=os.path.abspath(os.path.join(scenario, db_file)))
+    # run the simulation
+    sim.start()
+
+    if args["verbose"]:
+        print("\t[execute] Simulation Complete.")
+
+    print("Done.")
+
     return
+
+
+def simulation_process(iteration_number, adsm_cmd, log_path):
+    start = time.time()
+
+    simulation = subprocess.Popen(adsm_cmd,
+                                  shell=(platform.system() != "Darwin"),
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE,
+                                  bufsize=1)
+    simulation.communicate()
+
+    end = time.time()
+
+    return iteration_number, end - start
+
+
+class Simulation(multiprocessing.Process):
+    def __init__(self, args: dict, scenario_path="activeSession.db", **kwargs):
+        super(Simulation, self).__init__(**kwargs)
+        self.args = args
+        self.scenario_path = scenario_path
+
+    def run(self):
+
+        try:
+
+            sim_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                    "..", "..", "..", "bin"))
+            num_cores = multiprocessing.cpu_count()
+            # if num_cores > 2:  # Standard processor saturation
+            #     num_cores -= 1
+            if num_cores > 3:  # Lets you do other work while running sims
+                num_cores -= 2
+            executable_cmd = [os.path.join(sim_path, 'adsm_simulation.exe'), self.scenario_path,
+                              '--output-dir', os.path.join(sim_path, 'Supplemental-Output-Files')]
+
+            statuses = []
+            pool = multiprocessing.Pool(num_cores)
+            for iteration in range(1, self.args["next_iterations_count"] + 1):
+                adsm_cmd = executable_cmd + ['-i', str(iteration)]
+                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, sim_path))
+                statuses.append(res)
+
+            pool.close()
+
+            simulation_times = []
+            for status in statuses:
+                iteration_number, s_time = status.get()
+                simulation_times.append(round(s_time))
+
+        except (BaseException, Exception):
+            raise
 
 
 class InvalidArgumentsGiven(Exception):

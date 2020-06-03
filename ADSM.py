@@ -83,6 +83,23 @@ parser = argparse.ArgumentParser(prog='ADSM-Beta.exe')
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
 parser.add_argument('-v', '--version', dest='version', help='Get current version of program.', action='store_true')
+
+# arguments for auto
+parser.add_argument('--verbose', dest='verbose',
+                    help='Output extra status updates to the terminal.', action='store_true')
+parser.add_argument('--run-all-scenarios', dest='run_all_scenarios',
+                    help='Start the auto runner without any excluded scenarios.', action='store_true')
+parser.add_argument('--exclude-scenarios', dest='exclude_scenarios',
+                    help='A list of scenarios to exclude from the auto runner.', nargs='+')
+parser.add_argument('--exclude-scenarios-list', dest='exclude_scenarios_list',
+                    help="Filename that contains scenario names to exclude, one per line.", action='store')
+parser.add_argument('--run-scenarios', dest='run_scenarios',
+                    help='A list of scenarios to auto run.', nargs="+")
+parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
+                    help='Filename that contains scenario names to run, one per line.', action='store')
+parser.add_argument('--workspace-path', dest='workspace_path',
+                    help="Give a different workspace path to pull scenarios from.", action='store')
+
 args = parser.parse_args()
 
 # Respond to an updater query
@@ -168,6 +185,10 @@ if not settings.DEBUG:
 if args.test:
     print("\nRunning tests...")
     management.call_command('test')
+elif args.verbose or args.run_all_scenarios or args.exclude_scenarios is not None or \
+     args.exclude_scenarios_list is not None or args.run_scenarios is not None or \
+     args.run_scenarios_list is not None or args.workspace_path is not None or True:
+    management.call_command('auto')
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
     try:
