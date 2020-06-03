@@ -3,10 +3,10 @@ import subprocess
 import platform
 import sqlite3
 import time
+import sys
 import os
 
 from django.core.management import BaseCommand
-from ADSM import settings
 
 
 class Command(BaseCommand):
@@ -93,8 +93,25 @@ def setup(args):
 
     # if no scenario_path was given
     if args["workspace_path"] is None:
-        # get the default path from settings
-        args["workspace_path"] = settings.WORKSPACE_PATH
+
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.abspath(os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", ".."))
+
+        install_settings_file = os.path.join(base_dir, 'workspace.ini')
+        if os.path.isfile(install_settings_file):
+            from importlib import machinery
+            install_settings = machinery.SourceFileLoader('install_settings', install_settings_file).load_module()
+            workspace_path = install_settings.WORKSPACE_PATH
+            if str(workspace_path).strip() == ".":
+                workspace_path = os.path.join(base_dir, "ADSM Workspace")
+        else:
+            workspace_path = os.path.join(base_dir, "ADSM Workspace")
+
+        # get the current workspace path
+        args["workspace_path"] = workspace_path
 
         if args["verbose"]:
             # tab here because this will actually line up with the argument summary above
