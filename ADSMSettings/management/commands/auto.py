@@ -353,57 +353,85 @@ def execute_next(args, scenario):
     return
 
 
-def simulation_process(iteration_number, adsm_cmd, log_path):
+def run_simulation(iteration_number, adsm_cmd):
+    """
+    This simple function exists because it can be run individually as a thread. This function actually runs the
+    simulation given in the adsm_cmd argument.
+    :param iteration_number: integer value for the current iteration in relation to the current scenario  # TODO: Remove this argument
+    :param adsm_cmd: list of paths to both the adsm executable and the scenario db. (also includes other arguments)
+    :return: given iteration number, total runtime
+    """
+
+    # store the current time at simulation start
     start = time.time()
 
+    # setup the simulation to run
     simulation = subprocess.Popen(adsm_cmd,
                                   shell=(platform.system() != "Darwin"),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
+    # actually run the simulation
     simulation.communicate()
 
+    # store the current time at simulation end
     end = time.time()
 
     return iteration_number, end - start
 
 
 class Simulation(multiprocessing.Process):
+    """
+    Class managing simulations. This class is independent so that multiple scenarios can be run concurrently.
+    """
     def __init__(self, args: dict, scenario_path="activeSession.db", **kwargs):
         super(Simulation, self).__init__(**kwargs)
         self.args = args
         self.scenario_path = scenario_path
 
     def run(self):
+        """
+        NOT the function to be called to run the scenario, instead call Simulation.start(). multiprocessing.Process will
+        call this function itself.
+        :return: None
+        """
 
+        # We try to avoid nebulous try-except blocks like this, but if something goes wrong in 1 of a 100 user
+        # scenarios, we wan't to make sure all of the other scenarios still run.
         try:
 
+            # path to adsm_simulation.exe in ADSM/bin/
             sim_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                     "..", "..", "..", "bin"))
+
+            # get the number of cores on the current machine
             num_cores = multiprocessing.cpu_count()
-            # if num_cores > 2:  # Standard processor saturation
-            #     num_cores -= 1
-            if num_cores > 3:  # Lets you do other work while running sims
+            # if there are at least 4 cores, leave 2 of them for the user.
+            if num_cores > 3:
                 num_cores -= 2
+
+            # [ sim_path, scenario_path, output_path ]
             executable_cmd = [os.path.join(sim_path, 'adsm_simulation.exe'), self.scenario_path,
                               '--output-dir', os.path.join(sim_path, 'Supplemental-Output-Files')]
 
-            statuses = []
+            # setup the multi-threading object
             pool = multiprocessing.Pool(num_cores)
+            # for each iteration in the scenario (1 base index)
             for iteration in range(1, self.args["next_iterations_count"] + 1):
+                # add a few arguments to the command
                 adsm_cmd = executable_cmd + ['-i', str(iteration)]
-                res = pool.apply_async(func=simulation_process, args=(iteration, adsm_cmd, sim_path))
-                statuses.append(res)
+                # call run_simulation. apply_async does not require run_simulation to be done in order to return, so
+                # the overhead for loop will immediately continue onto the next iteration
+                res = pool.apply_async(func=run_simulation, args=(iteration, adsm_cmd))  # TODO: Stop storing this operation
 
+            # close the multi-threading
             pool.close()
 
-            simulation_times = []
-            for status in statuses:
-                iteration_number, s_time = status.get()
-                simulation_times.append(round(s_time))
-
         except (BaseException, Exception):
+            # TODO: Log the failure
             raise
+
+        return
 
 
 class InvalidArgumentsGiven(Exception):
