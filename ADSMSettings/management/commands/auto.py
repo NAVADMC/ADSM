@@ -2,7 +2,6 @@ import multiprocessing
 import subprocess
 import platform
 import sqlite3
-import time
 import sys
 import os
 
@@ -373,33 +372,6 @@ def execute_next(args, scenario):
     return
 
 
-def run_simulation(iteration_number, adsm_cmd):
-    """
-    This simple function exists because it can be run individually as a thread. This function actually runs the
-    simulation given in the adsm_cmd argument.
-    :param iteration_number: integer value for the current iteration in relation to the current scenario  # TODO: Remove this argument
-    :param adsm_cmd: list of paths to both the adsm executable and the scenario db. (also includes other arguments)
-    :return: given iteration number, total runtime
-    """
-
-    # store the current time at simulation start
-    start = time.time()
-
-    # setup the simulation to run
-    simulation = subprocess.Popen(adsm_cmd,
-                                  shell=(platform.system() != "Darwin"),
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE,
-                                  bufsize=1)
-    # actually run the simulation
-    simulation.communicate()
-
-    # store the current time at simulation end
-    end = time.time()
-
-    return iteration_number, end - start
-
-
 class Simulation(multiprocessing.Process):
     """
     Class managing simulations. This class is independent so that multiple scenarios can be run concurrently.
@@ -432,18 +404,38 @@ class Simulation(multiprocessing.Process):
 
             # [ sim_path, scenario_path, output_path ]
             executable_cmd = [os.path.join(sim_path, 'adsm_simulation.exe'), self.scenario_path,
-                              '--output-dir', os.path.join(sim_path, 'Supplemental-Output-Files')]
+                              '--output-dir', os.path.abspath(os.path.join(self.scenario_path, '..',
+                                                                           "Supplemental Output Files"))]
 
             # setup the multi-threading object
             pool = multiprocessing.Pool(num_cores)
+
+            if self.args["verbose"]:
+                # this is for the "progress bar" formatting
+                print("\t", end="")
+
             # for each iteration in the scenario (1 base index)
             for iteration in range(1, self.args["next_iterations_count"] + 1):
                 # add a few arguments to the command
                 adsm_cmd = executable_cmd + ['-i', str(iteration)]
-                # call run_simulation. apply_async does not require run_simulation to be done in order to return, so
-                # the overhead for loop will immediately continue onto the next iteration
-                res = pool.apply_async(func=run_simulation, args=(iteration, adsm_cmd))  # TODO: Stop storing this operation
-                res.get()
+
+                # setup the simulation to run
+                simulation = subprocess.Popen(adsm_cmd,
+                                              shell=(platform.system() != "Darwin"),
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE,
+                                              bufsize=1)
+
+                # actually run the simulation
+                simulation.communicate()
+
+                if self.args["verbose"]:
+                    # printing out a very simple progress bar, which may help users who think ADSM is frozen
+                    print(".", end="", flush=True)
+
+            if self.args["verbose"]:
+                # more formatting for the progress bar, this is in reality just writing out a newline
+                print()
 
             # close the multi-threading
             pool.close()
