@@ -440,6 +440,19 @@ class Simulation(multiprocessing.Process):
             # close the multi-threading
             pool.close()
 
+            '''
+            @Bryan Look in Results/simulation.py around line 104. You can see here that results are sorted and then
+             - DailyControls
+             - DailyByZoneAndProductionType
+             - DialyByProductionType
+             - DailyByZone
+             - ResultsVersion
+            are all bulk created, which I believe is actually filling out the database. I do believe unfortunately that
+            the data given back from the simulation is not being stored anywhere in this file (I cut it before I
+            understood the difference between that and logging) however it should be easy to find where to insert it
+            back in.
+            '''
+
         except (BaseException, Exception):
             # TODO: Log the failure
             raise
