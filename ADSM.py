@@ -129,6 +129,7 @@ print("\nPreparing Workspace...")
 if os.path.exists(os.path.join(BASE_DIR, 'workspace')):
     # Rename any old 'workspace' folders to 'ADSM Workspace'
     os.rename(os.path.join(BASE_DIR, 'workspace'), os.path.join(BASE_DIR, 'ADSM Workspace'))
+
 user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
 if not os.path.isfile(user_settings_file):
     Tk().withdraw()
@@ -144,6 +145,13 @@ if not os.path.isfile(user_settings_file):
 
     with open(user_settings_file, 'w') as user_settings:
         user_settings.write('WORKSPACE_PATH = %s' % json.dumps(custom_directory))
+
+auto_settings_file = os.path.join(BASE_DIR, 'auto.ini')
+if os.path.exists(auto_settings_file):
+    os.remove(auto_settings_file)
+if args.workspace_path:
+    with open(auto_settings_file, 'w') as auto_settings:
+        auto_settings.write('WORKSPACE_PATH = %s' % json.dumps(os.path.abspath(args.workspace_path)))
 
 print("\nPreparing Django environment...")
 
@@ -197,6 +205,8 @@ elif args.run_all_scenarios or args.exclude_scenarios or args.exclude_scenarios_
                             workspace_path=args.workspace_path,
                             output_path=args.output_path,
                             max_iterations=args.max_iterations)
+elif args.workspace_path or args.output_path or args.max_iterations:
+    raise ValueError('The command line arguments "workspace-path", "output-path", and "max-iterations" currently only work with the ADSM Auto Scenario Runner!')
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
     try:

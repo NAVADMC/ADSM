@@ -3,11 +3,13 @@ import shutil
 import subprocess
 import platform
 import os
+import sys
 
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.db import close_old_connections
 
-from ADSMSettings.utils import adsm_executable_command
+from ADSMSettings.utils import adsm_executable_command, graceful_startup
 from ADSMSettings.views import open_scenario
 from Results.simulation import Simulation
 from Results.utils import delete_all_outputs
@@ -60,6 +62,7 @@ class Command(BaseCommand):
 
         if not self.options['output_path']:
             self.options['output_path'] = '.'
+        os.makedirs(self.options['output_path'], exist_ok=True)
 
         with open(os.path.join(self.options['output_path'], 'auto_output.log'), 'w') as self.log_file:
             self.setup_scenarios()
@@ -72,7 +75,7 @@ class Command(BaseCommand):
         self.log_file.write("\n%s" % message)
 
     def setup_scenarios(self):
-        self.log("\nADSM Auto Scenario Runner mode detected, setting up...")
+        self.log("\nADSM Auto Scenario Runner mode detected, setting up...\n")
         # check and make sure that a command line arguments conflict was not given by the user
         if self.options["run_all_scenarios"] and (self.options["run_scenarios"] is not None or self.options["run_scenarios_list"] is not None):
             raise InvalidArgumentsGiven('The argument "run-all-scenarios" cannot be used with either "run-scenarios" or "run-scenarios-list"!')
@@ -88,24 +91,45 @@ class Command(BaseCommand):
         if self.options["max_iterations"] is not None and self.options['max_iterations'] <= 0:
             raise InvalidArgumentsGiven('The given "max_iterations" must be greater than 0!')
 
-        if os.path.exists(settings.AUTO_SETTINGS_FILE):
-            os.remove(settings.AUTO_SETTINGS_FILE)
-
-        # if no scenario_path was given
+        # Setup the workspace path
         if self.options["workspace_path"] is None:
-            # get the current workspace path
             self.options["workspace_path"] = settings.WORKSPACE_PATH
+        else:
+            self.options['workspace_path'] = os.path.abspath(self.options['workspace_path'])
 
-        settings.WORKSPACE_PATH = self.options['workspace_path']
-        settings.DB_BASE_DIR = os.path.join(settings.WORKSPACE_PATH, "settings")
-        with open(settings.AUTO_SETTINGS_FILE, 'w') as user_settings:
-            user_settings.write('WORKSPACE_PATH = %s' % json.dumps(settings.WORKSPACE_PATH))
+        if not getattr(sys, 'frozen', False):  # This is preempted in ADSM.py when compiled
+            if os.path.exists(settings.AUTO_SETTINGS_FILE):
+                os.remove(settings.AUTO_SETTINGS_FILE)
+
+            settings.WORKSPACE_PATH = self.options['workspace_path']
+            settings.DB_BASE_DIR = os.path.join(settings.WORKSPACE_PATH, "settings")
+            settings.DATABASES.update({
+                'default': {
+                    'NAME': os.path.join(settings.DB_BASE_DIR, 'settings.db'),
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'TEST': {'NAME': os.path.join(settings.DB_BASE_DIR, 'test_settings.db')},
+                },
+                'scenario_db': {
+                    'NAME': os.path.join(settings.DB_BASE_DIR, 'activeSession.db'),
+                    'ENGINE': 'django.db.backends.sqlite3',
+                    'TEST': {'NAME': os.path.join(settings.DB_BASE_DIR, 'test_activeSession.db')},
+                    'OPTIONS': {
+                        'timeout': 300,
+                    }
+                }
+            })
+            with open(settings.AUTO_SETTINGS_FILE, 'w') as user_settings:
+                user_settings.write('WORKSPACE_PATH = %s' % json.dumps(settings.WORKSPACE_PATH))
 
         if not os.path.isdir(self.options['workspace_path']):
             raise InvalidArgumentsGiven('"workspace_path" not found!')
 
+        close_old_connections()
+        graceful_startup(skip_examples=True)
+        os.makedirs(os.path.join(settings.DB_BASE_DIR, "logs"), exist_ok=True)
+
         # tab here because this will actually line up with the argument summary above
-        self.log("Scenarios will be pulled from the following Workspace: %s" % self.options["workspace_path"])
+        self.log("\nScenarios will be pulled from the following Workspace: %s" % self.options["workspace_path"])
 
         self.log("Building complete scenario list...")
         if self.options['run_all_scenarios'] or (not self.options['run_scenarios'] and not self.options['run_scenarios_list']):
@@ -188,7 +212,6 @@ class Command(BaseCommand):
             else:
                 self.log("\tFAILED! Skipping Scenario %s" % scenario)
                 continue
-            self.log("C Engine Exit Code: %s" % simulation.returncode)
 
             if not self.options['max_iterations']:
                 max_iterations = OutputSettings.objects.all().first().iterations

@@ -146,7 +146,7 @@ def copy_blank_to_settings():
         reset_db('default')
 
 
-def graceful_startup():
+def graceful_startup(skip_examples=False):
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     print("Setting up application...")
 
@@ -157,24 +157,25 @@ def graceful_startup():
         print("Creating DB Directory...")
         os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
 
-    print("Copying Sample Scenarios and Example Queries and Code...")
-    samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
-    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
-    blacklisted_files = ["population_map.png", "population_thumbnail.png"]
-    for dirpath, dirnames, files in os.walk(samples_dir):
-        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
-        subdir = str(dirpath).replace(samples_dir, '')
-        if subdir.startswith(os.path.sep):
-            subdir = subdir.replace(os.path.sep, '', 1)
-        if subdir.strip():
-            if not os.path.exists(os.path.join(workspace_path(), subdir)):
-                os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
-        for file in files:
-            if file not in blacklisted_files:
-                try:
-                    shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
-                except Exception as e:
-                    print(e)
+    if not skip_examples:
+        print("Copying Sample Scenarios and Example Queries and Code...")
+        samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
+        blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
+        blacklisted_files = ["population_map.png", "population_thumbnail.png"]
+        for dirpath, dirnames, files in os.walk(samples_dir):
+            [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
+            subdir = str(dirpath).replace(samples_dir, '')
+            if subdir.startswith(os.path.sep):
+                subdir = subdir.replace(os.path.sep, '', 1)
+            if subdir.strip():
+                if not os.path.exists(os.path.join(workspace_path(), subdir)):
+                    os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
+            for file in files:
+                if file not in blacklisted_files:
+                    try:
+                        shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+                    except Exception as e:
+                        print(e)
 
     print("Migrating all .sqlite3 files to .db...")
     connections.close_all()
