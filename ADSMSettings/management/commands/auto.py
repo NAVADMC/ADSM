@@ -155,6 +155,7 @@ class Command(BaseCommand):
         if self.options['run_scenarios_list']:
             with open(self.options['run_scenarios_list'], 'r') as scenarios:
                 for scenario in scenarios:
+                    scenario = scenario.strip()
                     if not str(scenario).lower().endswith('.db'):
                         scenario = "%s.db" % scenario
                     include_scenarios.append(scenario)
@@ -167,6 +168,7 @@ class Command(BaseCommand):
         if self.options['exclude_scenarios_list']:
             with open(self.options['exclude_scenarios_list'], 'r') as scenarios:
                 for scenario in scenarios:
+                    scenario = scenario.strip()
                     if not str(scenario).lower().endswith('.db'):
                         scenario = "%s.db" % scenario
                     exclude_scenarios.append(scenario)
