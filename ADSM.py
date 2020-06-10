@@ -85,20 +85,22 @@ parser.add_argument('-n', '--update_name', dest='update_name', help='Query for t
 parser.add_argument('-v', '--version', dest='version', help='Get current version of program.', action='store_true')
 
 # arguments for auto
-parser.add_argument('--verbose', dest='verbose',
-                    help='Output extra status updates to the terminal.', action='store_true')
 parser.add_argument('--run-all-scenarios', dest='run_all_scenarios',
-                    help='Start the auto runner without any excluded scenarios.', action='store_true')
+                    help='Run all Scenarios in the Workspace with the ADSM Auto Scenario Runner unless a file called DO.NOT.RUN is present in the scenario folder.', action='store_true')
 parser.add_argument('--exclude-scenarios', dest='exclude_scenarios',
-                    help='A list of scenarios to exclude from the auto runner.', nargs='+')
+                    help='A list of scenarios to exclude from the ADSM Auto Scenario Runner. Ex: "Scenario 1" "Scenario 2"', nargs='+')
 parser.add_argument('--exclude-scenarios-list', dest='exclude_scenarios_list',
-                    help="Filename that contains scenario names to exclude, one per line.", action='store')
+                    help="File that contains a list of scenario names to exclude from the ADSM Auto Scenario Runner, one per line.", action='store')
 parser.add_argument('--run-scenarios', dest='run_scenarios',
-                    help='A list of scenarios to auto run.', nargs="+")
+                    help='A list of scenarios for the ADSM Auto Scenario Runner to run. Ex: "Scenario 1" "Scenario 2"', nargs="+")
 parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
-                    help='Filename that contains scenario names to run, one per line.', action='store')
+                    help='File that contains a list of scenario scenario names to run with the ADSM Auto Scenario Runner, one per line.', action='store')
 parser.add_argument('--workspace-path', dest='workspace_path',
-                    help="Give a different workspace path to pull scenarios from.", action='store')
+                    help="Give a different workspace path to pull scenarios from for the ADSM Auto Scenario Runner.", action='store')
+parser.add_argument('--output-path', dest='output_path',
+                    help="Where the ADSM Auto Scenario Runner should store output logs.", action='store')
+parser.add_argument('--max-iterations', dest='max_iterations',
+                    help="Maximum number of iterations any single simulation can run with the ADSM Auto Scenario Runner.", action='store')
 
 args = parser.parse_args()
 
@@ -185,10 +187,16 @@ if not settings.DEBUG:
 if args.test:
     print("\nRunning tests...")
     management.call_command('test')
-elif args.verbose or args.run_all_scenarios or args.exclude_scenarios is not None or \
-     args.exclude_scenarios_list is not None or args.run_scenarios is not None or \
-     args.run_scenarios_list is not None or args.workspace_path is not None or True:
-    management.call_command('auto')
+elif args.run_all_scenarios or args.exclude_scenarios or args.exclude_scenarios_list or args.run_scenarios or args.run_scenarios_list:
+    management.call_command('auto',
+                            run_all_scenarios=args.run_all_scenarios,
+                            exclude_scenarios=args.exclude_scenarios,
+                            exclude_scenarios_list=args.exclude_scenarios_list,
+                            run_scenarios=args.run_scenarios,
+                            run_scenarios_list=args.run_scenarios_list,
+                            workspace_path=args.workspace_path,
+                            output_path=args.output_path,
+                            max_iterations=args.max_iterations)
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
     try:

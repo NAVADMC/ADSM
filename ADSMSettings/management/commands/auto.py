@@ -1,463 +1,212 @@
-import multiprocessing
+import json
+import shutil
 import subprocess
 import platform
-import sqlite3
-import sys
 import os
 
+from django.conf import settings
 from django.core.management import BaseCommand
+
+from ADSMSettings.utils import adsm_executable_command
+from ADSMSettings.views import open_scenario
+from Results.simulation import Simulation
+from Results.utils import delete_all_outputs
+from ScenarioCreator.models import DestructionGlobal, OutputSettings
+from ScenarioCreator.views import match_data
 
 
 class Command(BaseCommand):
-    help = "Run the ADSM auto scenario runner."
+    help = "Run the ADSM Auto Scenario Runner."
+
+    scenarios = []  # List of all scenarios to process
+    options = None
+    log_file = None
 
     def add_arguments(self, parser):
-        parser.add_argument('--verbose', dest='verbose',
-                            help='Output extra status updates to the terminal.', action='store_true')
         parser.add_argument('--run-all-scenarios', dest='run_all_scenarios',
-                            help='Start the auto runner without any excluded scenarios.', action='store_true')
+                            help='Run all Scenarios in the Workspace with the ADSM Auto Scenario Runner unless a file called DO.NOT.RUN is present in the scenario folder.', action='store_true')
         parser.add_argument('--exclude-scenarios', dest='exclude_scenarios',
-                            help='A list of scenarios to exclude from the auto runner.', nargs='+')
+                            help='A list of scenarios to exclude from the ADSM Auto Scenario Runner. Ex: "Scenario 1" "Scenario 2"', nargs='+')
         parser.add_argument('--exclude-scenarios-list', dest='exclude_scenarios_list',
-                            help="Filename that contains scenario names to exclude, one per line.", action='store')
+                            help="File that contains a list of scenario names to exclude from the ADSM Auto Scenario Runner, one per line.", action='store')
         parser.add_argument('--run-scenarios', dest='run_scenarios',
-                            help='A list of scenarios to auto run.', nargs="+")
+                            help='A list of scenarios for the ADSM Auto Scenario Runner to run. Ex: "Scenario 1" "Scenario 2"', nargs="+")
         parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
-                            help='Filename that contains scenario names to run, one per line.', action='store')
+                            help='File that contains a list of scenario scenario names to run with the ADSM Auto Scenario Runner, one per line.', action='store')
         parser.add_argument('--workspace-path', dest='workspace_path',
-                            help="Give a different workspace path to pull scenarios from.", action='store')
+                            help="Give a different workspace path to pull scenarios from for the ADSM Auto Scenario Runner.", action='store')
+        parser.add_argument('--output-path', dest='output_path',
+                            help="Where the ADSM Auto Scenario Runner should store output logs.", action='store')
         parser.add_argument('--max-iterations', dest='max_iterations',
-                            help="Maximum number of iterations any single simulation can run.", action='store')
+                            help="Maximum number of iterations any single simulation can run with the ADSM Auto Scenario Runner.", action='store')
 
     def handle(self, *args, **options):
-        setup(options)
+        self.options = options
+
+        if not self.options['workspace_path']:
+            print("WARNING! Using the ADSM Auto Scenario Runner will cause you to lose any unsaved work in your ADSM Workspace.")
+            print("Are you okay with losing any unsaved work?")
+
+            answer = None
+            while str(answer).lower() not in ['yes', 'y', 'no', 'n']:
+                answer = str(input('Enter (Y)es or (N)o: ')).lower()
+                if answer in ['yes', 'y']:
+                    break
+                elif answer in ['no', 'n']:
+                    print('\nYou may either open the ADSM Program and save the current Scenario, or you may specify a custom Workspace with "--workspace-path" to avoid conflict with the ADSM Program.')
+                    return
+                else:
+                    print("Unknown input!")
+
+        if not self.options['output_path']:
+            self.options['output_path'] = '.'
+
+        with open(os.path.join(self.options['output_path'], 'auto_output.log'), 'w') as self.log_file:
+            self.setup_scenarios()
+            self.run_scenarios()
+
         return
 
+    def log(self, message):
+        print(message)
+        self.log_file.write("\n%s" % message)
 
-def setup(args):
-    """ Setup the auto-runner. This function mainly is in place to handle the exclude-file, if one is given.
+    def setup_scenarios(self):
+        self.log("\nADSM Auto Scenario Runner mode detected, setting up...")
+        # check and make sure that a command line arguments conflict was not given by the user
+        if self.options["run_all_scenarios"] and (self.options["run_scenarios"] is not None or self.options["run_scenarios_list"] is not None):
+            raise InvalidArgumentsGiven('The argument "run-all-scenarios" cannot be used with either "run-scenarios" or "run-scenarios-list"!')
 
-    :param args: argsparse arguments object
-    :return: None
-    """
+        # make sure that a valid max_iterations argument was given
+        try:
+            # make sure it exists in the first place before we try and convert it to an integer
+            if self.options["max_iterations"] is not None:
+                # make the conversion
+                self.options["max_iterations"] = int(self.options["max_iterations"])
+        except ValueError:
+            raise InvalidArgumentsGiven('The given "max_iterations" could not be converted to an integer!')
+        if self.options["max_iterations"] is not None and self.options['max_iterations'] <= 0:
+            raise InvalidArgumentsGiven('The given "max_iterations" must be greater than 0!')
 
-    # list of all scenarios to process, not filled if args.run_scenarios has any values
-    scenarios = []
-    # list of scenarios to exclude
-    excluded_scenarios = []
-    # file containing names of scenarios to exclude, one per line
-    exclude_file = None
-    # list of scenarios to include
-    included_scenarios = []
-    # file containing names of scenarios to include, one per line
-    include_file = None
-    file_text = ""  # raw file data
-    # boolean to mark if a scenario from the workspace should be used or not
-    include = False
+        if os.path.exists(settings.AUTO_SETTINGS_FILE):
+            os.remove(settings.AUTO_SETTINGS_FILE)
 
-    print("\nAuto-run mode detected, setting up...")
+        # if no scenario_path was given
+        if self.options["workspace_path"] is None:
+            # get the current workspace path
+            self.options["workspace_path"] = settings.WORKSPACE_PATH
 
-    # check and make sure that a command line arguments conflict was not given by the user
-    if args["run_all_scenarios"] and \
-            (args["run_scenarios"] is not None or args["run_scenarios_list"] is not None):
-        raise InvalidArgumentsGiven('"run-all-scenarios" cannot be used with either '
-                                    '"run-scenarios" or "run-scenarios-list".')
+        settings.WORKSPACE_PATH = self.options['workspace_path']
+        settings.DB_BASE_DIR = os.path.join(settings.WORKSPACE_PATH, "settings")
+        with open(settings.AUTO_SETTINGS_FILE, 'w') as user_settings:
+            user_settings.write('WORKSPACE_PATH = %s' % json.dumps(settings.WORKSPACE_PATH))
 
-    # make sure that a valid max_iterations argument was given
-    try:
-        # make sure it exists in the first place before we try and convert it to an integer
-        if args["max_iterations"] is not None:
-            # make the conversion
-            args["max_iterations"] = int(args["max_iterations"])
-    except ValueError:
-        raise InvalidArgumentsGiven("The given iterations max could not be converted to an integer.")
+        if not os.path.isdir(self.options['workspace_path']):
+            raise InvalidArgumentsGiven('"workspace_path" not found!')
 
-    if args["verbose"]:
-        print("[setup] Argument Summary: ")
-        print("\t[setup] Running all scenarios (unless manually excluded)"
-              if args["run_all_scenarios"] else
-              "\t[setup] Only running specified scenarios.")
-        print(("\t[setup] Excluded scenarios: " + str(args["exclude_scenarios"]))
-              if args["exclude_scenarios"] is not None else
-              "\t[setup] No specific scenarios excluded.")
-        print(("\t[setup] Given exclude-file name is: " + args["exclude_scenarios_list"])
-              if args["exclude_scenarios_list"] is not None else
-              "\t[setup] No exclude-file name detected.")
-        print(("\t[setup] Scenarios included to be run: " + str(args["run_scenarios"]))
-              if args["run_scenarios"] is not None else
-              "\t[setup] No specific scenario included.")
-        print(("\t[setup] Given include-file name is: " + args["run_scenarios_list"])
-              if args["run_scenarios_list"] is not None else
-              "\t[setup] No include-file name detected.")
-
-    # if no scenario_path was given
-    if args["workspace_path"] is None:
-
-        if getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.executable)
-        else:
-            base_dir = os.path.abspath(os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", ".."))
-
-        install_settings_file = os.path.join(base_dir, 'workspace.ini')
-        if os.path.isfile(install_settings_file):
-            from importlib import machinery
-            install_settings = machinery.SourceFileLoader('install_settings', install_settings_file).load_module()
-            workspace_path = install_settings.WORKSPACE_PATH
-            if str(workspace_path).strip() == ".":
-                workspace_path = os.path.join(base_dir, "ADSM Workspace")
-        else:
-            workspace_path = os.path.join(base_dir, "ADSM Workspace")
-
-        # get the current workspace path
-        args["workspace_path"] = workspace_path
-
-        if args["verbose"]:
-            # tab here because this will actually line up with the argument summary above
-            print("\t[setup] Scenarios will be pulled from this directory: ", args["workspace_path"])
-    else:
         # tab here because this will actually line up with the argument summary above
-        print("\t[setup] Scenarios will be pulled from this directory: ", args["workspace_path"])
+        self.log("Scenarios will be pulled from the following Workspace: %s" % self.options["workspace_path"])
 
-    if args["verbose"]:
-        print("\n[setup] Building complete scenario exclusion list...")
+        self.log("Building complete scenario list...")
+        if self.options['run_all_scenarios'] or (not self.options['run_scenarios'] and not self.options['run_scenarios_list']):
+            for root, dirs, files in os.walk(self.options['workspace_path']):
+                for dir in dirs:
+                    if dir not in ['Example Database Queries', 'Example R Code', 'settings']:
+                        dir_files = os.listdir(os.path.join(self.options['workspace_path'], dir))
+                        for file in dir_files:
+                            if file.endswith('.db'):
+                                self.scenarios.append(file)
+                                break  # Don't add a directory more than once
+                break  # only look at the top level for folders that may contain DBs
 
-    # test if an exclude file was given before trying to open it
-    if args["exclude_scenarios_list"] is not None:
-        # we're going to try to catch if the file could not be opened
-        try:
-            if args["verbose"]:
-                print("\t[setup] Opening exclude file...")
-            exclude_file = open(args["exclude_scenarios_list"], "r")
-            if args["verbose"]:
-                print("\t[setup] File opened.")
-        except FileNotFoundError:
-            # print an error message
-            print("\n\nGIVEN EXCLUDE-SCENARIOS-LIST FILE COULD NOT BE OPENED")
-            if args["verbose"]:
-                print("[setup] aborting ADSM")
-            # exit ADSM
-            return None
+        # Compile formatted include and exclude scenario lists
+        include_scenarios = []
+        exclude_scenarios = []
 
-    # first we need to create a list of excluded scenarios
-    # if an exclude_file was even given
-    if exclude_file is not None:
-        # get the file data
-        file_text = exclude_file.readlines()
-        # build the exclusion list be removing newlines
-        excluded_scenarios = [file_name.replace("\n", "") for file_name in file_text]
+        if self.options['run_scenarios']:
+            for scenario in self.options['run_scenarios']:
+                if not str(scenario).lower().endswith('.db'):
+                    scenario = "%s.db" % scenario
+                include_scenarios.append(scenario)
+        if self.options['run_scenarios_list']:
+            with open(self.options['run_scenarios_list'], 'r') as scenarios:
+                for scenario in scenarios:
+                    if not str(scenario).lower().endswith('.db'):
+                        scenario = "%s.db" % scenario
+                    include_scenarios.append(scenario)
 
-    if args["verbose"] and args["exclude_scenarios_list"] is not None:
-        print("\t[setup] " + str(len(excluded_scenarios)) + " scenario(s) were collected from the given file.")
+        if self.options['exclude_scenarios']:
+            for scenario in self.options['exclude_scenarios']:
+                if not str(scenario).lower().endswith('.db'):
+                    scenario = "%s.db" % scenario
+                exclude_scenarios.append(scenario)
+        if self.options['exclude_scenarios_list']:
+            with open(self.options['exclude_scenarios_list'], 'r') as scenarios:
+                for scenario in scenarios:
+                    if not str(scenario).lower().endswith('.db'):
+                        scenario = "%s.db" % scenario
+                    exclude_scenarios.append(scenario)
 
-    # if additional specific scenario names were given to exclude
-    if args["exclude_scenarios"] is not None:
-        # append those scenarios to the excluded_scenarios list
-        excluded_scenarios += args["exclude_scenarios"]
-        if args["verbose"]:
-            print("\t[setup] " + str(len(args["exclude_scenarios"])) +
-                  " scenario(s) were collected from the command line.")
+        if set(include_scenarios) & set(exclude_scenarios):
+            raise ScenarioConflict("A given Scenario was both included and excluded!")
 
-    if args["verbose"]:
-        print("[setup] Excluded scenarios compiled: " + str(excluded_scenarios) +
-              "\t(Duplicate scenarios names will not cause any errors.)")
-        print("\n[setup] Building complete scenario inclusion list...")
+        for scenario in include_scenarios:
+            if scenario not in self.scenarios:
+                self.scenarios.append(scenario)
+        if exclude_scenarios:
+            self.scenarios = [scenario for scenario in self.scenarios if scenario not in exclude_scenarios]
+        do_not_run = []
+        for scenario in self.scenarios:
+            if os.path.exists(os.path.join(self.options['workspace_path'], scenario.replace('.db', ''), 'DO.NOT.RUN')):
+                do_not_run.append(scenario)
+        if do_not_run:
+            self.scenarios = [scenario for scenario in self.scenarios if scenario not in do_not_run]
 
-    # we don't need to collect any of the included scenarios if the --run-all-scenarios option was given
-    if not args["run_all_scenarios"]:
+        self.log("\tRunning the following scenarios: %s" % ', '.join(self.scenarios))
 
-        # test if an include file was given before trying to open it
-        if args["run_scenarios_list"] is not None:
-            # we're going to try to catch if the file could not be opened
-            try:
-                if args["verbose"]:
-                    print("\t[setup] Opening include file...")
-                include_file = open(args["run_scenarios_list"], "r")
-                if args["verbose"]:
-                    print("\t[setup] File opened.")
-            except FileNotFoundError:
-                # print an error message
-                print("\n\nGIVEN RUN-SCENARIOS-LIST FILE COULD NOT BE OPENED")
-                if args["verbose"]:
-                    print("[setup] aborting ADSM")
-                # exit ADSM
-                return None
+    def run_scenarios(self):
+        self.log("\nSetup complete, starting ADSM Auto Scenario Runner...")
 
-        # first we need to create a list of included scenarios
-        # if an include_file was even given
-        if include_file is not None:
-            # get the file data
-            file_text = include_file.readlines()
-            # for each file name
-            for file in file_text:
-                # get rid of that pesky newline
-                file.replace("\n", "")
-                # check and make sure that name is not also in the exluded list
-                if file in excluded_scenarios:
-                    raise ScenarioConflict("A given scenario was both included and excluded.")
-                else:
-                    included_scenarios.append(file)
+        for scenario in self.scenarios:
+            self.log("\nAuto running %s..." % scenario)
 
-        if args["verbose"] and args["run_scenarios_list"] is not None:
-            print("\t[setup] " + str(len(included_scenarios)) + " scenario(s) were collected from the given file.")
+            open_scenario(None, scenario, wrap_target=True)
+            delete_all_outputs()
 
-        # if additional specific scenario names were given to include
-        if args["run_scenarios"] is not None:
-            # we need to check and make sure each included file is also not excluded
-            # for each file name
-            for file in args["run_scenarios"]:
-                # get rid of that pesky newline
-                file.replace("\n", "")
-                # check and make sure that name is not also in the excluded list
-                if file in excluded_scenarios:
-                    raise ScenarioConflict("A given scenario was both included and excluded.")
-                else:
-                    # next we'll check to make sure that a DO.NOT.RUN file is also not in the scenario directory
+            # ensure that the destruction_reason_order includes all elements. See #990 for more details
+            null = DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order=match_data(DestructionGlobal.objects.all()[0].destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
 
-                    # get all of the files within the potential scenario
-                    potential_files = os.listdir(args["workspace_path"] + "/" + file)
-
-                    # if a DO.NOT.RUN file is in the scenario
-                    if "DO.NOT.RUN" not in potential_files:
-                        # for each file within the potential scenarios
-                        for db_file in potential_files:
-                            # if that file name has the .db extension
-                            if ".db" in db_file:
-                                if args["verbose"]:
-                                    print("\t[setup] Scenario confirmed, adding to list of known scenarios")
-                                scenarios.append(db_file.replace(".db", ""))
-                                break
-                        else:
-                            raise ScenarioConflict("A given scenario was both included and excluded.")
-                    else:
-                        raise ScenarioConflict("A given scenario was both included and excluded.")
-                    included_scenarios.append(file)
-
-            if args["verbose"]:
-                print("\t[setup] " + str(len(args["run_scenarios"])) +
-                      " scenario(s) were collected from the command line.")
-    else:
-        if args["verbose"]:
-            print("\t[setup] Collecting scenarios from the workspace...")
-
-        # for every folder in the given workspace
-        for potential in os.listdir(args["workspace_path"]):
-            if args["verbose"]:
-                print("\n\t[setup] Checking next potential scenario: " + potential)
-
-            # make sure the potential is not excluded, no sense verifying it if we can't use it anyways
-            if potential in excluded_scenarios:
-                if args["verbose"]:
-                    print("\t[setup] Potential scenario excluded by user. Skipping.")
+            self.log("\tValidating simulation setup...")
+            simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
+                                          shell=(platform.system() != 'Darwin'),
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE)
+            stdout, stderr = simulation.communicate()  # still running while we work on python validation
+            simulation.wait()  # simulation will process db then exit
+            if simulation.returncode == 0 and not stderr:
+                self.log("\tPASSED")
+            else:
+                self.log("\tFAILED! Skipping Scenario %s" % scenario)
                 continue
+            self.log("C Engine Exit Code: %s" % simulation.returncode)
 
-            # try catch block will prevent anything not a directory in the workspace from stopping ADSM
-            try:
-                # get all of the files within the potential scenario
-                potential_files = os.listdir(args["workspace_path"] + "/" + potential)
+            if not self.options['max_iterations']:
+                max_iterations = OutputSettings.objects.all().first().iterations
+            else:
+                max_iterations = self.options['max_iterations']
 
-                # hard-check to make sure we're not in the settings folder
-                if 'activeSession.db' in potential_files and 'settings.db' in potential_files:
-                    if args["verbose"]:
-                        print("\t[setup] Settings folder detected. Skipping.")
-                    continue
+            self.log("\tRunning simulation...")
+            sim = Simulation(max_iteration=max_iterations)
+            sim.start()
+            sim.join()  # Wait for it to complete
+            log_dir = os.path.join(os.path.join(self.options['workspace_path'], 'settings', 'logs'))
+            scenario_output = os.path.join(self.options['output_path'], "%s Auto Output" % scenario.replace(".db", ""))
+            os.makedirs(scenario_output, exist_ok=True)
+            for f in os.listdir(log_dir):
+                shutil.move(os.path.join(log_dir, f), scenario_output)
+            self.log("\tDone running %s." % scenario)
 
-                # if a DO.NOT.RUN file is in the scenario
-                if "DO.NOT.RUN" not in potential_files:
-                    # for each file within the potential scenarios
-                    for file in potential_files:
-                        # if that file name has the .db extension
-                        if ".db" in file:
-                            if args["verbose"]:
-                                print("\t[setup] Scenario confirmed, adding to list of known scenarios")
-                            scenarios.append(potential)
-                            break
-                    else:
-                        if args["verbose"]:
-                            print("\t[setup] Scenario denied.")
-                else:
-                    if args["verbose"]:
-                        print("\t[setup] Scenario denied.")
-
-            except NotADirectoryError:
-                if args["verbose"]:
-                    print("\t[setup] Potential is not a directory. Skipping.")
-                continue
-
-    if args["verbose"]:
-        print("\n[setup] Included scenarios compiled:", scenarios,
-              "\t(Excluded scenarios have already been removed from this list.)\n")
-
-    args["scenarios"] = scenarios
-
-    print("Setup complete, starting ADSM auto-runner.")
-    # loop through all of the given scenarios
-    for scenario in args["scenarios"]:
-        print("\nRunning next scenario: \"" + scenario + "\"")
-        execute_next(args, args["workspace_path"] + "\\" + scenario)
-
-    if args["verbose"]:
-        print("\n[setup] ADSM auto-runner complete, cleaning up...")
-
-    # if an exclude file was opened
-    if "exclude_file" in args.keys():
-        if args["verbose"]:
-            print("[setup] Closing the exclude file.")
-        # close it
-        exclude_file.close()
-
-    if args["verbose"]:
-        print("[setup] Clean up complete. Closing ADSM.")
-    # exit ADSM
-    return None
-
-
-def execute_next(args, scenario):
-    """ This function takes a single scenario path and runs that scenario through the simulator.
-
-    :param args: dictionary of parameters
-    :param scenario: Path to scenario to run through the simulator
-    :return: 0 if scenario executed as expected, 1 if an error occurred.
-    """
-
-    # string to the path of the .db file within the scenario
-    db_file = ""
-
-    if args["verbose"]:
-        print("\t[execute] Full path of next scenario to be run: " + scenario)
-
-    for file in os.listdir(scenario):
-        if ".db" in file:
-            db_file = file
-            break
-
-    if args["verbose"]:
-        print("\t[execute] Scenario Database File: " + db_file)
-
-    # Get the actual number of iterations to run from the scenario itself
-    # open the scenario for reading
-    db_conn = sqlite3.connect(os.path.abspath(os.path.join(scenario, db_file)))
-    db_curr = db_conn.cursor()
-
-    # execute the query
-    db_curr.execute("SELECT iterations from ScenarioCreator_outputsettings")
-
-    # actually save the value (fetchone() returns a tuple)
-    args["next_iterations_count"] = int(db_curr.fetchone()[0])
-
-    db_conn.close()
-
-    # Make sure that said scenarios iterations count is not more than the max (if a user max was specified)
-    if args["max_iterations"] is not None:
-        if args["next_iterations_count"] > args["max_iterations"]:
-            args["next_iterations_count"] = args["max_iterations"]
-
-    if args["verbose"]:
-        print("\t[execute] Running", args["next_iterations_count"], "iteration(s).")
-        print("\t[execute] Starting Simulation...")
-
-    # create the simulation object
-    sim = Simulation(args, scenario_path=os.path.abspath(os.path.join(scenario, db_file)))
-    # run the simulation
-    sim.start()
-    # this line prevents the auto-runner from continuing onto the next scenario until all iterations of the current one
-    # are complete.
-    sim.join()
-
-    if args["verbose"]:
-        print("\t[execute] Simulation Complete.")
-
-    print("Done.")
-
-    return
-
-
-class Simulation(multiprocessing.Process):
-    """
-    Class managing simulations. This class is independent so that multiple scenarios can be run concurrently.
-    """
-    def __init__(self, args: dict, scenario_path="activeSession.db", **kwargs):
-        super(Simulation, self).__init__(**kwargs)
-        self.args = args
-        self.scenario_path = scenario_path
-
-    def run(self):
-        """
-        NOT the function to be called to run the scenario, instead call Simulation.start(). multiprocessing.Process will
-        call this function itself.
-        :return: None
-        """
-
-        # We try to avoid nebulous try-except blocks like this, but if something goes wrong in 1 of a 100 user
-        # scenarios, we wan't to make sure all of the other scenarios still run.
-        try:
-
-            # path to adsm_simulation.exe in ADSM/bin/
-            sim_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                    "..", "..", "..", "bin"))
-
-            # get the number of cores on the current machine
-            num_cores = multiprocessing.cpu_count()
-            # if there are at least 4 cores, leave 2 of them for the user.
-            if num_cores > 3:
-                num_cores -= 2
-
-            # [ sim_path, scenario_path, output_path ]
-            executable_cmd = [os.path.join(sim_path, 'adsm_simulation.exe'), self.scenario_path,
-                              '--output-dir', os.path.abspath(os.path.join(self.scenario_path, '..',
-                                                                           "Supplemental Output Files"))]
-
-            # setup the multi-threading object
-            pool = multiprocessing.Pool(num_cores)
-
-            if self.args["verbose"]:
-                # this is for the "progress bar" formatting
-                print("\t", end="")
-
-            # for each iteration in the scenario (1 base index)
-            for iteration in range(1, self.args["next_iterations_count"] + 1):
-                # add a few arguments to the command
-                adsm_cmd = executable_cmd + ['-i', str(iteration)]
-
-                # setup the simulation to run
-                simulation = subprocess.Popen(adsm_cmd,
-                                              shell=(platform.system() != "Darwin"),
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE,
-                                              bufsize=1)
-
-                # actually run the simulation
-                simulation.communicate()
-
-                if self.args["verbose"]:
-                    # printing out a very simple progress bar, which may help users who think ADSM is frozen
-                    print(".", end="", flush=True)
-
-            if self.args["verbose"]:
-                # more formatting for the progress bar, this is in reality just writing out a newline
-                print()
-
-            # close the multi-threading
-            pool.close()
-
-            '''
-            @Bryan Look in Results/simulation.py around line 104. You can see here that results are sorted and then
-             - DailyControls
-             - DailyByZoneAndProductionType
-             - DialyByProductionType
-             - DailyByZone
-             - ResultsVersion
-            are all bulk created, which I believe is actually filling out the database. I do believe unfortunately that
-            the data given back from the simulation is not being stored anywhere in this file (I cut it before I
-            understood the difference between that and logging) however it should be easy to find where to insert it
-            back in.
-            '''
-
-        except (BaseException, Exception):
-            # TODO: Log the failure
-            raise
-
-        return
+        self.log("\nDone running all Scenarios.")
 
 
 class InvalidArgumentsGiven(Exception):
