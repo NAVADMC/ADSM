@@ -127,7 +127,7 @@ class Command(BaseCommand):
             raise InvalidArgumentsGiven('"workspace_path" not found!')
 
         close_old_connections()
-        graceful_startup(skip_examples=True)
+        graceful_startup(skip_examples=True, skip_updates=True)
         os.makedirs(os.path.join(settings.DB_BASE_DIR, "logs"), exist_ok=True)
 
         # tab here because this will actually line up with the argument summary above

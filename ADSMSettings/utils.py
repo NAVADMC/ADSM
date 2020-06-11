@@ -146,7 +146,7 @@ def copy_blank_to_settings():
         reset_db('default')
 
 
-def graceful_startup(skip_examples=False):
+def graceful_startup(skip_examples=False, skip_updates=False):
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     print("Setting up application...")
 
@@ -219,7 +219,7 @@ def graceful_startup(skip_examples=False):
     update_db_version()
     SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
 
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, 'frozen', False) and not skip_updates:
         check_for_updates()
     else:
         print("Skipping update check.")
