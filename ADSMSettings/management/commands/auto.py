@@ -41,11 +41,13 @@ class Command(BaseCommand):
                             help="Where the ADSM Auto Scenario Runner should store output logs.", action='store')
         parser.add_argument('--max-iterations', dest='max_iterations',
                             help="Maximum number of iterations any single simulation can run with the ADSM Auto Scenario Runner.", action='store')
+        parser.add_argument('--quiet', dest='quiet',
+                            help='Skip all user prompts and automatically reply Yes.', action='store_true')
 
     def handle(self, *args, **options):
         self.options = options
 
-        if not self.options['workspace_path']:
+        if not self.options['workspace_path'] and not self.options['quiet']:
             print("WARNING! Using the ADSM Auto Scenario Runner will cause you to lose any unsaved work in your ADSM Workspace.")
             print("Are you okay with losing any unsaved work?")
 
