@@ -110,6 +110,8 @@
                             </td>
                             <td>
                                 <b>Warning:</b> These operations may take very long for large scenarios.
+                                <br> <b>Note:</b> Files shown here are present in
+                                this scenario's workspace folder.
                             </td>
                         </tr>
                     </table>
@@ -117,7 +119,6 @@
                     {% for file in supplemental_files %}
                         <li class="file_list_item"><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
                             <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                            <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
                             </li>
                     {% endfor %}
                 </ul>
