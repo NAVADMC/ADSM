@@ -765,21 +765,16 @@ def functions_panel(request, form=None):
 
 def export_relational_graph(request):
 
+    # get the graph src, this looks a lot like a url. This is only used to extract the private key of the graph from
     graph_src = str(request.GET.get('graph_src', None))
+    # extract said private key. This is used as a unique identifier for each function
     graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
 
+    # get the object itself. This will actually only be used to get the exact name of the function
     rel_graph = ScenarioCreator.models.RelationalFunction.objects.get(pk=graph_pk)
 
-    print(rel_graph)
-
-    x_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('x', flat=True))
-    y_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('y', flat=True))
-    x_label = rel_graph.x_axis_units
-    graph_name = rel_graph.name
-
-    line_graph = function_graphs.new_graph(x_label)
-    print(line_graph)
-    plt.plot(x_series, y_series, color="black")
+    # get the graph object, this comes back as an HttpResponse, but the image is in HttpResponse.content as bytes
+    graph = function_graphs.existing_relational_graph(graph_pk)
 
     # ensure that the path will exist
     if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files")):
@@ -787,17 +782,24 @@ def export_relational_graph(request):
     if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs")):
         os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs"))
 
-    plt.savefig(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs/" + graph_name + ".png"))
+    # write the image to file.
+    with open(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs/" + rel_graph.name + ".png"), "wb") as image_file:
+        image_file.write(graph.content)
 
+    # blank response - nothing happens on the front end.
     return JsonResponse({})
 
 def export_pdf_graph(request):
 
+    # get the graph src, this looks a lot like a url. This is only used to extract the private key of the graph from
     graph_src = str(request.GET.get('graph_src', None))
+    # extract said private key. This is used as a unique identifier for each function
     graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
 
+    # get the object itself. This will actually only be used to get the exact name of the function
     pdf_graph = ScenarioCreator.models.ProbabilityDensityFunction.objects.get(pk=graph_pk)
 
+    # get the graph object, this comes back as an HttpResponse, but the image is in HttpResponse.content as bytes
     graph = function_graphs.existing_probability_graph(graph_pk)
 
     # ensure that the path will exist
@@ -806,9 +808,11 @@ def export_pdf_graph(request):
     if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs")):
         os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs"))
 
+    # write the image to file
     with open(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs/" + pdf_graph.name + ".png"), "wb") as image_file:
         image_file.write(graph.content)
 
+    # blank response - nothing happens on the front end.
     return JsonResponse({})
 
 def control_protocol_list(request):
