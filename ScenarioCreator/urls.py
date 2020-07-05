@@ -35,6 +35,8 @@ urlpatterns = patterns('', url('^AssignSpreads/$', 'ScenarioCreator.views.assign
          url('^ExportPopulation/(?P<format>.+)$', 'ScenarioCreator.views.export_population'),
          url('^ExportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.export_functions'),
          url('^ImportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.import_functions'),
+         url('^ExportRelGraph/$', 'ScenarioCreator.views.export_relational_graph'),
+         url('^ExportPDFGraph/$', 'ScenarioCreator.views.export_pdf_graph'),
          url('^BaseModel/$',                      'ScenarioCreator.views.model_list'),
          url('^BaseModel/new/$',                  'ScenarioCreator.views.new_entry'),
          url('^BaseModel/(?P<primary_key>\d+)/$', 'ScenarioCreator.views.edit_entry'),

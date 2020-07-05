@@ -19,7 +19,7 @@ from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
-from ScenarioCreator.models import VaccinationRingRule, RelationalFunction
+from ScenarioCreator.models import VaccinationRingRule, RelationalFunction, ProbabilityDensityFunction
 from ScenarioCreator.exporter import *
 from ScenarioCreator.importer import *
 from ScenarioCreator import function_graphs
@@ -763,6 +763,53 @@ def functions_panel(request, form=None):
         context['models'].append(list_per_model(local_model))
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
+def export_relational_graph(request):
+
+    graph_src = str(request.GET.get('graph_src', None))
+    graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
+
+    rel_graph = ScenarioCreator.models.RelationalFunction.objects.get(pk=graph_pk)
+
+    print(rel_graph)
+
+    x_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('x', flat=True))
+    y_series = list(ScenarioCreator.models.RelationalPoint.objects.filter(relational_function=rel_graph).order_by('x').values_list('y', flat=True))
+    x_label = rel_graph.x_axis_units
+    graph_name = rel_graph.name
+
+    line_graph = function_graphs.new_graph(x_label)
+    print(line_graph)
+    plt.plot(x_series, y_series, color="black")
+
+    # ensure that the path will exist
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files"))
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs"))
+
+    plt.savefig(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs/" + graph_name + ".png"))
+
+    return JsonResponse({})
+
+def export_pdf_graph(request):
+
+    graph_src = str(request.GET.get('graph_src', None))
+    graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
+
+    pdf_graph = ScenarioCreator.models.ProbabilityDensityFunction.objects.get(pk=graph_pk)
+
+    graph = function_graphs.existing_probability_graph(graph_pk)
+
+    # ensure that the path will exist
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files"))
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs"))
+
+    with open(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs/" + pdf_graph.name + ".png"), "wb") as image_file:
+        image_file.write(graph.content)
+
+    return JsonResponse({})
 
 def control_protocol_list(request):
     return model_list(request, 'ScenarioCreator/ControlProtocolList.html')
