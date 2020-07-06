@@ -41,14 +41,14 @@ def workspace_path(target=None):
         return path  # TODO: shlex.quote(path) if you want security
 
 
-def db_list():
+def db_list(include_current=False):
     dbs = []
     for root, dirs, files in os.walk(workspace_path()):
         for dir in dirs:
             if dir not in ['Example Database Queries', 'Example R Code', 'settings']:
                 dir_files = os.listdir(os.path.join(workspace_path(), dir))
                 for file in dir_files:
-                    if file.endswith('.db') and file.replace('.db', '') != scenario_filename():
+                    if file.endswith('.db') and (include_current or file.replace('.db', '') != scenario_filename()):
                         dbs.append((file, os.path.getmtime(os.path.join(workspace_path(), dir, file))))  # Append tuple (filename, datemodified)
                         break  # Don't add a directory more than once
         break  # only look at the top level for folders that may contain DBs
