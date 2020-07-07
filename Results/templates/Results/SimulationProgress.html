@@ -13,7 +13,7 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script>
         <div class="mapwrapper">
             <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
-                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;">
+                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;" title="Use mouse wheel to zoom.">
                     <!--top level map content goes here-->
                 </div>
                 <div style="height: 2080px; width: 2400px;">
@@ -83,6 +83,11 @@
 
             <p>Simulation Version: {{ version_number }}</p>
             {% include "Results/Summary.html" %}
+
+            <p><br></p>
+            <b> Learn more about how to interpret your results: </b>
+            <a href="https://github.com/NAVADMC/ADSM/wiki/Results-Interpretation"> https://github.com/NAVADMC/ADSM/wiki/Results-Interpretation </a>
+
         </div>
     </div>
     <div class="row">
