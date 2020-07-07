@@ -187,7 +187,7 @@ class Simulation(multiprocessing.Process):
             print(''.join(str(s) + 's, ' for s in simulation_times))
             print("Average Time:", round(sum(simulation_times)/len(simulation_times), 2), 'seconds')
             population_zoom_png()
-            zip_map_directory_if_it_exists()
+            # zip_map_directory_if_it_exists()  # see ticket 1006 for why this is commented out
             save_scenario()
             close_old_connections()
         except:
