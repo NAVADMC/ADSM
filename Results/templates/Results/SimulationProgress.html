@@ -118,8 +118,10 @@
 
                     {% for file in supplemental_files %}
                         <li class="file_list_item"><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
-                            <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                            </li>
+                            {% if 'Map' not in file %}
+                                <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 </ul>
             </div>

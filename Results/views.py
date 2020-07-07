@@ -51,6 +51,8 @@ def results_home(request):
         context['supplemental_files'].append(combined_file)
     for combined_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Combined Outputs/*.csv")]:
         context['supplemental_files'].append(combined_file)
+    for map_file in [os.path.relpath(file_path, start=start) for file_path in glob(path_ex + "/Map/*.png")]:
+        context['supplemental_files'].append(map_file)
 
     summary_path = os.path.join(scenario_filename(), SUMMARY_FILE_NAME)
     try:
