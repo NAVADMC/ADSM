@@ -125,7 +125,7 @@ for proc in psutil.process_iter():
         proc_name = proc.name().lower()
     except psutil.AccessDenied as e:
         continue
-    if 'ADSM'.lower() in proc_name:
+    if 'ADSM'.lower() in proc_name and 'Viewer'.lower() in proc_name:
         print("\nThere is already an instance of ADSM running!")
         print("\nPress any key to exit...")
         input()
