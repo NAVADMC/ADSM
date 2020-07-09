@@ -8,7 +8,7 @@ import sys
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import close_old_connections
-from djanto.utils import timezone as djtimezone
+from django.utils import timezone as djtimezone
 
 from ADSMSettings.utils import adsm_executable_command, graceful_startup
 from ADSMSettings.views import open_scenario
