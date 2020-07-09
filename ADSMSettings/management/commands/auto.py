@@ -235,6 +235,7 @@ class Command(BaseCommand):
                     max_iterations = OutputSettings.objects.all().first().iterations
                 except:
                     print("Unable to find OutputSettings! Scenario may not be complete or is corrupt. Skipping Scenario %s" % scenario)
+                    continue
             else:
                 max_iterations = self.options['max_iterations']
 
