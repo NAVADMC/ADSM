@@ -35,6 +35,8 @@ class Command(BaseCommand):
                             help='A list of scenarios for the ADSM Auto Scenario Runner to run. Ex: "Scenario 1" "Scenario 2"', nargs="+")
         parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
                             help='File that contains a list of scenario scenario names to run with the ADSM Auto Scenario Runner, one per line.', action='store')
+        parser.add_argument('--store-logs', dest='store_logs',
+                            help='Should logs from each Scenario be saved? Default is to the current working directory unless output-path is defined.', action='store_true')
         parser.add_argument('--workspace-path', dest='workspace_path',
                             help="Give a different workspace path to pull scenarios from for the ADSM Auto Scenario Runner.", action='store')
         parser.add_argument('--output-path', dest='output_path',
@@ -48,8 +50,11 @@ class Command(BaseCommand):
         self.options = options
 
         if not self.options['workspace_path'] and not self.options['quiet']:
-            print("WARNING! Using the ADSM Auto Scenario Runner will cause you to lose any unsaved work in your ADSM Workspace.")
-            print("Are you okay with losing any unsaved work?")
+            print("WARNING! Using the ADSM Auto Scenario Runner will cause you to lose any unsaved work in the Scenario currently open in ADSM (activeSession.db). Please make sure all current changes are saved back to your Scenario in the ADSM program.")
+            print()
+            print("WARNING! Using the ADSM Auto Scenario Runner will delete existing Results and Supplemental Output Files on all scenarios that are run.")
+            print()
+            print("Are you okay with losing any unsaved work and existing results?")
 
             answer = None
             while str(answer).lower() not in ['yes', 'y', 'no', 'n']:
@@ -64,7 +69,8 @@ class Command(BaseCommand):
 
         if not self.options['output_path']:
             self.options['output_path'] = '.'
-        os.makedirs(self.options['output_path'], exist_ok=True)
+        else:
+            os.makedirs(self.options['output_path'], exist_ok=True)
 
         with open(os.path.join(self.options['output_path'], 'auto_output.log'), 'w') as self.log_file:
             self.setup_scenarios()
@@ -202,7 +208,9 @@ class Command(BaseCommand):
             delete_all_outputs()
 
             # ensure that the destruction_reason_order includes all elements. See #990 for more details
-            null = DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order=match_data(DestructionGlobal.objects.all()[0].destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
+            dg = DestructionGlobal.objects.all().first()
+            if dg:
+                DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order=match_data(dg.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
 
             self.log("\tValidating simulation setup...")
             simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
@@ -226,11 +234,12 @@ class Command(BaseCommand):
             sim = Simulation(max_iteration=max_iterations)
             sim.start()
             sim.join()  # Wait for it to complete
-            log_dir = os.path.join(os.path.join(self.options['workspace_path'], 'settings', 'logs'))
-            scenario_output = os.path.join(self.options['output_path'], "%s Auto Output" % scenario.replace(".db", ""))
-            os.makedirs(scenario_output, exist_ok=True)
-            for f in os.listdir(log_dir):
-                shutil.move(os.path.join(log_dir, f), scenario_output)
+            if self.options['store_logs']:
+                log_dir = os.path.join(self.options['workspace_path'], 'settings', 'logs')
+                scenario_output = os.path.join(self.options['output_path'], "%s Auto Output" % scenario.replace(".db", ""))
+                os.makedirs(scenario_output, exist_ok=True)
+                for f in os.listdir(log_dir):
+                    shutil.move(os.path.join(log_dir, f), os.path.join(scenario_output, f))
             self.log("\tDone running %s." % scenario)
 
         self.log("\nDone running all Scenarios.")

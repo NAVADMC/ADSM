@@ -99,6 +99,8 @@ parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
                     help='File that contains a list of scenario scenario names to run with the ADSM Auto Scenario Runner, one per line.', action='store')
 parser.add_argument('--workspace-path', dest='workspace_path',
                     help="Give a different workspace path to pull scenarios from for the ADSM Auto Scenario Runner.", action='store')
+parser.add_argument('--store-logs', dest='store_logs',
+                    help='Should logs from each Scenario be saved? Default is to the current working directory unless output-path is defined.', action='store_true')
 parser.add_argument('--output-path', dest='output_path',
                     help="Where the ADSM Auto Scenario Runner should store output logs.", action='store')
 parser.add_argument('--max-iterations', dest='max_iterations',
@@ -123,7 +125,7 @@ for proc in psutil.process_iter():
         proc_name = proc.name().lower()
     except psutil.AccessDenied as e:
         continue
-    if 'ADSM Viewer'.lower() in proc_name:
+    if 'ADSM'.lower() in proc_name:
         print("\nThere is already an instance of ADSM running!")
         print("\nPress any key to exit...")
         input()
@@ -210,11 +212,12 @@ elif args.run_all_scenarios or args.exclude_scenarios or args.exclude_scenarios_
                             run_scenarios=args.run_scenarios,
                             run_scenarios_list=args.run_scenarios_list,
                             workspace_path=args.workspace_path,
+                            store_logs=args.store_logs,
                             output_path=args.output_path,
                             max_iterations=args.max_iterations,
                             quiet=args.quiet)
-elif args.workspace_path or args.output_path or args.max_iterations or args.quiet:
-    raise ValueError('The command line arguments "workspace-path", "output-path", "max-iterations", and "quiet" currently only work with the ADSM Auto Scenario Runner!')
+elif args.workspace_path or args.output_path or args.max_iterations or args.quiet or args.store_logs:
+    raise ValueError('The command line arguments "workspace-path", "store-logs", "output-path", "max-iterations", and "quiet" currently only work with the ADSM Auto Scenario Runner!')
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
     if args.recent:
