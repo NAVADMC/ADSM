@@ -8,11 +8,13 @@ import sys
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import close_old_connections
+from djanto.utils import timezone as djtimezone
 
 from ADSMSettings.utils import adsm_executable_command, graceful_startup
 from ADSMSettings.views import open_scenario
 from Results.simulation import Simulation
-from Results.utils import delete_all_outputs
+from Results.utils import delete_all_outputs, delete_supplemental_folder
+from Results.views import create_blank_unit_stats
 from ScenarioCreator.models import DestructionGlobal, OutputSettings
 from ScenarioCreator.views import match_data
 
@@ -205,7 +207,10 @@ class Command(BaseCommand):
             self.log("\nAuto running %s..." % scenario)
 
             open_scenario(None, scenario, wrap_target=True)
+            print("Starting Simulation run at %s" % djtimezone.now())
             delete_all_outputs()
+            delete_supplemental_folder()
+            create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
 
             # ensure that the destruction_reason_order includes all elements. See #990 for more details
             dg = DestructionGlobal.objects.all().first()
@@ -226,7 +231,10 @@ class Command(BaseCommand):
                 continue
 
             if not self.options['max_iterations']:
-                max_iterations = OutputSettings.objects.all().first().iterations
+                try:
+                    max_iterations = OutputSettings.objects.all().first().iterations
+                except:
+                    print("Unable to find OutputSettings! Scenario may not be complete or is corrupt. Skipping Scenario %s" % scenario)
             else:
                 max_iterations = self.options['max_iterations']
 
