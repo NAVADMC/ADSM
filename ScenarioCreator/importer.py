@@ -34,7 +34,7 @@ def import_relational_functions(existing_functions):
     for file_name in file_names:
         # open that file
         file = open(workspace_path(scenario_filename() + "\\Imports\\") + file_name, "r")
-        csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
+        csvreader = csv.reader(file, delimiter=",", quotechar='"', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
         # for each relational function saved within
         for rel in csvreader:
             if len(rel) > 0:
@@ -107,7 +107,7 @@ def import_pdfs(existing_functions):
     for file_name in file_names:
         # open that file
         file = open(workspace_path(scenario_filename() + "\\Imports\\") + file_name, "r")
-        csvreader = csv.reader(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
+        csvreader = csv.reader(file, delimiter=",", quotechar='"', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
         # for each of the pdfs saved within
         for pdf in csvreader:
             if len(pdf) > 0:
