@@ -19,7 +19,7 @@ from ADSMSettings.models import unsaved_changes
 from ADSMSettings.utils import graceful_startup, file_list, handle_file_upload, workspace_path, adsm_executable_command
 from ScenarioCreator.population_parser import lowercase_header
 from ScenarioCreator.utils import convert_user_notes_to_unit_id
-from ScenarioCreator.models import VaccinationRingRule, RelationalFunction
+from ScenarioCreator.models import VaccinationRingRule, RelationalFunction, ProbabilityDensityFunction
 from ScenarioCreator.exporter import *
 from ScenarioCreator.importer import *
 from ScenarioCreator import function_graphs
@@ -763,6 +763,57 @@ def functions_panel(request, form=None):
         context['models'].append(list_per_model(local_model))
     return render(request, 'functions_panel.html', context)  # no 3 panel layout
 
+def export_relational_graph(request):
+
+    # get the graph src, this looks a lot like a url. This is only used to extract the private key of the graph from
+    graph_src = str(request.GET.get('graph_src', None))
+    # extract said private key. This is used as a unique identifier for each function
+    graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
+
+    # get the object itself. This will actually only be used to get the exact name of the function
+    rel_graph = ScenarioCreator.models.RelationalFunction.objects.get(pk=graph_pk)
+
+    # get the graph object, this comes back as an HttpResponse, but the image is in HttpResponse.content as bytes
+    graph = function_graphs.existing_relational_graph(graph_pk)
+
+    # ensure that the path will exist
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files"))
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs"))
+
+    # write the image to file.
+    with open(workspace_path(scenario_filename() + "/Supplemental Output Files/Relational Function Graphs/" + rel_graph.name + ".png"), "wb") as image_file:
+        image_file.write(graph.content)
+
+    # blank response - nothing happens on the front end.
+    return JsonResponse({})
+
+def export_pdf_graph(request):
+
+    # get the graph src, this looks a lot like a url. This is only used to extract the private key of the graph from
+    graph_src = str(request.GET.get('graph_src', None))
+    # extract said private key. This is used as a unique identifier for each function
+    graph_pk = int(''.join(char for char in graph_src if char.isdigit()))
+
+    # get the object itself. This will actually only be used to get the exact name of the function
+    pdf_graph = ScenarioCreator.models.ProbabilityDensityFunction.objects.get(pk=graph_pk)
+
+    # get the graph object, this comes back as an HttpResponse, but the image is in HttpResponse.content as bytes
+    graph = function_graphs.existing_probability_graph(graph_pk)
+
+    # ensure that the path will exist
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files"))
+    if not os.path.exists(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs")):
+        os.mkdir(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs"))
+
+    # write the image to file
+    with open(workspace_path(scenario_filename() + "/Supplemental Output Files/PDF Graphs/" + pdf_graph.name + ".png"), "wb") as image_file:
+        image_file.write(graph.content)
+
+    # blank response - nothing happens on the front end.
+    return JsonResponse({})
 
 def control_protocol_list(request):
     return model_list(request, 'ScenarioCreator/ControlProtocolList.html')
@@ -898,8 +949,9 @@ def population(request):
 def validate_scenario(request):
 
     # ensure that the destruction_reason_order includes all elements. See #990 for more details
-    DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order = match_data(DestructionGlobal.objects.all()[0].destruction_reason_order,
-                                                                             "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
+    dg = DestructionGlobal.objects.all().first()
+    if dg:
+        DestructionGlobal.objects.filter(pk=1).update(destruction_reason_order=match_data(dg.destruction_reason_order, "Basic, Trace fwd direct, Trace fwd indirect, Trace back direct, Trace back indirect, Ring"))
 
     simulation = subprocess.Popen(adsm_executable_command() + ['--dry-run'],
                                   shell=(platform.system() != 'Darwin'),

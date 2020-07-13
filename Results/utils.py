@@ -91,4 +91,4 @@ def delete_all_outputs():
         model.objects.all().delete()
     SmSession.objects.all().update(iteration_text = '', simulation_has_started=False)  # This is also reset from open_scenario
     if os.path.isdir(workspace_path(scenario_filename() + "/" + "Supplemental Output Files")):
-        shutil.rmtree(workspace_path(scenario_filename() + "/" + "Supplemental Output Files"))
+        shutil.rmtree(workspace_path(scenario_filename() + "/" + "Supplemental Output Files"), ignore_errors=True)

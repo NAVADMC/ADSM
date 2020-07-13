@@ -5,15 +5,20 @@
 
 {% block content %}
     <form id="{{ action|action_id }}" class="ajax probability-form" action="{{ action }}">
+        <img id="function-graph" src="{{action}}graph.png" class="img-responsive">
 
-        <a href="{{ action }}graph.png" download class="download-overlay-container">
-            <img id="function-graph" src="{{action}}graph.png?{%  now 'U' %}" class="download-overlay-image">
-            <div class="download-overlay-base">
-                <div class="download-overlay-text">Click to Download</div>
-            </div>
-        </a>
-
-        <p style="margin-bottom:15px;">Click on the graph to download the highest possible resolution.</p>
+        <div class="btn btn-info" style="margin: 0px auto 0px auto; display: block;" onclick=
+        "
+        $.ajax({
+            url: '/setup/ExportPDFGraph/',
+            data: {
+                'graph_src': '{{ action }}'
+            },
+            dataType: 'json'
+        });
+        "
+        >Export Graph for Publication</div>
+        <p style="margin-bottom:15px; font-weight: 200; color: #737373; margin-top: 5px;">Graph will save in the current scenario's supplemental outputs folder.</p>
 
         {% crispy form %}
         {% include "ScenarioCreator/ViewEditButtons.html" %}

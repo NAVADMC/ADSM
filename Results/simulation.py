@@ -95,8 +95,7 @@ def simulation_process(iteration_number, adsm_cmd, production_types, zones, log_
             if not SmSession.objects.get().simulation_crashed:
                 error_text = errors.decode()
                 if "MEMORY-ERROR" in error_text:
-                    error_text += "This scenario has exceeded the limits of ADSM. It will be necessary to modify " \
-								  "your parameters to reducde disease spread to execute this scenario."
+                    error_text += "This scenario has exceeded the limits of ADSM. It will be necessary to modify your parameters to reduce disease spread to execute this scenario."
                 SmSession.objects.all().update(simulation_crashed=True, crash_text=error_text)
             abort_simulation()
     # End logging
@@ -188,7 +187,7 @@ class Simulation(multiprocessing.Process):
             print(''.join(str(s) + 's, ' for s in simulation_times))
             print("Average Time:", round(sum(simulation_times)/len(simulation_times), 2), 'seconds')
             population_zoom_png()
-            zip_map_directory_if_it_exists()
+            # zip_map_directory_if_it_exists()  # see ticket 1006 for why this is commented out
             save_scenario()
             close_old_connections()
         except:

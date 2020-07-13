@@ -1,6 +1,7 @@
 import re
 from django.db import connections
 import Results.models
+from ADSMSettings.utils import scenario_filename
 
 
 def camel_case_spaces(name_with_spaces):
@@ -131,8 +132,9 @@ class DailyParser(object):
             del sparse_info['versionMajor']
             del sparse_info['versionMinor']
             del sparse_info['versionRelease']
+            scenario_name = scenario_filename()
             if last_line:
-                print("Finished Iteration %i:  %i Days" % (iteration, day))
+                print("%s - Finished Iteration %i:  %i Days" % (scenario_name, iteration, day))
         except:
             return []
         self.failures = set(sparse_info.keys())  # whatever is left is a failure

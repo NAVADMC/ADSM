@@ -13,7 +13,7 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/mapbox.js"></script>
         <div class="mapwrapper">
             <div id="viewport" style="background: url({{ STATIC_URL }}working.gif) no-repeat center;height: 800px; width: 923px;">
-                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;">
+                <div style="background: url(/results/population_thumbnail.png?{%  now 'U' %}) no-repeat center;height: 800px; width: 923px;" title="Use mouse wheel to zoom.">
                     <!--top level map content goes here-->
                 </div>
                 <div style="height: 2080px; width: 2400px;">
@@ -23,25 +23,6 @@
                 <div style="height: 4160px; width: 4800px;"> 
                     <img src="/results/population_zoom.png?{%  now 'U' %}" alt="" />
                     <div class="mapcontent"></div>
-                </div>
-            </div>  
-            <div id="legend">
-                <div id="legend-left">
-                    <p class="legend-label">Zone Probability</p>
-                    <div class="legend-values">
-                        <span>100%</span>
-                        <span>>1%</span>
-                    </div>
-                </div>
-                <div id="legend-right">
-                    <p class="legend-label">Unit Outcome</p>
-                    <div class="legend-values">
-                        <ul>
-                            <li>Infected</li>
-                            <li>Vaccinated</li>
-                            <li>Destroyed</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -79,8 +60,34 @@
                 </div>
             {% endif %}
 
+            <p>Map Legend: </p>
+            <div id="legend">
+                <div id="legend-left">
+                    <p class="legend-label">Zone Probability</p>
+                    <div class="legend-values">
+                        <span>100%</span>
+                        <span>>1%</span>
+                    </div>
+                </div>
+                <div id="legend-right">
+                    <p class="legend-label">Unit Outcome</p>
+                    <div class="legend-values">
+                        <ul>
+                            <li>Infected</li>
+                            <li>Vaccinated</li>
+                            <li>Destroyed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <p>Simulation Version: {{ version_number }}</p>
             {% include "Results/Summary.html" %}
+
+            <p><br></p>
+            <b> Learn more about how to interpret your results: </b>
+            <a href="https://github.com/NAVADMC/ADSM/wiki/Results-Interpretation"> https://github.com/NAVADMC/ADSM/wiki/Results-Interpretation </a>
+
         </div>
     </div>
     <div class="row">
@@ -110,15 +117,18 @@
                             </td>
                             <td>
                                 <b>Warning:</b> These operations may take very long for large scenarios.
+                                <br> <b>Note:</b> Files shown here are present in
+                                this scenario's workspace folder.
                             </td>
                         </tr>
                     </table>
 
                     {% for file in supplemental_files %}
                         <li class="file_list_item"><a href="/app/Download/?target={{ file }}" >{{ file }}</a>
-                            <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
-                            <a href="/app/Download/?target={{ file }}" ><img alt="Download" src="{{ STATIC_URL }}icons/download.png" class="icon pull-right"></a>
-                            </li>
+                            {% if 'Map' not in file %}
+                                <a href="#" class="icon delete-icon ajax-post" data-delete-link="/app/DeleteFile/{{ file }}/"></a>
+                            {% endif %}
+                        </li>
                     {% endfor %}
                 </ul>
             </div>

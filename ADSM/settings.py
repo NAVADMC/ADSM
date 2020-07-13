@@ -34,8 +34,15 @@ if OVERRIDE_DEBUG:
 
 # Look for any settings to import from the installer.
 # Installer settings are to be used globally across all users.
+AUTO_SETTINGS_FILE = os.path.join(BASE_DIR, "auto.ini")
 INSTALL_SETTINGS_FILE = os.path.join(BASE_DIR, 'workspace.ini')
-if os.path.isfile(INSTALL_SETTINGS_FILE):
+if os.path.isfile(AUTO_SETTINGS_FILE):
+    from importlib import machinery
+    auto_settings = machinery.SourceFileLoader('auto_settings', AUTO_SETTINGS_FILE).load_module()
+    WORKSPACE_PATH = auto_settings.WORKSPACE_PATH
+    if str(WORKSPACE_PATH).strip() == ".":
+        WORKSPACE_PATH = os.path.join(BASE_DIR, "ADSM Workspace")
+elif os.path.isfile(INSTALL_SETTINGS_FILE):
     from importlib import machinery
     install_settings = machinery.SourceFileLoader('install_settings', INSTALL_SETTINGS_FILE).load_module()
     WORKSPACE_PATH = install_settings.WORKSPACE_PATH

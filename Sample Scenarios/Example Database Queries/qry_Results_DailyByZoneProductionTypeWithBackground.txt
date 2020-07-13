@@ -1,0 +1,30 @@
+-----------------------------------------------------------------------------------------------
+--	Sample Query: Results Daily by Zone and Production type with Backkground
+--	Date:         5/13/2020
+--      By:           Schoenbaum, Missy
+--
+--      Notes: where clause 1=1 allows for easy editing of subsequent clauses
+--             -- allows for line to be commented  (omitted)
+--	Background means all units outside of a designated zone
+-----------------------------------------------------------------------------------------------
+SELECT 
+iteration,
+day,
+last_day,
+-- production_type_id, -- not useful, use case on name instead
+CASE WHEN r.production_type_id IS NULL THEN "ALL" ELSE pt.name END as productiontype,
+zone_id, -- not useful, use case on name instead
+CASE WHEN r.zone_id IS NULL THEN "Not_in_Zone" ELSE z.name END as zone,
+unitsInZone,
+unitDaysInZone,
+animalDaysInZone
+FROM Results_dailybyzoneandproductiontype r
+LEFT JOIN -- left join here because the NULL production type indicates ALL, note case statement to manage this
+ScenarioCreator_productiontype pt
+on r.production_type_id = pt.id
+LEFT JOIN ScenarioCreator_zone z -- left join here because the NULL zone id indicates BACKGROUND, note case statement to manage this
+on r.zone_id = z.id
+WHERE 1=1 -- Example of WHERE clause
+AND r.production_type_id is null -- this allows for only records with ALL production types since combined row is null in data
+ORDER BY -- Allows organization of results
+1, 2, 5, 6

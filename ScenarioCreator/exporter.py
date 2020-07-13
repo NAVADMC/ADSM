@@ -20,7 +20,7 @@ def export_relational_functions(functions, points):
     except FileExistsError:
         pass
     file = open(workspace_path("\\Exports\\Exported Functions\\") + "REL_" + scenario_filename().replace(" ", "") + ".csv", "w")
-    csvwriter = csv.writer(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
+    csvwriter = csv.writer(file, delimiter=",", quotechar='"', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
     # for all of the functions
     for function in functions:
         next_func = [str(getattr(function, key)) for key in RelationalFunction.export_fields]
@@ -46,7 +46,7 @@ def export_pdfs(functions):
     except FileExistsError:
         pass
     file = open(workspace_path("\\Exports\\Exported Functions\\") + "PDF_" + scenario_filename().replace(" ", "") + ".csv", "w")
-    csvwriter = csv.writer(file, delimiter=",", quotechar='¿', quoting=csv.QUOTE_ALL)
+    csvwriter = csv.writer(file, delimiter=",", quotechar='"', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
     # for each of the existing pdfs
     for function in functions:
         # for each key we need to output

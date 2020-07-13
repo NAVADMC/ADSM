@@ -31,6 +31,7 @@ import _thread
 import psutil
 import socket
 
+from shutil import copy2
 from tkinter import Tk
 from tkinter.filedialog import askdirectory
 from tkinter.messagebox import askyesno, Message
@@ -83,6 +84,30 @@ parser = argparse.ArgumentParser(prog='ADSM.exe')
 parser.add_argument('-t', '--test', dest='test', help='run the test suite', action='store_true')
 parser.add_argument('-n', '--update_name', dest='update_name', help='Query for the name of this program as known to the update server', action='store_true')
 parser.add_argument('-v', '--version', dest='version', help='Get current version of program.', action='store_true')
+parser.add_argument('-r', '--recent', dest='recent', action='store_true', help="Open the most recently edited scenario instead of what was last open in ADSM. WARNING: This will cause the loss of any unsaved changes in the currently open scenario!")
+
+# arguments for auto
+parser.add_argument('--run-all-scenarios', dest='run_all_scenarios',
+                    help='Run all Scenarios in the Workspace with the ADSM Auto Scenario Runner unless a file called DO.NOT.RUN is present in the scenario folder.', action='store_true')
+parser.add_argument('--exclude-scenarios', dest='exclude_scenarios',
+                    help='A list of scenarios to exclude from the ADSM Auto Scenario Runner. Ex: "Scenario 1" "Scenario 2"', nargs='+')
+parser.add_argument('--exclude-scenarios-list', dest='exclude_scenarios_list',
+                    help="File that contains a list of scenario names to exclude from the ADSM Auto Scenario Runner, one per line.", action='store')
+parser.add_argument('--run-scenarios', dest='run_scenarios',
+                    help='A list of scenarios for the ADSM Auto Scenario Runner to run. Ex: "Scenario 1" "Scenario 2"', nargs="+")
+parser.add_argument('--run-scenarios-list', dest='run_scenarios_list',
+                    help='File that contains a list of scenario scenario names to run with the ADSM Auto Scenario Runner, one per line.', action='store')
+parser.add_argument('--workspace-path', dest='workspace_path',
+                    help="Give a different workspace path to pull scenarios from for the ADSM Auto Scenario Runner.", action='store')
+parser.add_argument('--store-logs', dest='store_logs',
+                    help='Should logs from each Scenario be saved? Default is to the current working directory unless output-path is defined.', action='store_true')
+parser.add_argument('--output-path', dest='output_path',
+                    help="Where the ADSM Auto Scenario Runner should store output logs.", action='store')
+parser.add_argument('--max-iterations', dest='max_iterations',
+                    help="Maximum number of iterations any single simulation can run with the ADSM Auto Scenario Runner.", action='store')
+parser.add_argument('--quiet', dest='quiet',
+                    help='Skip all user prompts and automatically reply Yes.', action='store_true')
+
 args = parser.parse_args()
 
 # Respond to an updater query
@@ -100,7 +125,7 @@ for proc in psutil.process_iter():
         proc_name = proc.name().lower()
     except psutil.AccessDenied as e:
         continue
-    if 'ADSM Viewer'.lower() in proc_name:
+    if 'ADSM'.lower() in proc_name and 'Viewer'.lower() in proc_name:
         print("\nThere is already an instance of ADSM running!")
         print("\nPress any key to exit...")
         input()
@@ -110,6 +135,7 @@ print("\nPreparing Workspace...")
 if os.path.exists(os.path.join(BASE_DIR, 'workspace')):
     # Rename any old 'workspace' folders to 'ADSM Workspace'
     os.rename(os.path.join(BASE_DIR, 'workspace'), os.path.join(BASE_DIR, 'ADSM Workspace'))
+
 user_settings_file = os.path.join(BASE_DIR, 'workspace.ini')
 if not os.path.isfile(user_settings_file):
     Tk().withdraw()
@@ -126,6 +152,13 @@ if not os.path.isfile(user_settings_file):
     with open(user_settings_file, 'w') as user_settings:
         user_settings.write('WORKSPACE_PATH = %s' % json.dumps(custom_directory))
 
+auto_settings_file = os.path.join(BASE_DIR, 'auto.ini')
+if os.path.exists(auto_settings_file):
+    os.remove(auto_settings_file)
+if args.workspace_path:
+    with open(auto_settings_file, 'w') as auto_settings:
+        auto_settings.write('WORKSPACE_PATH = %s' % json.dumps(os.path.abspath(args.workspace_path)))
+
 print("\nPreparing Django environment...")
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ADSM.settings")
@@ -134,6 +167,7 @@ import django
 django.setup()
 from django.conf import settings
 from django.core import management
+from ADSMSettings.utils import db_list
 
 
 if not os.access(settings.WORKSPACE_PATH, os.W_OK | os.X_OK) or not os.access(settings.DB_BASE_DIR, os.W_OK | os.X_OK):
@@ -168,8 +202,34 @@ if not settings.DEBUG:
 if args.test:
     print("\nRunning tests...")
     management.call_command('test')
+elif args.run_all_scenarios or args.exclude_scenarios or args.exclude_scenarios_list or args.run_scenarios or args.run_scenarios_list:
+    if args.recent:
+        raise ValueError("Opening the most recent scenario doesn't work with the ADSM Auto Scenario Runner!")
+    management.call_command('auto',
+                            run_all_scenarios=args.run_all_scenarios,
+                            exclude_scenarios=args.exclude_scenarios,
+                            exclude_scenarios_list=args.exclude_scenarios_list,
+                            run_scenarios=args.run_scenarios,
+                            run_scenarios_list=args.run_scenarios_list,
+                            workspace_path=args.workspace_path,
+                            store_logs=args.store_logs,
+                            output_path=args.output_path,
+                            max_iterations=args.max_iterations,
+                            quiet=args.quiet)
+elif args.workspace_path or args.output_path or args.max_iterations or args.quiet or args.store_logs:
+    raise ValueError('The command line arguments "workspace-path", "store-logs", "output-path", "max-iterations", and "quiet" currently only work with the ADSM Auto Scenario Runner!')
 else:
     # NOTE: Normally you would need to check for updates. However, graceful startup is doing this for us.
+    if args.recent:
+        print("Opening the most recently edited scenario...")
+        active_session = os.path.join(settings.DB_BASE_DIR, 'activeSession.db')
+        if os.path.isfile(active_session):
+            os.remove(active_session)
+
+        recent_db = db_list(include_current=True)[0]
+        recent_db_path = os.path.join(settings.WORKSPACE_PATH, os.path.splitext(recent_db)[0], recent_db)
+        copy2(recent_db_path, active_session)
+
     try:
         server_port, app_port = find_available_ports()
     except:

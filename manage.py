@@ -13,6 +13,8 @@ sys.path.append(BASE_DIR)
 
 def main(*args):
     execute_from_command_line(*args)
+    return
+
 
 if __name__ == "__main__":
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ADSM.settings')

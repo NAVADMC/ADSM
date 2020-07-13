@@ -69,6 +69,8 @@ class Command(BaseCommand):
              "url('^ExportPopulation/(?P<format>.+)$', 'ScenarioCreator.views.export_population')",
              "url('^ExportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.export_functions')",
              "url('^ImportFunctions/(?P<block>.+)$', 'ScenarioCreator.views.import_functions')",
+             "url('^ExportRelGraph/$', 'ScenarioCreator.views.export_relational_graph')",
+             "url('^ExportPDFGraph/$', 'ScenarioCreator.views.export_pdf_graph')",
             ])
 
         urls_code = "\"\"\"URLs is entirely procedural based on the contents of models.py. This has the advantage that urls automatically update as the models change or are renamed.\"\"\"\n\n\n" \

@@ -41,14 +41,14 @@ def workspace_path(target=None):
         return path  # TODO: shlex.quote(path) if you want security
 
 
-def db_list():
+def db_list(include_current=False):
     dbs = []
     for root, dirs, files in os.walk(workspace_path()):
         for dir in dirs:
             if dir not in ['Example Database Queries', 'Example R Code', 'settings']:
                 dir_files = os.listdir(os.path.join(workspace_path(), dir))
                 for file in dir_files:
-                    if file.endswith('.db') and file.replace('.db', '') != scenario_filename():
+                    if file.endswith('.db') and (include_current or file.replace('.db', '') != scenario_filename()):
                         dbs.append((file, os.path.getmtime(os.path.join(workspace_path(), dir, file))))  # Append tuple (filename, datemodified)
                         break  # Don't add a directory more than once
         break  # only look at the top level for folders that may contain DBs
@@ -146,7 +146,7 @@ def copy_blank_to_settings():
         reset_db('default')
 
 
-def graceful_startup():
+def graceful_startup(skip_examples=False, skip_updates=False):
     """Checks something inside of each of the database files to see if it's valid.  If not, rebuild the database."""
     print("Setting up application...")
 
@@ -157,24 +157,25 @@ def graceful_startup():
         print("Creating DB Directory...")
         os.makedirs(settings.DB_BASE_DIR, exist_ok=True)
 
-    print("Copying Sample Scenarios and Example Queries and Code...")
-    samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
-    blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
-    blacklisted_files = ["population_map.png", "population_thumbnail.png"]
-    for dirpath, dirnames, files in os.walk(samples_dir):
-        [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
-        subdir = str(dirpath).replace(samples_dir, '')
-        if subdir.startswith(os.path.sep):
-            subdir = subdir.replace(os.path.sep, '', 1)
-        if subdir.strip():
-            if not os.path.exists(os.path.join(workspace_path(), subdir)):
-                os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
-        for file in files:
-            if file not in blacklisted_files:
-                try:
-                    shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
-                except Exception as e:
-                    print(e)
+    if not skip_examples:
+        print("Copying Sample Scenarios and Example Queries and Code...")
+        samples_dir = os.path.join(settings.BASE_DIR, "Sample Scenarios")
+        blacklisted_dirs = ["Supplemental Output Files", "Combined Outputs", "Map"]
+        blacklisted_files = ["population_map.png", "population_thumbnail.png"]
+        for dirpath, dirnames, files in os.walk(samples_dir):
+            [os.makedirs(workspace_path(sub), exist_ok=True) for sub in dirnames if sub not in blacklisted_dirs]
+            subdir = str(dirpath).replace(samples_dir, '')
+            if subdir.startswith(os.path.sep):
+                subdir = subdir.replace(os.path.sep, '', 1)
+            if subdir.strip():
+                if not os.path.exists(os.path.join(workspace_path(), subdir)):
+                    os.makedirs(os.path.join(workspace_path(), subdir), exist_ok=True)
+            for file in files:
+                if file not in blacklisted_files:
+                    try:
+                        shutil.copy(os.path.join(dirpath, file), os.path.join(workspace_path(), subdir, file))
+                    except Exception as e:
+                        print(e)
 
     print("Migrating all .sqlite3 files to .db...")
     connections.close_all()
@@ -218,7 +219,7 @@ def graceful_startup():
     update_db_version()
     SmSession.objects.all().update(simulation_crashed=False, crash_text=None)
 
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, 'frozen', False) and not skip_updates:
         check_for_updates()
     else:
         print("Skipping update check.")
