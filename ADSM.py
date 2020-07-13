@@ -47,7 +47,7 @@ def launch_viewer(server_port):
     # console_log_path = os.path.join(settings.WORKSPACE_PATH, 'settings', 'Viewer', settings.OS_DIR, 'console.log')  # The new viewer created 11/26/2019 doesn't create separate browser and javascript logs. Everything goes into log_path above.
     try:
         # viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Beta_Viewer%s" --log-file="%s" --console-log-path="%s" --url="%s" --no-sandbox' % (settings.EXTENSION, log_path, console_log_path, "http://127.0.0.1:%s" % server_port)), shell=True)
-        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" "%s" "%s" "%s" "%s"' % (settings.EXTENSION, "http://127.0.0.1:%s" % server_port, "ADSM Beta Viewer", log_path, os.path.join(settings.BASE_DIR, 'bin', 'env', 'favicon.ico'))), shell=True)
+        viewer_status = subprocess.call('"'+os.path.join(BASE_DIR, 'Viewer', settings.OS_DIR, 'ADSM_Viewer%s" "%s" "%s" "%s" "%s"' % (settings.EXTENSION, "http://127.0.0.1:%s" % server_port, "ADSM Viewer", log_path, os.path.join(settings.BASE_DIR, 'bin', 'env', 'favicon.ico'))), shell=True)
         if viewer_status != 0 and viewer_status != 9:  # The 9 is to ignore X Window System error BadDrawable when closing. TODO: Debug viewer
             raise RuntimeError("Error launching Viewer!")
     except:
