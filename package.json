@@ -1,6 +1,6 @@
 {
   "name": "adsm",
-  "version": "10.18.0",
+  "version": "10.19.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/NAVADMC/ADSM.git"
   },
-  "author": "Newline Technical Innovations",
+  "author": "NAVADMC",
   "license": "",
   "bugs": {
     "url": "https://github.com/NAVADMC/ADSM/issues"
