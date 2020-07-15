@@ -14,20 +14,21 @@ from ADSMSettings.models import SingletonManager
 
 from unittest import skip
 
-
+# @skip("Skipping Simulation Tests") # uncomment this line to skip these test cases, this will drastically increase the speed of testing
 class SimulationTest(TransactionTestCase):
     multi_db = True
 
     @classmethod
     def setUpClass(cls):
         source_db = os.path.join(settings.BASE_DIR, 'ScenarioCreator', 'tests', 'population_fixtures', 'Roundtrip.db')
-        cls.destination_db = workspace_path('Roundtrip_test.db')
+        cls.destination_db = workspace_path('Roundtrip_test/Roundtrip_test.db')
+        os.makedirs(workspace_path('Roundtrip_test'))
         shutil.copy(source_db, cls.destination_db)
         cls.scenario_directory = workspace_path('Roundtrip_test')
 
     @classmethod
     def tearDownClass(cls):
-        os.remove(cls.destination_db)
+        shutil.rmtree(cls.scenario_directory, ignore_errors=True)
 
     def setUp(self):
         self.client.get('/app/OpenScenario/Roundtrip_test.db/')
@@ -39,7 +40,8 @@ class SimulationTest(TransactionTestCase):
         close_old_connections()
 
     def tearDown(self):
-        shutil.rmtree(self.scenario_directory, ignore_errors=True)
+        pass
+        # shutil.rmtree(self.scenario_directory, ignore_errors=True)
 
     # @skip("Waiting on updated adsm_simulation")
     def test_multiple_threads(self):
@@ -69,7 +71,7 @@ class SimulationTest(TransactionTestCase):
         settings.save_daily_unit_states = True
         settings.save()
         close_old_connections()
-        output_file = os.path.join(self.scenario_directory, 'states_1.csv')
+        output_file = os.path.join(self.scenario_directory, 'Supplemental Output Files', 'states_1.csv')
 
         sim = Simulation(1, testing=True)
         sim.start()
@@ -77,7 +79,7 @@ class SimulationTest(TransactionTestCase):
 
         self.assertTrue(os.access(output_file, os.F_OK))
 
-    # @skip("Waiting on updated adsm_simulation")
+    @skip("Zipped map outputs are no longer being created (#1006)")
     def test_map_zip_with_output(self):
         settings = OutputSettings.objects.first()
         settings.save_daily_unit_states = True
@@ -96,7 +98,7 @@ class SimulationTest(TransactionTestCase):
         with zipfile.ZipFile(file_name, 'r') as zf:
             self.assertListEqual(zf.namelist(), os.listdir(folder_name))
 
-    # @skip("Waiting on updated adsm_simulation")
+    @skip("Zipped map outputs are no longer being created (#1006)")
     def test_map_zip_no_output(self):
         settings = OutputSettings.objects.first()
         settings.save_map_output = False
@@ -304,9 +306,6 @@ class ParserTests(TestCase):
 
 class ResultsVersionTestCase(TestCase):
     multi_db = True
-
-    def test_model_is_singleton(self):
-        self.assertIsInstance(ResultsVersion.objects, SingletonManager)
 
     def test_save(self):
         result = ResultsVersion()
