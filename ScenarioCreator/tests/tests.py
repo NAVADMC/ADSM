@@ -166,7 +166,7 @@ class ViewTests(TransactionTestCase):
         self.assertIn('data-delete-link', r.content.decode())
 
         # has a related model, not deleteable
-        function = RelationalFunction.objects.get(name="Prevalence")
+        function = RelationalFunction.objects.get(name="WHP company feedlot") # This function was chosen because it has ID=1
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertNotIn('data-delete-link', r.content.decode())
 
