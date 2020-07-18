@@ -285,7 +285,7 @@ class AssignEffectsTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.context['formset_grouped']), ProductionType.objects.count())
         self.assertEqual(len(r.context['formset_grouped'][pt_1]), 2)
-        self.assertEqual(r.context['formset_grouped'][pt_1][0].instance.id, 1)
+        self.assertEqual(r.context['formset_grouped'][pt_1][0].instance.id, 25)
         self.assertEqual(r.context['formset_grouped'][pt_1][0].instance.effect, effect_1)
 
     def test_save_ZoneEffectAssignment(self):
