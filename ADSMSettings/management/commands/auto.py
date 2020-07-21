@@ -207,7 +207,7 @@ class Command(BaseCommand):
             self.log("\nAuto running %s..." % scenario)
 
             open_scenario(None, scenario, wrap_target=True)
-            print("Starting Simulation run at %s" % djtimezone.now())
+            self.log("Starting Simulation run at %s" % djtimezone.now())
             delete_all_outputs()
             delete_supplemental_folder()
             create_blank_unit_stats()  # create UnitStats before we risk the simulation writing to them
@@ -234,7 +234,7 @@ class Command(BaseCommand):
                 try:
                     max_iterations = OutputSettings.objects.all().first().iterations
                 except:
-                    print("Unable to find OutputSettings! Scenario may not be complete or is corrupt. Skipping Scenario %s" % scenario)
+                    self.log("Unable to find OutputSettings! Scenario may not be complete or is corrupt. Skipping Scenario %s" % scenario)
                     continue
             else:
                 max_iterations = self.options['max_iterations']
