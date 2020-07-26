@@ -18,6 +18,9 @@ def import_relational_functions(existing_functions):
     :return: None
     '''
 
+    # stamp into cmd (#1016)
+    print("Starting REL function import...")
+
     # get a list of all file names delimited by "REL_", are .csv, and do not have the current scenario's name
     file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
                   str(file).startswith("REL_") and
@@ -81,6 +84,9 @@ def import_relational_functions(existing_functions):
                             new_points.save()
         # close the file to avoid corruption
         file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function import complete.")
     return
 
 
@@ -93,6 +99,9 @@ def import_pdfs(existing_functions):
     :param existing_functions: list of existing functions, used to avoid creating duplicate function names
     :return: None
     '''
+
+    # stamp into cmd (#1016)
+    print("Starting PDF import...")
 
     # get a list of all file names delimited by "PDF_", are .csv, and do not have the current scenario's name
     file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
@@ -132,4 +141,8 @@ def import_pdfs(existing_functions):
                 new_pdf.save()
         # close the file to avoid corruption.
         file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function import complete.")
+
     return
