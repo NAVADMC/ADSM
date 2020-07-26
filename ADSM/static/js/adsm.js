@@ -154,12 +154,14 @@ $(function(){
                 rebuild_protocols_list();
             }
         }
+
+        ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
+
         if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {// MOST IMPORTANT: for deleting outputs on form submission
             success_callback = function () {
                 window.location.reload()
             };  //updates Navigation bar context
         }
-        ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
     });
 
     $(document).on('click', '#update_adsm', function(event){
