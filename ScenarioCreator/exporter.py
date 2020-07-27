@@ -14,6 +14,10 @@ def export_relational_functions(functions, points):
     :param points: all of the relational point objects, these must be matched to functions before being exported
     :return: None
     '''
+
+    # stamp into cmd (#1016)
+    print("Starting REL function export...")
+
     # open and erase or create the export file
     try:
         os.makedirs(workspace_path("\\Exports\\Exported Functions\\"))
@@ -30,6 +34,10 @@ def export_relational_functions(functions, points):
         csvwriter.writerow(next_func)
     # close the file to save and avoid corruption
     file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function export complete.")
+
     return
 
 
@@ -40,6 +48,10 @@ def export_pdfs(functions):
     :param functions: The existing pdfs
     :return: None
     '''
+
+    # stamp into cmd (#1016)
+    print("Starting PDF export...")
+
     # Open and erase or create the output file
     try:
         os.makedirs(workspace_path("\\Exports\\Exported Functions\\"))
@@ -53,4 +65,8 @@ def export_pdfs(functions):
         csvwriter.writerow([str(getattr(function, key)) for key in ProbabilityDensityFunction.export_fields])
     # close the file to save and avoid corruption
     file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function export complete.")
+
     return

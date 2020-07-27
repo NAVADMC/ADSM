@@ -8,7 +8,7 @@
         <button type="button" class="btn btn-default btn-cancel" {% if action %}form="{{ action|action_id }}"{% endif %} id="id-cancel" onclick="hideCenterPanel();">Cancel</button>
         <button type="submit" class="btn btn-primary btn-save" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} id="submit-id-submit" disabled onclick="hideFunctionsPanel();">Apply</button>
     {% endif %}
-    {% if backlinks %}
+    {% if backlinks %}e
         <button type="submit" disabled class="btn btn-danger" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} >Remove References before Deleting</button>
     {% elif deletable %}
         <a href="#" data-delete-link="{{deletable}}" class="btn btn-danger" formnovalidate {% if action %}form="{{ action|action_id }}"{% endif %} >Delete</a>
