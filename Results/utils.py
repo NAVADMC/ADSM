@@ -28,10 +28,13 @@ def get_simulation_controllers():
     for record in records:
         for process in psutil.process_iter():
             if process.pid == record.pid:
-                if 'python' not in process.name().lower() and 'adsm' not in process.name().lower():
-                    record.delete()  # stale process record where the pid was reused
-                else:  # process call python
-                    results.append(process)
+                try:
+                    if 'python' not in process.name().lower() and 'adsm' not in process.name().lower():
+                        record.delete()  # stale process record where the pid was reused
+                    else:  # process call python
+                        results.append(process)
+                except psutil.AccessDenied as e:
+                    continue
     return results
 
 
