@@ -499,11 +499,13 @@ protocol_substructure = {'use_detection': ['detection_probability_for_observed_t
                                              'destroy_indirect_back_traces',
                                              'destruction_priority',
                                              ],
+                         ''' Vaccination Validation was disabled for #1015
                          'use_vaccination': ['vaccinate_detected_units',
                                              'minimum_time_between_vaccinations',
                                              'days_to_immunity',
                                              'vaccine_immune_period',
                                              ],
+                         '''
                          'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
                                                  'cost_of_destruction_cleaning_per_unit',
                                                  'cost_of_euthanasia_per_animal',
