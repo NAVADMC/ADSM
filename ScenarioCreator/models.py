@@ -499,13 +499,9 @@ protocol_substructure = {'use_detection': ['detection_probability_for_observed_t
                                              'destroy_indirect_back_traces',
                                              'destruction_priority',
                                              ],
-                         ''' Vaccination Validation was disabled for #1015
                          'use_vaccination': ['vaccinate_detected_units',
                                              'minimum_time_between_vaccinations',
-                                             'days_to_immunity',
-                                             'vaccine_immune_period',
                                              ],
-                         '''
                          'use_cost_accounting': ['cost_of_destruction_appraisal_per_unit',
                                                  'cost_of_destruction_cleaning_per_unit',
                                                  'cost_of_euthanasia_per_animal',
@@ -646,6 +642,8 @@ class ControlProtocol(BaseModel):
         return self.name
 
     def tab_is_valid(self, use_tab_name, fields=None):
+        if use_tab_name is "use_vaccination":
+            return True
         if fields is None:
             fields = protocol_substructure[use_tab_name]
         for field in fields:
