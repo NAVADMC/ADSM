@@ -156,7 +156,8 @@ $(function(){
         }
         if($self.parent().find('button[type=submit]').hasClass('btn-danger')) {// MOST IMPORTANT: for deleting outputs on form submission
             success_callback = function () {
-                window.location.reload()
+                //window.location.reload()
+                window.location.href = "/LoadingScreen/?loading_url=" + window.location.pathname;
             };  //updates Navigation bar context
         }
         ajax_submit_complex_form_and_replaceWith(formAction, formData, $self, load_target, loading_message, success_callback);
