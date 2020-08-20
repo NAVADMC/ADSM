@@ -1,6 +1,7 @@
 import csv
 import itertools
 import os
+import re
 import xml.etree.ElementTree as ET
 import ScenarioCreator.models
 
@@ -32,8 +33,8 @@ def convert_numeric_status_codes(entry):
 
 
 class PopulationParser(object):
-    model_labels = ['user_notes', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
-    xml_fields =   ['id',         'production-type', 'latitude', 'longitude', 'status',        'size']
+    model_labels = ['unit_id', 'production_type', 'latitude', 'longitude', 'initial_state', 'initial_size']
+    xml_fields =   ['id',      'production-type', 'latitude', 'longitude', 'status',        'size'        ]
     text_fields = list(zip(model_labels, xml_fields))
 
     def __init__(self, filename):
@@ -94,6 +95,15 @@ class PopulationParser(object):
                     self.__populate_xml_text_field(herd, *t)
                 else:
                     self.__populate_xml_text_field(herd, t)
+
+            # now we need to ensure that a unit_id is present. If there isn't one, then the id could be in user_notes
+            if self.population[-1]["unit_id"] == '':
+                # actually bring in the user_notes
+                self.__populate_xml_text_field(herd, *('user_notes', 'user_notes'))
+                # search user_notes for the unit_id
+                unit_id_search = re.search(".*?[Ii][Dd]=([0-9]+)", str(self.population[-1]["user_notes"]))
+                if unit_id_search is not None:  # The unit_id being none check isn't needed with the new filter above, but we'll keep it for future safety
+                    self.population[-1]["unit_id"] = str(unit_id_search.group(1))
 
     def __populate_xml_text_field(self, herd, field_name, xml_name=''):
         if not xml_name:

@@ -25,7 +25,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_utf8(self):
         expected_results = {
-            'user_notes': 'UnitID=1',
+            'unit_id': '1',
             'initial_size': '100',
             'latitude': '50',
             'longitude': '-8',
@@ -41,7 +41,7 @@ class PopulationParserTestCase(TestCase):
 
     def test_parser_load_utf16(self):
         expected_results = {
-            'user_notes': 'UnitID=\u5f71\u97ff\u3092\u53d7\u3051\u3084\u3059\u3044',
+            'unit_id': '\u5f71\u97ff\u3092\u53d7\u3051\u3084\u3059\u3044',
             'initial_size': '84',
             'latitude': '52.9672',
             'longitude': '-8.201',
@@ -58,7 +58,7 @@ class PopulationParserTestCase(TestCase):
     def test_parser_multiple_herds(self):
         expected_results = [
             {
-                'user_notes': 'UnitID=1',
+                'unit_id': '1',
                 'initial_size': '84',
                 'latitude': '52.9672',
                 'longitude': '-8.201',
@@ -66,7 +66,7 @@ class PopulationParserTestCase(TestCase):
                 'initial_state': 'Susceptible',
             },
             {
-                'user_notes': 'UnitID=2',
+                'unit_id': '2',
                 'initial_size': '64',
                 'latitude': '52.9672',
                 'longitude': '-8.21',
@@ -82,6 +82,24 @@ class PopulationParserTestCase(TestCase):
         self.assertEqual(len(results), 2)
         self.assertDictEqual(results[0], expected_results[0])
         self.assertDictEqual(results[1], expected_results[1])
+
+    def test_convert_user_notes_to_unit_id(self):
+        expected_results = {
+            'unit_id': '1',
+            'initial_size': '100',
+            'latitude': '50',
+            'longitude': '-8',
+            'production_type': 'Free Range Cows',
+            'initial_state': 'Susceptible',
+            'user_notes': 'unit_id=1',
+        }
+
+        p = PopulationParser(POPULATION_FIXTURES + 'Population_Test_User_Notes_to_Unit_ID.xml')
+
+        results = p.parse_to_dictionary()
+
+        self.assertEqual(len(results), 1)
+        self.assertDictEqual(results[0], expected_results)
 
     def test_parser_load_invalid_xml(self):
         with self.assertRaises(ParseError):

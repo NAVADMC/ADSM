@@ -6,17 +6,19 @@ import csv
 
 
 def import_relational_functions(existing_functions):
-    '''
-
+    """
     Import the relational functions
 
     Relational functions are saved with their points, however the database stores the functions and the points
-    seperatly. We need to build a funciton for each line of each file, as well as an unknown number of points that
-    also need to be linked to the correct funciton.
+    separately. We need to build a function for each line of each file, as well as an unknown number of points that
+    also need to be linked to the correct function.
 
     :param existing_functions: list of existing relational functions, this is used to avoid duplicate names
     :return: None
-    '''
+    """
+
+    # stamp into cmd (#1016)
+    print("Starting REL function import...")
 
     # get a list of all file names delimited by "REL_", are .csv, and do not have the current scenario's name
     file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
@@ -81,23 +83,29 @@ def import_relational_functions(existing_functions):
                             new_points.save()
         # close the file to avoid corruption
         file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function import complete.")
     return
 
 
 def import_pdfs(existing_functions):
-    '''
+    """
     Import the pdfs
 
     Each pdf needs to be read in from the file and built in an object for the database
 
     :param existing_functions: list of existing functions, used to avoid creating duplicate function names
     :return: None
-    '''
+    """
+
+    # stamp into cmd (#1016)
+    print("Starting PDF import...")
 
     # get a list of all file names delimited by "PDF_", are .csv, and do not have the current scenario's name
     file_names = [file for file in listdir(workspace_path(scenario_filename() + "\\Imports\\")) if
-             str(file).startswith("PDF_") and
-             str(file).endswith(".csv")]
+                  str(file).startswith("PDF_") and
+                  str(file).endswith(".csv")]
     # get a list of the existing pdf's names.
     existing_pdf_names = [pdf.name for pdf in existing_functions]
     # list of fields that need to be imported
@@ -132,4 +140,8 @@ def import_pdfs(existing_functions):
                 new_pdf.save()
         # close the file to avoid corruption.
         file.close()
+
+    # stamp out of cmd (#1016)
+    print("Function import complete.")
+
     return

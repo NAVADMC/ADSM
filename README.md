@@ -14,49 +14,51 @@ There is a Beta and Release channel available for installation.
 ### Windows Release Channel
 You can find the latest Release here: https://github.com/NAVADMC/ADSM/releases/latest
 
-1. On the latest release page, download the "ADSM_Installer.exe".
-1. Run the installer with admin privileges (ask your IT department for help if needed).
-1. Follow the on screen prompts until "Choose Install Location".
-1. Choose the folder in which to install ADSM. This is where the program will reside. It is generally best to put it in "Program Files".
-1. Next, choose the User Workspace Folder for ADSM. If you are the only user of the computer, you can choose where to store your Workspace Folder (folder of your scenarios). Note that you must have Read/Write access to the chosen folder.  
-   If ADSM is being installed on a shared computer and multiple users will use the program, leave this field BLANK so ADSM will find a suitable Workspace Folder that is writable and unique to each user.
-1. Continue following the on screen prompts.
-1. When installation is complete, find "ADSM.exe" (either a shortcut on your desktop or in the folder you installed ADSM) and run it.
+1. On the latest release page, download the "ADSM_vx.x.x.x_windows.zip".
+1. Extract the ADSM folder to any location your user has permissions.
+    1. If you are on a shared computer and multiple people are expected to use the ADSM installation, have an Admin on your computer place the ADSM folder in "Program Files" and created the desired program shortcuts.
+1. Find "ADSM.exe" in the ADSM folder and run it.
+1. When you launch ADSM for the first time, it will prompt you where the Workspace Folder should live.
+    1. In general, say "No" to the prompt and the Workspace will be created inside the ADSM folder.
+    1. If ADSM is being installed on a shared computer and multiple users will use the program, say "Yes" and select a common location that all users will have Read/Write permissions to (NOT in "Program Files").
 1. After launching the application, a black Terminal window with white text will appear. You can leave this window alone; some debug messages may appear in it.
 1. A Viewer window will then appear on top of the Terminal window. This is where you will interface with the ADSM program.
 1. To properly exit ADSM, close the Viewer window. Doing so will automatically close the Terminal window after saving and shutting down all processes.
 
 ### Debian Linux Release Channel
+NOTE: v3.3.7.0 was the last version that had a Linux Build compiled. For now, Linux users should follow instructions for Installing ADSM For Development. 
+
 You can find the latest Release here: https://github.com/NAVADMC/ADSM/releases/latest
 
-An installation process does not yet exist for Linux, so it is best for each user on a machine to download their own local copy of the program.
+### Notes on the ADSM Workspace Folder
+If you selected "No" to specifying a Workspace location and the Workspace was automatically created in the ADSM folder, your installation is considered "Portable".  
+This means that you can move the entire ADSM folder from one computer to another and have all your data and settings move around with it.
 
-1. On the latest release page, download the "ADSM.tar.gz".
-1. Extract the package into the folder in which you want ADSM to be installed. It is best to do this somewhere in your User space.
-1. Run the "ADSM" executable in the extracted folder.
-1. After launching the application, a Terminal will appear. You can leave this Terminal alone; some debug messages may appear in it.
-1. A Viewer window will then appear on top of the Terminal window. This is where you will interface with the ADSM program.
-1. To properly exit ADSM, close the Viewer window. Doing so will automatically close the Terminal after saving and shutting down all processes.
+It is NOT suggested to attempt to run the ADSM program from a portable drive as there may be performance issues.  
+If you put your installation on a portable drive to do work on another computer, copy the installation onto the new computer's internal Hard Drive before doing your work.
+
+You can change where ADSM looks for the Workspace Folder at any time by opening the Scenario Browser in the right nav panel of the program and clicking "(change)" next to the Current Workspace path.  
+Doing this will prompt you to close the program and launch again going through the initial setup as described during the installation process.
 
 ### Windows And Linux Beta Channel
+NOTE: v3.3.7.0 was the last version that had a Linux Build compiled. For now, Linux users should follow instructions for Installing ADSM For Development. 
+
 You can find the latest Pre-release on the Releases page: https://github.com/NAVADMC/ADSM/releases
 
-Beta builds do not come with an installer, so it is best for each user on a machine to download their own local copy of the program.
-
-**WARNING:** If you have a Release installation on your computer, the Beta install MAY **overwrite your scenarios** from the Release version if you didn't specify a custom Workspace directory during Release install.   
-If ADSM is selecting the Workspace directory automatically both the Release and Beta channel will select the same folder.
+**WARNING:** If you have a Release installation on your computer, the Beta install MAY **overwrite your scenarios** from the Release version if you point both installations to the same Workspace Folder.   
+If ADSM is automatically putting the Workspace Folder in the ADSM folder, there will be no conflict.
 
 1. On the latest pre-release page, download either "ADSM_vx.x.x.x-beta_windows.zip" or "ADSM_vx.x.x.x-beta_linux.tar.gz"
-1. Extract the package into the folder in which you want ADSM Beta to be installed. It is best to do this somewhere in your User space (a directory your user owns).
-1. If you need to specify a different Workspace Folder to avoid a conflict with a Production Release, follow these steps.
-   1. In your ADSM Beta folder, create a file called "workspace.ini".
-   1. Using your favorite text editor, add one of the following lines:
-      1. Windows: `WORKSPACE_PATH = 'DRIVE:\\desired\\path\\to\ADSM Beta Workspace'`
-      1. Linux: `WORKSPACE_PATH = '/desired/path/to/ADSM Beta Workspace'`  
-1. Run the "ADSM_Beta.exe" or "ADSM_Beta" executable in the extracted folder.
-1. After launching the application, a Terminal will appear. You can leave this Terminal alone; runtime and debug messages will appear in it.
-1. A Viewer window will then appear on top of the Terminal window. This is where you will interface with the ADSM Beta program.
-1. To properly exit ADSM Beta, close the Viewer window. Doing so will automatically close the Terminal after saving and shutting down all processes.
+1. Extract the ADSM_Beta folder to any location your user has permissions.
+    1. If you are on a shared computer and multiple people are expected to use the ADSM_Beta installation, have an Admin on your computer place the ADSM_Beta folder in "Program Files" and created the desired program shortcuts.
+1. Find "ADSM_Beta.exe" in the ADSM_Beta folder and run it.
+1. When you launch ADSM_Beta for the first time, it will prompt you where the Workspace Folder should live.
+    1. In general, say "No" to the prompt and the Workspace will be created inside the ADSM_Beta folder.
+    1. If ADSM_Beta is being installed on a shared computer and multiple users will use the program, say "Yes" and select a common location that all users will have Read/Write permissions to (NOT in "Program Files").
+        1. Make sure to pick a location that doesn't conflict a Workspace Folder from a non beta installation of ADSM.
+1. After launching the application, a black Terminal window with white text will appear. You can leave this window alone; some debug messages may appear in it.
+1. A Viewer window will then appear on top of the Terminal window. This is where you will interface with the ADSM_Beta program.
+1. To properly exit ADSM_Beta, close the Viewer window. Doing so will automatically close the Terminal window after saving and shutting down all processes.
 
 ### Installing ADSM On A Server (Cloud Hosting)
 **NOTE:** ADSM was developed with the intention to move it towards a Cloud Hosted environment. It is setup to run as a webserver already. HOWEVER, it is not multi-user friendly yet so should not be setup in this way except for demo purposes.
@@ -369,9 +371,9 @@ The ADSM releases are:
 Project Members:
 
 * Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@usda.gov
-* ADSM Technical Lead - Josiah Seaman
+* ADSM Technical Lead - Josiah Seaman, Newline Technical Innovations, LLC
 * Simulation Creator / Maintainer - Neil Harvey
-* Dev Ops - Bryan Hurst
+* Dev Ops - Bryan Hurst, Newline Technical Innovations, LLC
 * Project Management - Alex Pyle & Kurt Tometich, USDA Office of the CIO
 * USDA Subject Matter Experts - Kelly Patyk, Amy Delgado, Columb Rigney, Kim Forde-Folle, Ann Seitzinger
 * University of Minnesota Center for Food Protection Subject Matter Expert Tim Boyer

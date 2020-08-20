@@ -10,6 +10,7 @@ from ScenarioCreator.models import (Scenario, choice_char_from_value, squish_nam
 from ScenarioCreator.population_parser import PopulationParser
 from ScenarioCreator.forms import IndirectSpreadForm
 from ADSMSettings.models import SingletonManager
+from ScenarioCreator.templatetags import db_status_tags
 
 updatedPost = {'description': 'Updated Description',
                "naadsm_version": '3.2.19', "language": 'en', "num_runs": '10',
@@ -165,7 +166,7 @@ class ViewTests(TransactionTestCase):
         self.assertIn('data-delete-link', r.content.decode())
 
         # has a related model, not deleteable
-        function = RelationalFunction.objects.get(name="Prevalence")
+        function = RelationalFunction.objects.get(name="WHP company feedlot") # This function was chosen because it has ID=1
         r = self.client.get('/setup/RelationalFunction/%s/' % function.id)
         self.assertNotIn('data-delete-link', r.content.decode())
 
@@ -276,7 +277,7 @@ class StatusTags(TestCase):
     def test_complete(self):
 
         #two test cases, one for true and one for false
-        self.assertEqual("completed ", db_status_tags.completed(True))
+        self.assertEqual("completed", db_status_tags.completed(True))
         self.assertEqual("incomplete", db_status_tags.completed(False))
 
     #parent_link() function is present in db_status_tags but currently has no uses in program, no testing required.

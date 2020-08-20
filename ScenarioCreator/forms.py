@@ -119,7 +119,7 @@ class ProbabilityDensityFunctionForm(BaseForm):
     class Meta(object):
         model = ProbabilityDensityFunction
         exclude = []
-        widgets = {'graph': PiecewiseSelect()}
+        widgets = {'graph': SelectExisting()}
 
     def clean(self):
         cleaned_data = super(ProbabilityDensityFunctionForm, self).clean()
