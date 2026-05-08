@@ -1,6 +1,7 @@
 # ADSM (Animal Disease Spread Model)
 A Frontend application with Desktop and Web Based GUI for creating a simulation model to assist decision making and education in evaluating animal disease incursions.  ADSM is an upgrade of the NAADSM application.
 
+ADMS is no longer in development and no longer supported. It is still available as of 5/8/2026.
 Project Owner - Missy Schoenbaum, USDA:APHIS:VS:CEAH Modeling Team contact melissa.schoenbaum@usda.gov. Training materials are provided at http://navadmc.github.io/ADSM/
 
 This repo is the primary repo for the ADSM project and houses the main Frontend that users will be interacting with.  
